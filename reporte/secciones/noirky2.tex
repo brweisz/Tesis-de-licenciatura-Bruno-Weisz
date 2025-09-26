@@ -1,0 +1,613 @@
+
+\chapter{Noirky2}
+Haber recorrido Noir y Plonky2 nos permite re-definir el problema que estamos intentando resolver en términos más concretos. Dijimos en la sección \ref{sec:problema} que la intención es adaptar Noir para que pueda usar Plonky2 para generar pruebas de ejecución. Concretamente, el trabajo consiste en hacer un programa (el cual llamaremos ''Noirky2'' de ahora en adelante) que tiene como dependencias a Nargo (el compilador de Noir) y a Plonky2. Tanto Nargo como Plonky2 están escritos en Rust, por lo tanto Noirky2 también estará programado en Rust. La figura \ref{fig:esquema_noirky2} muestra un esquema en alto nivel de la interacción de los programas involucrados.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  node distance=1cm and 1cm,
+  box/.style={draw, minimum width=2.5cm, minimum height=1.5cm, align=center, font=\sffamily},
+  redbox/.style={draw=red, very thick, minimum width=2cm, minimum height=1.5cm, align=center, font=\sffamily\bfseries, text=red}
+]
+
+% Nodes
+\node[box] (noir_) {Noir};
+\node[box, right=of noir_] (acir_) {ACIR};
+\node[redbox, right=1.5cm of acir_, yshift=1cm] (intermediate_) {Noirky2};
+\node[box, right=1.5cm of intermediate_] (plonky2_) {Plonky2};
+\node[box, below=1.5cm of plonky2_] (barretenberg_) {Barretenberg};
+
+% Arrows
+%\draw[->] (noir_) -- (acir_);
+%\draw[->] (acir_) -- (intermediate_);
+%\draw[->] (intermediate_) -- (plonky2_);
+%\draw[->] (plonky2_) -- (intermediate_);
+%\draw[->] (acir_.south) |- (barretenberg_.west);
+
+\end{tikzpicture}
+\caption{Flujo de compilación de Noir hacia distintos backends}
+\label{fig:esquema_noirky2}
+\end{figure}
+
+
+Noirky2 tiene que poder:
+
+\begin{itemize}
+    \item Leer los artefactos generados por Noir, es decir, el ACIR y el diccionario de witnesses a elementos de cuerpo. Para parsear estos elementos correctamente vamos a usar de forma directa el código de Nargo, ya que nos vamos a manejar con el mismo sistema de objetos que Nargo usa internamente. 
+    \item Generar un circuito de Plonky2 que sea semánticamente equivalente al código ACIR.
+    \item Responder a los mismos comandos que Barretenberg provee: \textbf{prove}, \textbf{create\_vk} y \textbf{verify}. La semántica de estos debe ser la misma que en el otro prover.
+\end{itemize}
+
+\section{Cuerpo finito utilizado}
+Esta solución haría que tanto Noir como Plonky2 sean agnósticos a la existencia de Noirky2, ya que Noirky2 solo usa a Nargo y Plonky2 como dependencias y no al revés. Sin embargo hay lidiar con una dificultad extra: el cuerpo finito usado por Noir no es el mismo que el usado por Plonky2. Adicionalmente, el desarrollo de Noirky2 se produce en simultaneo con el desarrollo de Nargo por parte de otro equipo de trabajo (Aztec~\cite{Aztec}), por lo tanto el repositorio de Nargo está en constante cambio. La decisión respecto a esto fue crear un \textbf{fork} del repositorio de Nargo y realizar las modificaciones pertinentes sobre el mismo. La cantidad de cambios en el compilador hacía muy engorrosa cualquier otra modalidad de trabajo; aunque al principio se intentó mantener una versión actualizada rápidamente se descartó esta alternativa.
+
+La primera traba del trabajo fue la siguiente: hacer que la resolución de witnesses de Nargo se realizara con un cuerpo finito con $p_{goldilocks} = 2^{64}-2^{32}+1$ (primo utilizado por Plonky2) en lugar de $p_{grumpkin}=2^{254}+2^{224}+2^{192}+2^{96}-1$ (primo usado por Nargo y Barretenberg). 
+
+Pensemos por qué esto es un problema con un ejemplo más simple. Supongamos que $p_{nargo} = 7$ y $p_{plonky2} = 5$. Hacer un programa en Noir que verifique $a+b=c$ implicaría que todas las operaciones ocurren módulo $7$, por lo tanto si proveemos inputs como $a=5, b = 5, c = 3$, el programa verificaría correctamente ya que $5+5\equiv 3 ~ (7)$. Sin embargo, si trasladamos estos mismos inputs a Plonky2 e hiciéramos un programa que hace lo mismo, la ecuación no verificaría porque $5+5 \not\equiv 3 ~ (5)$. Esto hace que los witnesses resueltos por Noir no sean utilizables por Plonky2 a menos que estén usando el mismo cuerpo finito. Vamos a necesitar el valor de esos witnesses para generar la prueba de Plonky2. 
+
+La descripción de la solución es puramente implementativa y no es de interés para este trabajo, así que simplemente nos va a alcanzar con decir que esta modificación fue realizada con éxito pero al mismo tiempo, el cambio en el compilador generó la necesidad de usar una versión forkeada de Nargo durante el resto del desarrollo. 
+
+Otro problema relacionado con el uso de $p_{goldilocks} = 2^{64}-2^{32}+1$ en Plonky2 es que no permite representar fácilmente valores de 64 bits, una funcionalidad que Noir provee. Esto se debe a que $p_{goldilocks} < 2^{64}-1$ por lo tanto un \texttt{u64} no ''entra'' en un elemento de $\Fp$. Esta dificultad se podría saltear usando dos elementos de $\Fp$ para representar un \texttt{u64}, donde cada elemento de cuerpo representa los 32 bits menos significativos o los 32 bits más significativos del \texttt{u64}. Sin embargo, esto sigue resultando insuficiente ya que habría que modificar la resolución de Witnesses por parte de Nargo y su forma de armar el código ACIR. En particular, al usar \texttt{u64} en un programa de Noir e intentar compilarlo con nuestro Nargo modificado para usar $p_{goldilocks}$, el compilador genera un error ''\texttt{Range constraint of 64 bits is too large for the Field size}''. Por estas cosas vamos a impedir el uso de \texttt{u64} y \texttt{u128} en Noirky2. 
+
+
+
+\section{Tiempos de ejecución}\label{sec:tiempos_de_ejecución}
+Hay un concepto que es tan importante para este proyecto que merece una sección aparte. Noirky2 cuenta con 3 momentos de ejecución distintos. Entender la diferencia entre ellos es crucial para entender conceptualmente donde estamos parados y qué recursos tenemos en cada momento:
+\begin{enumerate}
+    \item \textbf{Tiempo de compilación}: es el momento donde se compila Noirky2 y no es más que la compilación de un programa de Rust. En esta instancia contamos con nuestro código, pero no sabemos nada acerca de los programas ACIR que vamos a recibir ni de los inputs concretos con los que va a ser ejecutado.
+    
+    \item \textbf{Tiempo de generación de circuito}: es el momento en la \textbf{ejecución} de Noirky2 en donde el circuito de Plonky2 está siendo construido. En esta instancia tenemos el código ACIR del programa a traducir, pero no usamos todavía los valores concretos con los que el circuito va a ser ejecutado. Esta idea va de la mano de la independencia entre el circuito y los inputs concretos con los que se ejecuta. No podemos usar la información de los inputs para construir el circuito de Plonky2 de ninguna forma.
+
+    \item \textbf{Tiempo de resolución de circuito}: es el momento en que se genera la prueba, cuando los valores concretos son inyectados en el circuito. Plonky2 tiene la capacidad de asignar valores a todos los targets, resolviéndolos a través de sus dependencias. 
+\end{enumerate}
+
+Es importante entender también que Noirky2 empieza su flujo cuando Noir ya construyó el código ACIR. También es importante percibir la independencia entre la creación del ACIR y la resolución de witnesses: se podría compilar un código fuente de Noir y solamente generar un código ACIR, sin la resolución de los witnesses. Paralelamente, también se debería poder ejecutar Noirky2 para traducir un código ACIR en un circuito de Plonky2 sin contar con estos valores concretos, solamente con el objetivo de generar un circuito vacío sin la prueba asociada. 
+
+Toda la traducción que veremos a continuación ocurre durante el tiempo de generación de circuito. El tiempo de resolución de circuito comienza cuando decidimos proveer el \texttt{PartialWitness} con los valores concretos para generar la prueba, pero Noirky2 no tiene control sobre eso, sino que toda esa parte del flujo queda delegada en Plonky2 y su mecanismo interno.
+
+\section{Traducción de ACIR a Plonky2}
+En esencia lo que queremos hacer es traducir un lenguaje a otro preservando la semántica de los programas. El código ACIR tiene 
+\begin{itemize}
+    \item Un conjunto de witnesses $W = \{w_i\}$ sobre los cuales opera. Llamamos $val_e: W \rightarrow \Fp$ a la función que recibe un witness y devuelve el valor asignado a ese witness en una ejecución $e$ con valores concretos. Para simplificar, vamos a decir $val$ en lugar de $val_e$.
+    \item Una lista ordenada $OP$ de opcodes (AssertZero, operaciones de memoria, BlackBoxFunction y BrilligCall). Notamos $OP[i]$ al i-esimo opcode. Decimos también que $w_i \in OP[j]$ si el witness $w_i$ es referenciado por el j-esimo opcode del código ACIR.
+\end{itemize}
+Lo primero que notamos es que dado un programa $P$ de ACIR, todos los witnesses de $P$ van a tener un target equivalente en un circuito de Plonky2 $P'$ que tenga la misma semántica. Esto no va a ocurrir a la inversa, ya que un opcode de ACIR podría tener una implementación arbitrariamente compleja en Plonky2 que requiera el uso de muchos más targets. Por ende, siendo $W$ el conjunto de witnesses de $P$ y $T$ el conjunto de targets en $P'$, vamos a tener una función inyectiva 
+$$witness\_target\_map: W \rightarrow T$$
+que asigna a cada witness del código ACIR $P$ un target del circuito de Plonky2 $P'$. Concretamente, esta función va a ser implementada con un diccionario que tendremos que mantener durante toda la generación del circuito. ¿Por qué es necesario esto? Hay varios motivos para tener este mapeo:
+\begin{enumerate}
+    \item Supongamos que en el código ACIR tenemos el listado $OP$ de opcodes y que $$\exists w \in W: ~ w \in OP[i] \land w \in OP[j] ~~ i < j$$ 
+    Si nosotros asociamos un target $t$ a $w$ queremos referirnos al mismo $t$ cuando vuelva a aparecer $w$ más adelante. Para eso definimos la función tal que $$witness\_target\_map(w) = t$$ 
+    \item Cuando generamos la prueba de Plonky2, tenemos que proveer al \texttt{CircuitBuilder} con una función 
+    $$partial\_witness: T \rightarrow \Fp$$ 
+    que asigna a los targets de $P'$ un valor y también es representada como un diccionario. Pero ¿cómo sabemos cuál es el valor correspondiente a un target? Para resolver esto vamos a tener que usar la información de las funciones 
+    $$witness\_target\_map: W \rightarrow T \text{  y  } val: W \rightarrow \Fp$$ 
+    Con ambas, dado un witness $w \in P$ podemos saber cual es su target  correspondiente en $P'$ y su valor en una ejecución concreta, por lo tanto también podemos construir la función $partial\_witness$ para que 
+    $$partial\_witness(witness\_target\_map(w)) = val(w)$$ 
+\end{enumerate}
+
+Otra cosa que notamos es que la traducción se puede hacer de forma secuencial sobre el listado de opcodes siguiendo las siguientes reglas:
+\begin{enumerate}
+    \item Al principio vamos a registrar los public inputs. Dado el ACIR 
+    \begin{verbatim}
+    private parameters indices : PUB
+    public parameters indices : PRIV
+    return value indices : OUT
+    \end{verbatim}
+    Donde $PUB,PRIV,OUT \subset W$ con $PUB\cap PRIV = \emptyset$, $PUB\cap OUT = \emptyset$ y $OUT\cap PRIV = \emptyset$. Vamos a crear targets para todos esos witnesses y registrarlos en la función $witness\_target\_map(w)$ haciendo que los witnesses en $PUB$ y $OUT$ sean públicos para el circuito de Plonky2. 
+
+    \item Cada vez que aparezca un witnesses nuevo en un opcode, vamos a registrarlo en la función $witness\_target\_map(w)$ (sin hacerlo público ya que los únicos targets públicos deberían ser aquellos que son declarados públicos por el código ACIR).
+\end{enumerate}
+Esas dos reglas nos garantizan que siempre que necesitemos acceder al target correspondiente a un witness con la función $witness\_target\_map$ este va a estar disponible. A continuación, vamos a hacer un recorrido por todos los opcodes para ver cómo se traduce cada uno en nuestro modelo, generando un circuito de Plonky2 consistente y que respeta la semántica del programa en ACIR. 
+
+\subsection{Traducción de AssertZero}
+Este es posiblemente el opcode con la traducción más directa, pero va a servir para explicar por qué la función $witness\_target\_map$ no es biyectiva. Supongamos que recibimos un opcode AssertZero de la forma 
+\begin{itemize}
+    \item Términos cuadráticos: $[(a_0, w_{l,0}, w_{r,0}), (a_1, w_{l,1}, w_{r,1}), \cdots (a_n, w_{l,n}, w_{r,n})]$
+    \item Términos lineales: $[(b_0, w_0), (b_1, w_1), \cdots, (b_m, w_m)]$
+    \item Constante: $c$
+\end{itemize}
+donde $\{a_i\},\{b_i\},\{c\} \subset \Fp$. Vamos a comenzar asignando targets a todos los witnesses que aún no estén asignados en el diccionario $witness\_target\_map$. Podemos pensar entonces que tenemos en el modelo de Plonky2
+\begin{itemize}
+    \item Términos cuadráticos: $CUAD = [(a_0, t_{l,0}, t_{r,0}), (a_1, t_{l,1}, t_{r,1}), \cdots (a_n, t_{l,n}, t_{r,n})]$
+    \item Términos lineales: $LIN = [(b_0, t_0), (b_1, t_1), \cdots, (b_m, t_m)]$
+    \item Constante: $c$
+\end{itemize}
+La API que nos provee Plonky2 para construir circuitos nos invita a pensar con sus funciones en un circuito binario, donde las operaciones tienen 2 inputs y un output. En este caso las operaciones necesarias para llevar esto a cabo son la \textbf{suma}, la \textbf{multiplicación}, el \textbf{assert\_zero} y la creación de targets con valor \textbf{constante}\footnote{El target en sí no contiene un valor constante porque los targets son solo ''cables en el circuito''. El \texttt{CircuitBuilder} contiene un diccionario que mapea ciertos targets a valores constantes y los va a usar en el tiempo de resolución de circuito.}. El algoritmo a llevar a cabo es el que se puede ver en \ref{alg:traduccion_assert_zero}.
+
+\begin{algorithm}
+\caption{Traducción del opcode AssertZero}
+\begin{algorithmic}[1]
+\State \textbf{Entrada:} CUAD, LIN, $c$, \texttt{builder}
+\State let accumulator = builder.constant(c)
+
+\For{$(b_i, t_i)$ \textbf{in} LIN}
+    \State let linear\_combination\_target = builder.mul\_const($b_i, t_i$)
+    \State accumulator = builder.add(linear\_combination\_target, accumulator)
+\EndFor
+\For{$(a_i, {t_l}_i, {t_r}_i)$ \textbf{in} CUAD}
+    \State let cuadratic\_target = builder.mul(${t_l}_i, {t_r}_i$)
+    \State cuadratic\_target = builder.mul\_const($a_i$, cuadratic\_target)
+    \State accumulator = builder.add(cuadratic\_target, accumulator)
+\EndFor
+\State builder.assert\_zero(accumulator)
+
+\end{algorithmic}
+\label{alg:traduccion_assert_zero}
+\end{algorithm}
+
+La idea es simple: se itera por todos los términos lineales y cuadráticos, combinando targets a través de operaciones binarias. Notamos que $\{a_i\}, \{b_i\} \text{ y } c$ son constantes en tiempo de generación de circuito; son valores que forman parte del ACIR y por ende son constantes del sistema de ecuaciones. El último paso del algoritmo consiste en usar la operación \texttt{builder.assert\_zero(accumulator)} para establecer la restricción $accumulator = 0$.
+
+Veamos cómo se traduce todo esto a un ejemplo simple como el que vimos en la sección \ref{sec:plonk}. Partamos del programa $result = e \cdot x + x - 1$, donde $result \text{ y } x$ son públicos y $e$ es privado. El ACIR que generaría esto sería como el que podemos ver en la figura \ref{fig:ACIR_ejemplo_traduccion_assert_zero}. Esto derivaría en nuestro sistema en una función 
+$$witness\_target\_map: \{w_0,w_1,w_2\} \rightarrow \{t_0, t_1, t_2\} \text{ , donde }$$
+$$ witness\_target\_map(w_i) = t_i ~~ i=1,2,3$$ 
+
+Podemos pensar al producto de Noirky2 como un circuito o un sistema de ecuaciones, como podemos ver en la figura \ref{fig:assert_zero_plonky2}. Ambas representaciones también permiten visualizar claramente a qué nos referimos con que no todos los targets tienen un witness correspondiente: $t_0$, $t_1$ y $t_2$ se corresponden con los witnesses $w_0$, $w_1$ y $w_2$ respectivamente, pero todos los targets $t\_aux\_i$ son ''intermedios'', en el sentido de que no se corresponden con inputs ni outputs de la operación.  
+
+\begin{figure} 
+    \centering
+    \begin{verbatim}
+    private parameters indices : [0]
+    public parameters indices : [1]
+    return value indices : [2]
+    EXPR [ (1, _0, _1) (1, _1) (-1, _2) -1 ]
+    \end{verbatim}
+    \caption{ACIR para el programa de ejemplo}
+    \label{fig:ACIR_ejemplo_traduccion_assert_zero}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{imagenes/circuito_assert_zero.jpg}
+    \caption{Visto como circuito}
+  \end{subfigure}%
+  \hfill
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \[
+    \left\{
+    \begin{array}{rl}
+    t_0 \cdot t_1 &= t_{aux_1} \\
+    1 \cdot t_1 &= t_{aux_3} \\
+    1 \cdot t_{aux_1} &= t_{aux_2} \\
+    t_{aux_2} + t_{aux_1} &= t_{aux_4} \\
+    -1 \cdot t_2 &= t_{aux_5} \\
+    t_{aux_4} + t_{aux_5} &= t_{aux_6} \\
+    -1 + t_{aux_6} &= t_{aux_7} \\
+    t_{aux_7} &= 0 \\
+    
+    
+    \end{array}
+    \right.
+    \]
+    \caption{Visto como sistema de ecuaciones}
+  \end{subfigure}
+  \caption{Vistas del Assert Zero}
+  \label{fig:assert_zero_plonky2}
+\end{figure}
+
+En este punto pueden empezar a surgir dudas sobre qué tan óptima es esta construcción. Vamos a tratar el tema de las optimizaciones más adelante, sin embargo el mecanismo interno con el que Plonky2 arma la traza tiene optimizaciones que vale la pena mencionar ahora. Antes dijimos que la configuración del circuito con la que instanciamos al \texttt{CircuitBuilder} establece una traza con 135 columnas, sin embargo todas nuestras las ecuaciones del ejemplo tienen a lo sumo 3 términos. Plonky2 empaqueta operaciones similares en las mismas filas, aprovechando el espacio total de la traza para reducir la cantidad de filas totales. Esto es muy importante a la hora de evitar cierto tipo de optimizaciones que en la práctica no tendrán ningún impacto real. 
+
+¿A qué nos referimos con operaciones similares? Plonky2 usa Custom Gates para todas sus operaciones. Todas las operaciones que vimos hasta el momento son distintas configuraciones de una misma \texttt{ArithmeticGate}. Esta compuerta sirve para establecer restricciones de la forma 
+$$t_{result} = const_1 \cdot t_1 \cdot t_2 + const_2 \cdot t_3$$
+Podemos ver que estableciendo las constantes correctas, todas las operaciones que vimos hasta el momento (suma, multiplicación, multiplicación por constante, igualdad a 0) pueden obtenerse usando esta compuerta. Esto es más parecido a lo que veníamos viendo con PLONK (\ref{sec:plonk}) y Turbo-PLONK (\ref{sec:turbo_plonk} y \ref{sec:turbo_plonk_custom_gates}), dejando de lado detalles implementativos.
+
+La \texttt{ArithmeticGate} no es la única compuerta que vamos a utilizar a lo largo de la traducción.
+
+
+\subsection{Traducción de operaciones de memoria}
+Para implementar las operaciones de memoria vamos a repasar qué implican con el lente de los tiempos de ejecución mencionados en la sección \ref{sec:tiempos_de_ejecución}. Mencionamos en la sección \ref{sec:acir_memoria} que las operaciones de memoria en el código ACIR aparecían en el contexto de accesos a bloques de memoria en posiciones dinámicas, por ejemplo, con un índice como input. ¿Qué significa esto respecto a los tiempos de ejecución? Significa que el índice con el que vamos a acceder al bloque de memoria \textbf{no es conocido en tiempo de generación de circuito} sino en tiempo de resolución de circuito, por ende no podemos indexar de una manera tradicional.
+
+La estrategia va a ser como sigue: así como teníamos un diccionario \texttt{witness\_target\_map} para mantener una relación entre witnesses y targets, también vamos a tener un listado de bloques de memoria representados como listas de targets que vamos a mantener actualizado a lo largo de toda la traducción. Podemos pensarlo como un objeto global a la traducción \verb|memory_blocks: Vec<Vec<Target>>| que inicialmente está vacío.
+
+Cuando procesamos un opcode $MemoryInit(idx, [w_{m_1}, \cdots, w_{m_n}])$ significa que el programa requiere la creación de un bloque nuevo de tamaño $n$. Como los índices son secuenciales y comienzan en $0$, podemos simplemente asumir que el i-esimo bloque va a ser el que se encuentre en la posición i-esima de \texttt{memory\_blocks}. Con esto en mente, la creación de un nuevo bloque de memoria es como sigue:
+\begin{enumerate}
+    \item Por cada witness $\{w_i\}$ mencionado en el opcode que no haya sido registrado todavía en la función $witness\_target\_map$ vamos a registrarlo como target $\{t_i\}$, al igual que hacíamos en la implementación de AssertZero. 
+
+    \item Vamos a crear un vector de targets con todos los targets mencionados en el opcode en ese mismo orden y lo vamos a agregar a \texttt{memory\_blocks}. La acción concreta sería \texttt{memory\_blocks.append(\ensuremath{[t_{m_1}, \cdots, t_{m_n}]})}.
+    
+\end{enumerate}
+
+\subsubsection{\textbf{Asignación condicional en Plonky2}}
+
+La parte más complicada está relacionada con la lectura y la modificación de los bloques de memoria, que veremos a continuación. Pero antes, veamos cómo podemos implementar una asignación condicional en este modelo. Más concretamente, nos interesa tener una restricción de la forma
+\[
+\texttt{res = \textbf{if} (x = y) \textbf{then} a \textbf{else} b}
+\]
+donde \texttt{x,y,a,b} y \texttt{res} son targets, y por ende su valor no se conoce en tiempo de generación de circuito. Esta expresión puede ser separada en 2 partes: 
+\[
+\texttt{1.(res = \textbf{if} equal \textbf{then} a \textbf{else} b) \textbf{|} 2.(equal = \textbf{if} (a == b) \textbf{then} 1 \textbf{else} 0)}
+\]
+donde \texttt{equal} también es un target booleano.
+
+\vspace{1em}
+
+Podemos expresar \textbf{1.} como un sistema de ecuaciones
+\begin{figure}[H]
+  \centering
+  \begin{minipage}[c]{0.6\textwidth}
+    \centering
+    \[
+    \left\{
+    \begin{array}{rl}
+    not\_z &= 1 - z \\
+    conditional\_a &= a \cdot z \\
+    conditional\_b &= b \cdot not\_z \\
+    res &= conditional\_a + conditional\_b
+    \end{array}
+    \right.
+    \]
+  \end{minipage}
+\end{figure}
+
+
+o más simplemente como la ecuación 
+$$res = z \cdot a + (1-z) \cdot b$$
+
+Para \textbf{2.} el proceso es conceptualmente distinto. Primero vamos a calcular un valor 
+\[
+    \texttt{
+        diff\_inverse := \textbf{if} $(x \neq y)$ \textbf{then} $\frac{1}{x-y}$  \textbf{else} 0
+    }
+\]
+
+
+Pero ¿cómo podemos calcularlo si no conocemos los valores que toman $x$ e $y$ en tiempo de generación de circuito? Antes mencionamos que Plonky2 tiene mecanismos para hacer operaciones en tiempo de resolución de circuito: es lo que usa para resolver los valores de todos los targets. La condición de la operación solo puede resolverse en tiempo de resolución de circuito, y eso es lo que va a ocurrir. Conceptualmente no estamos estableciendo una restricción, estamos \textbf{fijando} una forma con la que un valor va a ser calculado cuando haya valores concretos. Esto es lo que llamamos una ''pista'' para el prover, que viene acompañada por el siguiente sistema de ecuaciones:
+\begin{figure}[H]
+  \centering
+  \begin{minipage}[c]{0.6\textwidth}
+    \centering
+    \[
+    \left\{
+    \begin{array}{rl}
+    equal \cdot (equal - 1) &= 0 \\
+    equal \cdot (x - y) &= 0 \\
+    (x - y) \cdot diff\_inverse + equal &= 1 \\
+    \end{array}
+    \right.
+    \]
+  \end{minipage}
+\end{figure}
+
+Estas ecuaciones sirven restringir a la variable $equal$ a que sea un valor binario: $0$ si $x$ e $y$ son distintos y $1$ si son iguales. 
+\begin{enumerate}
+    \item La primera ecuación se ocupa de que $equal$ sea binaria. 
+    
+    \item Para analizar la segunda ecuación separemos en casos:
+    \begin{itemize}
+        \item \textbf{Si $x$ e $y$ son iguales} entonces la ecuación se cumple porque se anula el factor de la derecha.
+        \item \textbf{Si son distintos} entonces la variable $equal$ debería tener el valor $0$, anulando nuevamente el término.
+    \end{itemize}
+    Si $x$ e $y$ son distintos pero $equal \neq 0$ la ecuación no se cumpliría, por lo tanto esta ecuación nos da la implicación 
+    $$x \neq y \Longrightarrow equal = 0$$
+    pero nada más.
+
+    \item Para analizar la tercera ecuación también separemos en casos:
+    \begin{itemize}
+        \item \textbf{Si $x$ e $y$ son iguales} entonces la ecuación se cumple si solo si $equal = 1$.
+        \item \textbf{Si son distintos} entonces $(x-y)\cdot diff\_inverse = 1$ por lo tanto la ecuación se cumple si solo si $equal = 0$.
+    \end{itemize}
+\end{enumerate}
+Uno podría preguntarse para qué está la segunda ecuación, ¿no alcanza con la primera y la tercera? Pensándolo con cuidado vemos que $diff\_inverse$ no está restringido ya que solo es una pista para el prover, por lo que a priori no tendría por qué ser lo que dice ser (eg. $\frac{1}{x-y}$). Si tratamos de romper este sistema de ecuaciones podríamos hacer una asignación que cumpla
+
+\begin{itemize}
+    \item \texttt{diff\_inverse := 0}
+    \item \texttt{equal := 1}
+    \item \texttt{x $\neq$ y}
+\end{itemize}
+Esta asignación cumple la primera y la tercera ecuación, sin embargo es incorrecta respecto a lo que buscamos. Necesitamos que $equal = 1 \Longleftrightarrow x = y$ y esto no ocurre. La segunda ecuación nos salva en este caso ya que no hay forma de que cumpla bajo estas condiciones, ya que no existe ningún valor en $z \in \Fp$ no nulo tal que $z \cdot 1 = 0$.
+
+Recién vimos cómo podemos modelar asignaciones condicionales en Plonky2. Esta es una herramienta que nos va a servir para modelar operaciones de memoria, ya que justamente vamos a necesitar asignar condicionalmente un valor dependiendo de la igualdad entre dos índices.
+
+\subsubsection{\textbf{Lectura de memoria}}
+Veamos cómo traducir un opcode de lectura de memoria. Este está conformado por un $blockId$ (índice del bloque que se va a leer), $w_{index}$ (witness que contiene al índice que se va a leer) y $w_{value}$ (witness que tomará el valor leído). 
+El índice \texttt{block\_idx} del bloque que vamos a leer es una constante conocida en tiempo de generación de circuito, por lo tanto podemos obtener fácilmente el bloque con
+\[
+\texttt{block := memory\_blocks[blockId]}
+\]
+Recordemos en qué consiste una lectura de memoria en este contexto. Visto como una asignación tendríamos algo como
+\[
+\texttt{res := block[index]}
+\]
+por lo que queremos una restricción de la forma
+$$res = block[index]$$
+donde $res$ es el target correspondiente al witness $w_{value}$ e $index$ es el target correspondiente al witness $w_{index}$. La solución es construir un circuito que considere todos los casos (es decir, si se tiene que modificar el índice 0, índice 1, indice 2, etc.). Se recorren todas las posiciones del bloque de memoria, comparando el índice con el valor de $index$ y asignándole condicionalmente a $res$ su propio valor o el valor del target en el índice dependiendo de si la igualdad se cumple o no. El pseudocódigo se puede ver en la figura \ref{alg:traduccion_mem_read}.
+
+\begin{algorithm}
+\begin{algorithmic}[1]
+\State \textbf{Entrada:} \texttt{builder, block, index}
+\State \textbf{Salida:} \texttt{res}
+\State \texttt{let res: Target}
+\For{\texttt{i = 0..block.length()}}
+    \State \texttt{let target\_position\_i = builder.constant(i)}
+    \State \texttt{let is\_current\_position = builder.\textbf{is\_equal}(index, target\_position\_i)}
+    \State \texttt{res = builder.\textbf{conditional\_assign}(is\_current\_position, block[i], res)}
+\EndFor
+\State \texttt{return res}
+\end{algorithmic}
+\caption{Traducción del opcode \texttt{MemRead}}
+\label{alg:traduccion_mem_read}
+\end{algorithm}
+
+El pseudocódigo usa 2 funciones que encapsulan el comportamiento descrito anteriormente: 
+\begin{enumerate}
+    \item \texttt{builder.is\_equal(a,b)} es un método que recibe 2 targets y devuelve un tercer target que está restringido a tomar el valor $1$ si $a=b$ y el valor $0$ si $a \neq b$.
+
+    \item \texttt{builder.conditional\_assign(z,a,b)} es un método que recibe un target booleano $z$ y 2 targets $a$ y $b$. Devuelve $a$ si $z$ toma el valor de $1$ y $b$ si $z$ toma el valor de $0$.
+\end{enumerate}
+
+\subsubsection{\textbf{Escritura de memoria}}
+Veamos cómo traducir un opcode de escritura de memoria. Este está conformado por un $blockId$ (índice del bloque que se va a leer), $w_{index}$ (witness que contiene al índice que se va a leer) y $w_{value}$ (witness que contiene el valor que se va a escribir). 
+
+El enfoque que vamos a tomar en este caso es parecido al de la operación de lectura, con la diferencia de que tenemos que modificar el contenido del bloque de memoria. Recordemos que los targets toman un único valor a lo largo de toda la ejecución, por lo tanto para cambiar el valor en una posición del bloque vamos a tener que reemplazar un target por otro. Pero no solo eso: reemplazar un único target sería posible si supiéramos en tiempo de generación de circuito cuál es el índice que tenemos que reemplazar, pero no lo sabemos. En cambio, lo que vamos a hacer es \textbf{cambiar todos los targets} de todas las posiciones. Todos los targets excepto uno van a estar restringidos a tomar el mismo valor que su antecesor. La excepción va a ser en el índice a modificar, donde va a tomar el nuevo valor. 
+
+Conceptualmente podemos pensar todas las posiciones de manera independiente. En cada posición se hace la pregunta ¿es esta la posición que tiene que ser modificada? Solamente una va a tener un sí como respuesta. En el caso que la respuesta es no, el nuevo target que tomará esa posición tendrá el mismo valor que el anterior. En el caso que la respuesta es sí, el nuevo target que tomará esa posición tendrá el valor nuevo. Es otro caso más donde podemos aplicar la asignación condicional. Se pueden ver gráficamente las acciones a tomar en la figura \ref{fig:memory_write} y el pseudocódigo en la figura \ref{alg:traduccion_mem_write}.
+
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    node distance=1.5cm and 1.5cm,
+    box/.style={draw, minimum width=1.2cm, minimum height=1.2cm, align=center},
+    arr/.style={-Stealth},
+    arrh/.style={-},
+    redarr/.style={-Stealth, red},
+    font=\small
+]
+
+% Nodos de la fila superior (originales)
+\node[box] (to0) {$t_{a_0}$};
+\node[box, right=of to0] (to1) {$t_{a_1}$};
+\node[box, right=of to1] (to2) {$t_{a_2}$};
+\node[box, right=of to2] (to3) {$t_{a_3}$};
+
+% Nodos de la fila inferior (modificados)
+\node[box, below=of to0] (tn0) {$t_{d_0}$};
+\node[box, right=of tn0] (tn1) {$t_{d_1}$};
+\node[box, right=of tn1] (tn2) {$t_{d_2}$};
+\node[box, right=of tn2] (tn3) {$t_{d_3}$};
+
+% Flechas verticales
+\draw[arr] (to0) -- (tn0);
+\draw[arr] (to1) -- (tn1);
+% \draw[arr] (to2) -- (tn2);
+\draw[arr] (to3) -- (tn3);
+
+% Flechas horizontales
+\draw[arrh] (to0) -- (to1);
+\draw[arrh] (to1) -- (to2);
+\draw[arrh] (to2) -- (to3);
+\draw[arrh] (tn0) -- (tn1);
+\draw[arrh] (tn1) -- (tn2);
+\draw[arrh] (tn2) -- (tn3);
+
+% Nodo t_val y flecha roja hacia t_n_2
+\node[box, red, below=of tn2] (tval) {$t_{val}$};
+\draw[redarr] (tval) -- (tn2);
+
+% Etiquetas
+\node[align=center, left=1.5cm of to0] {Bloque de memoria\\antes de ser\\modificado};
+\node[align=center, left=1.5cm of tn0] {Bloque de memoria\\despu\'es de ser\\modificado};
+
+\end{tikzpicture}
+\caption{Actualización de un bloque de memoria}
+\label{fig:memory_write}
+\end{figure}
+
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\State \textbf{Entrada:} \texttt{builder, block, index, value}
+\For{\texttt{i = 0..block.length()}}
+    \State \texttt{let target\_position\_i = builder.constant(i)} 
+    \State \texttt{let is\_current\_position = builder.\textbf{is\_equal}(index, target\_position\_i)}
+    \State \texttt{let new\_target\_i = builder.\textbf{conditional\_assign}(is\_current\_position, value, block[i])}
+    \State \texttt{block[i] = new\_target\_i}
+\EndFor
+\end{algorithmic}
+\caption{Traducción del opcode \texttt{MemWrite}}
+\label{alg:traduccion_mem_write}
+\end{algorithm}
+
+Nuevamente podríamos preguntarnos sobre la eficiencia de estas operaciones, y nuevamente vamos a postergar el tema. 
+
+\subsection{Traducción de Range-Check}\label{sec:traduccion_range}
+La primera BlackBox Function que vamos a analizar va a ser \texttt{BlackBoxFunction::RangeCheck}. Este opcode aparece cuando queremos establecer una cantidad máxima de bits en la representación binaria de una variable. Sus argumentos son \texttt{RangeCheck(w, num\_bits)} donde \texttt{w} es el witness que queremos restringir y \texttt{num\_bits} la cantidad máxima de bits permitidos. Esto quiere decir que la restricción establecida debería ser
+$$0 \leq w < 2^{num\_bits}$$
+La existencia de este opcode particular se justifica con la dificultad para expresar la restricción con ecuaciones polinomiales. Una solución alternativa podría ser expresar esto mismo con varias operaciones de AssertZero, pero la filosofía de Noir en estos casos es delegar operaciones complejas al prover. 
+
+Para traducir esta operación vamos a usar 2 estrategias distintas: descomposición en bits y lookup tables. La idea es explicar la filosofía detrás de cada una y compararlas en términos de eficiencia.
+
+\subsubsection{\textbf{Range-Check con descomposición en bits}}\label{sec:range_check}
+Supongamos que tenemos un opcode \texttt{RangeCheck(w, n)}. La idea básica es crear (u obtener si ya existe) al target $t$ correspondiente a $w$, asumir que puede ser expresado con $n$ bits y establecer ecuaciones para descomponerlo en los bits $b_0, b_1, \cdots, b_{n-1}$. La ecuación sería
+$$b_0+2^1 \cdot b_1 + 2^2 \cdot b_2 + \cdots + 2^{n-1} \cdot b_{n-1} = t$$
+$$\Longleftrightarrow$$
+$$\prod_{i=0}^{n-1}2^i\cdot b_i = t$$
+En Plonky2 podemos hacer esto a través de una Custom Gate llamada \texttt{BaseSumGate}, que se encarga de la descomposición de números en distintas bases (en este caso, base 2). Si no es posible generar esa descomposición entonces podemos afirmar que el número concreto con el que se está ejecutando no está en rango. Notamos que $b_0, b_1, \cdots, b_{n-1}$ deben ser targets binarios, sino la ecuación no nos daría la información que queremos obtener. Por eso también vamos tener que agregar las restricciones 
+$$b_i \cdot (b_i - 1) = 0 ~~~ \forall i\in [0,n-1]$$
+
+Es importante destacar que los valores de $b_i$ van a ser \textbf{pistas} para el sistema de ecuaciones, calculadas por Plonky2 en tiempo de resolución de circuito en base al valor concreto que se le asigne a $t$. Le vamos a indicar a Plonky2 que lo descomponga en una cantidad fija de elementos, y este va a intentar hacerlo partiendo del bit menos significativo ($b_0$), sin embargo va a fallar si es incapaz de completar la descomposición el número. 
+
+Recordemos también que dado que el primo que usa Plonky2 es $p_{goldilocks} = 2^{64} - 2^{32} + 1$ no podemos trabajar nativamente con números de más de $63$ bits. Por esto, también hubo que restringir la operación de range-check. 
+
+\subsubsection{\textbf{Range-Check con lookup tables}}
+Otra estrategia posible para resolver esta operación es usar las lookup tables vistas en la sección \ref{sec:lookup_plonky2}. ¿Cómo las usamos? Tenemos que definir una lookup table que contenga en la primera componente de cada tupla todos los valores entre $0$ y el rango deseado, y cualquier valor en la segunda componente.
+
+Por ejemplo, para chequear que un target está restringido a un valor $u8$ definimos una tabla como la que se ve en la figura \ref{tab:tabla_lookup_u8}. Finalmente, el target $t$ asociado al witness que queremos restringir sería el input para el método \texttt{builder.add\_lookup\_from\_index(t, table\_index)}, donde el resultado puede ser ignorado ya que solo nos interesa la presencia del elemento en la tabla. 
+
+\begin{table}
+\begin{center}
+\begin{tabular}{cc}
+\toprule
+input & output \\
+\midrule
+0 & - \\
+1 & - \\
+... & ... \\
+255 & - \\
+\bottomrule
+\end{tabular}
+\caption{Lookup table para un range-check de 8 bits}
+\label{tab:tabla_lookup_u8}-
+\end{center}
+\end{table}
+
+Este enfoque nos establece una restricción que no se presentaba en la estrategia anterior: los lookups pueden hacerse hasta valores de $2^{16} -1$, con lo cual este método solamente puede usarse para el chequeo de rango de hasta $16$ bits inclusive. No solo eso, sino que si tenemos una tabla con el rango $[0, 2^n)$, esa tabla solo se puede usar para chequeos de $n$ bits y no menores. Por ejemplo, si tenemos una tabla con rango $[0,2^{16})$ no podemos usarla para valores $u8$, sino que tendríamos que tener otra tabla definida con rango $[0, 2^8)$.
+
+También hay que tener en cuenta el overhead de tener la lookup table: las consultas son computacionalmente baratas pero la creación de la tabla puede ser costosa para Plonky2. Especialmente se puede dar una situación donde tengamos un programa pequeño y una lookup table muy grande, en cuyo caso quizás no vale la pena. La idea es entrar más en detalle con estos temas cuando hagamos un análisis y comparación de la performance de los distintos métodos.
+
+\subsubsection{\textbf{Range-Check con descomposición en limbs y lookup tables}}
+Una alternativa intermedia entre las dos opciones consideradas es hacer una descomposición del número, pero no en base 2 (bits), sino en una base más grande. Por ejemplo, un número de 32 bits puede pensarse como la composición de cuatro números de 8 bits; entonces alcanzaría con verificar que esas 4 componentes (o \textit{limbs}, como solemos llamarlas) están en el rango de un $u8$ y juntas conforman al número que queremos restringir. Para verificar el rango de $u8$ podemos reutilizar la idea de las lookup tables.
+
+¿Cómo separamos al target $t$ en limbs de 8 bits cada una? Podríamos pensar en usar la compuerta que usamos para la separación en bits: \texttt{BaseSumGate}, pero esta no soporta bases mayores a $9$ y necesitamos una base $256$. Esto nos obliga a meternos más adentro de Plonky2 para entender cómo construye en tiempo de resolución de circuito los valores para los targets intermedios, y cómo podemos aprovecharnos de este mecanismo para crear pistas para el prover en tiempo de resolución. 
+
+Descubrimos entonces que Plonky2 usa \texttt{Generators}, un tipo de objeto que se suele asociar a las Custom Gates pero pueden usarse de manera independiente. Los Generators:
+\begin{itemize}
+    \item calculan el valor que se va a asociar los targets en tiempo de resolución de circuito. 
+    \item tienen dependencias de Targets: siempre ocurre que el valor de $0$ o más targets tiene que estar resuelto para poder calcular el valor de un target nuevo. En este caso tiene sentido pensar en el circuito de la figura \ref{fig:assert_zero_plonky2} a). Por ejemplo, para resolver el valor del target $t_{aux_4}$ es necesario tener antes el valor de $t_{aux_2}$ y $t_{aux_3}$.
+    \item implementan el método \texttt{run\_once()}, donde se ejecuta la operación. 
+    \item pueden tener una cantidad arbitraria de dependencias y de targets calculados. Por ejemplo, en el ejemplo anterior teníamos 2 dependencias ($t_{aux_2}$ y $t_{aux_3}$) y un resultado ($t_{aux_4}$).
+    \item se usan de la siguiente forma: en tiempo de generación de circuito se instancian con targets (de entrada y de salida), haciendo que quede pre-seteado el cálculo en tiempo de resolución de circuito.
+    \item no son suficientes para garantizar un circuito correcto: los Generators generan pistas para el prover a través de calcular valores que van a llenar la traza, pero no verifican polinomialmente que los resultados calculados sean correctos. Si simplemente confiamos en que el Generator va a calcular el valor pero no restringimos sus operaciones, estaríamos creando una vulnerabilidad en el sistema. 
+\end{itemize}
+
+Con esto en mente, creamos un Generator propio de la forma 
+\[
+\text{\texttt{struct LimbDecomposition8BitsGenerator<const N: usize> }}
+\]
+Para aquellos no tan familiarizados con Rust, la parametrización generada por \texttt{N} permite instanciar al \texttt{struct} con distintos valores para el parámetro. Estos valores tienen que ser conocidos en tiempo de compilación. En particular, nos va a interesar una descomposición en 2 limbs para números de $16$ bits y una descomposición en 4 limbs para números de $32$ bits (recordemos que números de 64 bits no son soportados nativamente por Noirky2). 
+
+Internamente, el Generator recibe 1 target \texttt{full\_number} con su valor asociado y $N$ targets para los limbs ($l_0, \cdots, l_{N-1}$). Su trabajo es calcular el valor de los $N$ limbs. El algoritmo puede verse en la figura \ref{alg:descomposicion_limbs}
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\State \textbf{Entrada 1:} \texttt{witness\_value\_mapping: $Target \rightarrow \Fp$}
+\State \textbf{Entrada 2:} \texttt{full\_number\_target: Target}
+\State \textbf{Entrada 3:} \texttt{limb\_targets: [Target; N]}
+\State \textbf{let mut} \texttt{full\_number\_value = witness\_value\_mapping.get(full\_number\_target)}
+\For{\texttt{i = 0..N}}
+    \State \texttt{\textbf{let} current\_limb\_value = full\_number\_value$/ 2^8$}
+    \State \texttt{full\_number\_value = full\_number\_value$/2^8$}
+    \State \texttt{witness\_value\_mapping.set(limb\_targets[i], current\_limb\_value)}
+\EndFor
+\end{algorithmic}
+\caption{Descomposición en N limbs de 8 bits}
+\label{alg:descomposicion_limbs}
+\end{algorithm}
+
+Internamente, Plonky2 cuenta con un \texttt{witness\_value\_mapping} donde almacena los valores resueltos de los targets. Ese diccionario es el que usamos para almacenar los nuevos valores y obtener los valores de las dependencias. Un detalle curioso es que si tratamos de sobre-escribir el valor de alguno de los targets, el sistema generará un error en tiempo de resolución de circuito ya que un target no puede tomar 2 valores distintos.
+
+Más allá de la ejecución del Generator, mencionamos anteriormente que el circuito tiene además que generar las restricciones polinomiales para la ejecución realizada, por lo tanto, debemos establecer una restricción de la forma
+$$full\_number_{32} = limb_0 + 2^8 \cdot limb_1 + 2^{16} \cdot limb_2 + 2^{24} \cdot limb_3$$
+para números de $32$ bits y
+$$full\_number_{16} = limb_0 + 2^8 \cdot limb_1$$
+para números de $16$ bits. Por último tenemos que definir una lookup table con los valores en el rango $[0, 2^8)$ y verificar que cada uno de los limbs se encuentre en este rango. Para resumir, los pasos serían:
+\begin{itemize}
+    \item Usar un Generator para establecer el cálculo correcto de los limbs en tiempo de resolución de circuito.
+    \item Descomposición: verificar con restricciones que los limbs efectivamente componen al número.
+    \item Rango parcial: verificar con lookups que los limbs son efectivamente valores $u8$.
+\end{itemize}
+
+Esta es una sofisticación por sobre la alternativa de usar solo lookup tables, ya que nos permite chequear también valores de 32 bits solamente definiendo una única tabla de $2^8$ elementos. Se podrían explorar alternativas de descomposición en limbs que no sean de 8 bits, por ejemplo, de 4 bits. Esta opción, aunque posible, va a quedar por fuera del alcance del trabajo. 
+
+\subsection{Traducción de XOR y AND}\label{sec:traduccion_xor}
+La forma de traducir la operaciones \texttt{BlackBoxFunction::AND} y \texttt{BlackBoxFunction::XOR} son muy similares en casi todos los aspectos, por lo tanto ahondaremos únicamente en la explicación del XOR sin perder generalidad más que para la operación subyacente. 
+
+El Opcode \texttt{BlackBoxFunction::XOR} está definido por 2 witnesses $v,w$ y la cantidad de bits que poseen (ej. 8, 16, 32), por lo tanto todo programa de Noir que tenga un \texttt{XOR} como opcode antes sí o sí deberá tener un \texttt{RangeCheck} para sus 2 operandos. Esto nos permite asumir al momento de procesar el opcode que los targets $t_v$ y $t_w$ asociados a $v$ y $w$ respectivamente en el \texttt{witness\_target\_map} fueron chequeados por su rango.
+
+Nuevamente tenemos 2 estrategias para esta traducción.
+
+\subsubsection{\textbf{XOR con descomposición en bits}}
+La idea básica es realizar una descomposición en bits igual que como hicimos en la sección \ref{sec:range_check}, pero ahora llevarlo un poco más lejos y operar con esos bits. Veamos cómo dados 2 targets binarios $a$ y $b$ podemos restringir un tercer target binario $c$ para que se cumpla
+$$c = a \oplus b$$
+La ecuación que se deriva entonces es 
+$$(a-b)^2-c = 0$$
+$$a^2 + b^2 -2ab -c = 0$$
+La demostración se puede ver por extensión en la tabla \ref{tab:verdad_xor}. Vemos que 
+$$c = a \oplus b \Leftrightarrow (a-b)^2-c = 0$$
+
+\begin{table}
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$a$ & $b$ & $c$ & $(a-b)^2-c$ \\
+\midrule
+0 & 0 & 1 & \textcolor{red}{-1} \\
+0 & 0 & 0 & \textcolor{blue}{0} \\
+0 & 1 & 1 & \textcolor{blue}{0} \\
+0 & 1 & 0 & \textcolor{red}{1} \\
+1 & 0 & 1 & \textcolor{blue}{0} \\
+1 & 0 & 0 & \textcolor{red}{1} \\
+1 & 1 & 1 & \textcolor{red}{-1} \\
+1 & 1 & 0 & \textcolor{blue}{0} \\
+\bottomrule
+\end{tabular}
+\caption{Tabla de verdad para $a \oplus b =c$ respecto a la fórmula $(a-b)^2-c$}
+\label{tab:verdad_xor}
+\end{center}
+\end{table}
+
+En el caso del \texttt{AND} es más sencillo, ya que la operación es equivalente al producto de bits. Siempre que $a,b \in \{0,1\}$ se cumple que
+$$a ~\&~ b = a \cdot b$$
+
+Ahora veamos la operación completa para los targets $a$, $b$ y $c$ de $k$ bits. Con la operación en mente para un solo bit, podemos pensar que el range-check anterior nos da una descomposición de cada uno de los targets 
+$$a = a_0 + 2\cdot a_1 + \dots 2^{k-1}\cdot a_{k-1}~~\text{y}~~b = b_0 + 2\cdot b_1 + \dots 2^{k-1}\cdot b_{k-1}$$
+Tenemos que realizar la misma descomposición de $c$ para ''reconstruir'' el resultado luego de la operación bit a bit, definiendo targets $c_0, \cdots c_{k-1}$ y la ecuación 
+$$c = c_0 + 2\cdot c_1 + \dots 2^{k-1}\cdot c_{k-1}$$
+Finalmente el sistema de ecuaciones se completaría para el XOR con
+$$(a_i-b_i)^2-c_i=0 ~~~ \forall~ i \in [0..k)$$
+y para el AND con
+$$a_i\cdot b_i - c_i = 0 ~~~ \forall~i \in [0..k)$$
+
+\subsubsection{\textbf{XOR con descomposición en limbs y lookup tables}}
+Nuevamente podemos usar lookup tables y descomposición en limbs para resolver nuestro problema, en este caso usando las tablas para guardar resultados pre-computados del XOR. La idea básica va a ser tener una tabla con todos los resultados para inputs chicos, de hasta 8 bits. Una lookup table de esta pinta se puede ver en la tabla \ref{tab:calculo_xor}. En ella se calculan todas las combinaciones posibles de resultados para $a \oplus b$ donde $a$ y $b$ son valores de 8 bits. La longitud de esta tabla es de $2^8 \cdot 2^8 = 2^{16}$, el máximo permitido por Plonky2. 
+
+\begin{table}
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+$a$ & $b$ & $a \oplus b$ \\
+\midrule
+0 & 0 & 0 \\
+0 & 1 & 1 \\
+0 & 2 & 2 \\
+0 & 3 & 3 \\
+... & ... & ... \\
+1 & 0 & 1 \\
+1 & 1 & 0 \\
+1 & 2 & 3 \\
+1 & 3 & 2 \\
+... & ... & ... \\
+255 & 254 & 1 \\
+255 & 255 & 0 \\
+\bottomrule
+\end{tabular}
+\caption{Tabla de XOR para inputs de 8 bits}
+\label{tab:calculo_xor}
+\end{center}
+\end{table}
+
+Sin embargo vimos que las lookup tables en Plonky2 se definen a partir de 2 columnas, pero esta tabla tiene 3. Para solucionar este problema vamos a codificar los inputs en una única columna como un único número $c = 256\cdot a + b$. Notamos que esta codificación permite distinguir a los pares de inputs inequivocamente, siendo 
+$$a = \lfloor \frac{c}{256} \rfloor ~~ \text{ y }~~ b = c \% 256$$
+Como el valor máximo que pueden tomar $a$ y $b$ es 255, el máximo valor de $c$ es $255*256+255 = 2^{16}-1$ que entra dentro del rango de valores posibles de una lookup table de Plonky2.
+
+Una vez definida esta Lookup Table, la forma de realizar la operación va a ser la siguiente. Veámoslo primero para una operación XOR de $8$ bits para luego generalizar con descomposición en limbs, al igual que hicimos con el caso de Range-Check. Para empezar, el opcode se define sobre 2 witnesses de input $v,w$, 1 witness de salida $z$ y un valor constante, en este caso $num\_bits = 8$. Primero debemos obtener o crear los targets asociados a $v,w$ y $z$; los nombramos $a,b$ y $out$ respectivamente. Lo siguiente que tenemos que hacer es construir el target que va a ser buscado en la primera columna de la lookup table, es decir, necesitamos un target $c$ tal que $c = 256 \cdot a + b$. Este target puede ser obtenido a partir de operaciones básicas del \texttt{CircuitBuilder}, en particular
+\[\texttt{let c = builder.mul\_add(256, a, b)}\]
+luego realizamos el lookup en la tabla definida con 
+\[\texttt{let lookup\_result = builder.add\_lookup\_from\_index(c, table\_index)}\]
+En este caso sí vamos a utilizar el resultado del lookup, ya que tenemos que restringirlo a que tome el mismo valor que $out$. Esto lo hacemos a través de la operación 
+\[\texttt{builder.connect(lookup\_result, out)}\]
+
+El caso general para $16$ bits y $32$ bits consiste en realizar la separación en limbs tal como vimos en la operación de Range-Check y realizar el XOR con la lookup table limb por limb. Veamos el caso para $N$ limbs. Nos aseguramos con restricciones aritméticas básicas de que 
+$$a = \sum_{i=0}^{N-1} 2^{8i} \cdot limb_{a,i}~~|~~b = \sum_{i=0}^{N-1} 2^{8i} \cdot limb_{b,i}~~|~~out = \sum_{i=0}^{N-1} 2^{8i} \cdot limb_{out,i}$$
+
+y con lookups nos aseguramos de que
+
+$$limb_{a,i}\oplus limb_{b,i} = limb_{out,i}~~\forall i \in [0,N)$$
+y
+$$limb_{a,i} \in [0,2^8),~~ limb_{b,i} \in [0,2^8),~~limb_{c,i} \in [0,2^8),~~\forall i \in [0,N)$$
+
+
+
+En este caso alcanza con definir una única tabla de $2^{16}$ filas para el XOR de $8, 16 \text{ y } 32$ bits. Nuevamente incurrimos en el overhead que conlleva el procesar una tabla por parte del prover.

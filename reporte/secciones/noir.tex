@@ -1,0 +1,316 @@
+\chapter{Noir}\label{sec:noir}
+Noir es un lenguaje de programación que permite generar pruebas de ejecución usando un protocolo ZK-SNARK. Podemos escribir programas tradicionales, librerías y Smart Contracts, aunque vamos a enfocarnos en los programas tradicionales. El prover que usa para esto se llama \textbf{Barretenberg} y está escrito en C++. La versión de Noir usada en este trabajo es la 0.47.0 por motivos que veremos más adelante. A su vez, la versión de Barretenberg usada es la 0.61.0. A continuación vamos a realizar un análisis en profundidad del flujo que realiza Noir para pasar de un código de alto nivel a una prueba de ejecución a través de su compilador: \textbf{Nargo}. 
+
+\begin{enumerate}
+    \item Lo primero que tenemos que hacer instalar Nargo, el compilador de Noir.
+    \item Después tenemos que crear un nuevo proyecto con el comando \texttt{nargo new nombre\_proyecto}. Esto nos generará un directorio con la siguiente estructura:
+    
+    \dirtree{%
+    .1 nombre\_proyecto.
+    .2 src.
+    .3 main.nr.
+    .2 Nargo.toml.
+    }
+    
+    \item A continuación tenemos que escribir un programa en Noir  en el archivo \texttt{main.nr}. Noir es un lenguaje estáticamente tipado (es decir, se tiene que conocer el tipo de las variables en tiempo de compilación). Ahora es el momento donde cabe preguntarnos ¿qué tipo de programas queremos escribir en Noir? Estamos hablando de un lenguaje de propósito general, pero lo que este lenguaje nos permite es ejecutar un programa con inputs tanto públicos como privados.
+    \begin{itemize}
+        \item Los inputs públicos son conocidos tanto por el prover como por el verifier, potencialmente en un ejemplo del mundo real es el verifier el que provee estos inputs para delegar la ejecución del programa.
+        \item Los inputs privados que solo van a ser conocidos por el prover (quien genera la prueba de ejecución).
+    \end{itemize}
+    Veamos un ejemplo trivial con inputs tanto públicos como privados:
+    \begin{verbatim}
+    fn main(x: pub Field, y: Field) {
+        assert(x == y*y);
+    }
+    \end{verbatim}
+    ¿Qué es lo que hace este programa? \texttt{main} es el punto de entrada, recibe un parametro público y uno privado y no tiene un valor de retorno. Su propósito en lenguaje coloquial es generar una prueba de ejecución de que quien lo ejecuta conoce el valor de $\sqrt{x}$ en $\Fp$. 
+    
+    \item Lo siguiente que tenemos que hacer para generar la prueba de ejecución es proveer un listado de parámetros ''testigo'' para que este programa se instancie con valores concretos. Para esto vamos a ejecutar \texttt{nargo check}, comando que creará un archivo Prover.toml. En este archivo tenemos que completar los valores de los parámetros testigo: \texttt{x = 4 y = 2}
+
+    
+    
+    
+    \item Una vez provistos estos parámetros, lo que vamos a querer es ejecutar el programa para generar un sistema de restricciones que lo respresente. Esto concretamente toma la forma de un \textbf{ACIR} (\textit{Abstract Circuit Intermediate Representation}). Para ejecutarlo tenemos que correr el comando \texttt{nargo execute witness --print-acir}. El sistema de ecuaciones generado puede verse en la figura \ref{fig:ACIR_ejemplo_1}.
+
+    \begin{figure} 
+    \centering
+    \begin{minipage}{0.7\textwidth}
+    \begin{verbatim}
+        private parameters indices : [0]
+        public parameters indices : [1]
+        return value indices : []
+        EXPR [ (-1, _1, _1) (1, _0) 0 ]
+    \end{verbatim}
+    \end{minipage}
+
+    \caption{ACIR para el programa de ejemplo con un AssertZero}
+    \label{fig:ACIR_ejemplo_1}
+    \end{figure}
+    
+    Vamos a desglosar lo anterior: el output de la ejecución del programa en formato ACIR se maneja con variables llamadas \textbf{Witnesses}. Los Witnesses son nombrados de forma secuencial (de 0 en adelante) según su orden de aparición en el código. 
+    \begin{itemize}
+        \item \textbf{private parameters indices} es un listado de los inputs privados del circuito. En nuestro programa de alto nivel llamamos \texttt{x} al input privado, pero en el ACIR este input es representado por el witness $0$. Esto se debe a que \texttt{x} es la primera variable que procesa el compilador.  
+        \item \textbf{public parameters indices} es un listado de los inputs públicos del circuito. En este caso, ''y'' es representado por el witness $1$. 
+        \item \textbf{return value indices} es el listado de los witness de retorno. En este caso no hay ninguno, pero serían los siguientes en ser nombrados.
+        \item \textbf{Circuito}: la última linea representa la única ecuación del sistema de ecuaciones del circuito. El Opcode que denota es el \textbf{AssertZero}, con lo cual esa linea se puede traducir a la ecuación:
+
+        \begin{center}
+        $-1 \cdot w_1 \cdot w_1 + 1 \cdot w_0 + 0 = 0$, 
+        \end{center}
+        que si la despejamos es equivalente a 
+        \begin{center}
+        $w_0 = w_1^2$,
+        \end{center}
+        que es lo que el programa busca demostrar. Estamos usando la notación $w_i$ para denotar al $i$-esimo witness (lo que vimos como $\_i$). Vamos a desarrollar sobre el \texttt{AssertZero} en breve, pero antes sigamos con el flujo de generar una prueba de ejecución. 
+    \end{itemize}
+    En este punto el directorio debería ser algo como esto:
+    
+    \noindent
+    \dirtree{%
+    .1 nombre\_proyecto.
+    .2 Nargo.toml.
+    .2 Prover.toml.
+    .2 src.
+    .3 main.nr.
+    .2 target.
+    .3 witness.gz.
+    .3 nombre\_proyecto.json.
+    }
+
+    Los 2 recursos que generó la ejecución anterior son:
+    \begin{itemize}
+        \item \textbf{ACIR}: en archivo ubicado en \texttt{target/nombre\_proyecto.json}.
+        \item \textbf{Valores generados de witness}: en \texttt{target/witness.gz}. En esta instancia Nargo ya resolvió todos los valores de los witnesses. Para hacerlo, tomó $\Fp$ con 
+        $$p=2^{254}+2^{224}+2^{192}+2^{96}-1$$
+    \end{itemize}
+    
+    \item El siguiente paso sería generar la prueba de ejecución de este circuito con algún proving system. 
+    Para esto vamos a usar un prover. El único prover que sabe interpretar código ACIR es \textbf{Barretenberg}, por lo cual tendremos que instalarlo. Lo siguiente que tenemos que hacer es generar la prueba de ejecución de Barretenberg, con el comando:
+
+    \vspace{0.5em}
+    \begin{verbatim}
+    bb prove -c target/nombre_proyecto.json -w /target/witness -o proof
+    \end{verbatim}
+    \vspace{0.5em}
+
+    Esto va a crear una prueba ($\pi$) de Barretenberg en \texttt{nombre\_proyecto/proof}.
+    
+    \item A continuación queremos verificar la prueba. Esto consta de 2 partes: generar la clave de verificación y verificarla. En un caso real la verificación querríamos que sea hecha por un agente distinto al que generó la prueba, por lo tanto, tanto la clave de verificación como la prueba deberían ser pasadas al verifier.
+
+    \begin{verbatim}
+        bb write_vk -b target/nombre_proyecto.json -o target/vk
+        bb verify -k target/vk -p proof
+    \end{verbatim}
+    
+    El primer comando va a generar una \textbf{Verification Key} en la ruta indicada. Esta contiene toda la información necesaria para verificar la prueba: el programa codificado, los public inputs, etc. En lenguaje de PLONK, podríamos pensarlo como las matrices $Q$, $V$ y $PI$ (o sus polinomios interpoladores en un dominio $D$).
+    
+    El segundo comando va a realizar la verificación, valiéndose de la Verification Key y la prueba. 
+
+    Es importante notar también que la semántica que da Noir a las operaciones hace que el comando \texttt{prove} y el comando \texttt{write\_vk} repitan acciones. En particular, podemos decir que \texttt{write\_vk} realiza un subconjunto de las acciones que realiza \texttt{prove} ya que este último tiene que generar una verifying key antes de poder generar la prueba. Una decisión de diseño distinta sería que el comando \texttt{prove} reciba como parámetro una verifying key previamente generada, sin embargo no pretendemos en este trabajo modificar la semántica de las operaciones del programa sobre el cual deseamos construir. 
+
+\end{enumerate}
+
+\section{ACIR}
+Como mencionamos previamente, el \textit{Abstract Circuit Intermediate Representation} (ACIR) es el bytecode de alto nivel en el cual deriva todo programa escrito en Noir. Esencialmente, un código ACIR determina un sistema de ecuaciones \textbf{en abstracto}. Esto quiere decir que no siempre va a proveer explícitamente todas las ecuaciones polinomiales, sino que muchas veces simplemente va a decir qué características deben cumplir estas ecuaciones, delegando en el proving system la implementación concreta. 
+
+Las variables de este sistema de ecuaciones son los \textbf{witnesses}. Un código ACIR describe qué variables van a ser \textbf{inputs públicos}, \textbf{inputs privados} y \textbf{valores de retorno}. Esto no significa nada para el sistema de ecuaciones en sí, pero provee información para que el proving system pueda replicar el programa escrito en Noir con su propio modelo. Los witnesses están numerados del $0$ en adelante, y los notamos $w_i$ o simplemente $\_i$. Podemos pensar a los witnesses como variables \textbf{inmutables} del programa, aunque en realidad sabemos que su inmutabilidad se debe a que estamos parados en otro modelo: en el de los sistemas de ecuaciones. 
+
+Las instrucciones que describen este sistema de ecuaciones se denominan \textbf{opcodes} y los hay de varios tipos. Ya nos topamos con uno antes cuando estábamos viendo el flujo de un programa de Noir en la figura \ref{fig:ACIR_ejemplo_1}. Todos los opcodes predican sobre witnesses, estableciendo restricciones sobre ellos. Veamos a los opcodes uno por uno:
+
+\subsection{AssertZero}
+
+Un opcode AssertZero determina de forma explícita una restricción polinomial sobre los witnesses. Internamente está compuesta por una \texttt{Expression}. Esta expresión tiene 3 campos posibles:
+\begin{itemize}
+    \item \textbf{Términos cuadráticos}: una lista $M$ de $|M|$ triplas de la forma $({k_M}_i,w_{M_{i,l}}, w_{M_{i,r}})$ con ${k_M}_i\in \Fp$. Esta lista describe una combinación lineal de productos cuadráticos entre witnesses: 
+    $$\sum_{i=0}^{|M|}({k_M}_i\cdot w_{M_{i,l}} \cdot w_{M_{i,r}})$$
+    
+    \item \textbf{Términos lineales}: una lista $L$ de $|L|$ tuplas de la forma $({k_L}_i,w_{L_i})$ con ${k_L}_i\in \Fp$. Esta lista describe una combinación lineal de witnesses:
+    $$\sum_{i=0}^{|L|}({k_L}_i\cdot w_{L_i} )$$
+    
+    \item \textbf{Constante}: un valor constante $C \in \Fp$.
+\end{itemize}
+Finalmente, un opcode AssertZero establece la siguiente restricción sobre los witnesses:
+$$\sum_{i=0}^{|M|}({k_M}_i\cdot w_{M_{i,l}} \cdot w_{M_{i,r}}) + \sum_{i=0}^{|L|}({k_L}_i\cdot w_{L_i} ) + C = 0$$
+
+Un ejemplo concreto sería
+$$\textcolor{red}{3\cdot w_3\cdot w_2 + 5 \cdot w_1 \cdot w_2} \textcolor{blue}{~+~ 4\cdot w_1 + 1 \cdot w_0} \textcolor{orange}{ ~+~ 22} = 0$$
+
+\subsection{Operaciones de memoria}\label{sec:acir_memoria}
+En un programa tradicional usamos arreglos para almacenar datos. Noir también provee esa herramienta, pero ¿cómo esto se traduce a código ACIR? El caso donde queremos leer y escribir posiciones con un indice constante es sencillo: el código ACIR simplemente modela estos casos con AssertZero. El caso intrincado es cuando las posiciones que leemos y escribimos son dinámicas, es decir, cuando no dependen del circuito estático sino de la ejecución concreta del mismo. Para esto, hay operaciones de memoria \textbf{abstractas} para crear un bloque de memoria, escribir en una posición y leer de esa posición. 
+
+\subsubsection{\textbf{MemoryInit}}
+Este opcode dicta la creación de un bloque de memoria. El opcode tiene 3 campos:
+\begin{itemize}
+    \item \textbf{blockId}: es un $n \in \mathbb{N}$ que toma valores del $0$ en adelante para distintos bloques de memoria. Permite identificar y referenciar al bloque más adelante. 
+    \item \textbf{init}: una lista $L$ con $n$ witnesses que contienen los valores iniciales de todas las posiciones del arreglo. Dado que $L = [{w_l}_0, {w_l}_1, \cdots, {w_l}_{n-1}]$, los valores del arreglo $A$ estarán restringidos por el proving system a tomar los valores $A[0] = {w_l}_0, ~ A[1]={w_l}_1, \cdots, A[n-1] = {w_l}_{n-1}$ inicialmente. 
+\end{itemize}
+
+\subsubsection{\textbf{MemoryRead}}
+Este opcode permite ''leer'' una posición de memoria. Tiene los siguientes campos:
+\begin{itemize}
+    \item \textbf{blockId}: una constante para identificar el índice del bloque previamente creado.
+    \item \textbf{index}: un witness que representa el índice que se quiere leer del arreglo. Es importante notar que este es un witness y no una constante, y que por ende no es conocida en tiempo de compilación
+    \item \textbf{value}: un witness que representa el valor leído. 
+\end{itemize}
+Podemos pensar una operación de lectura como una restricción de la forma
+$$w_{value} := B_{blockId}[w_{index}]$$ 
+Veamos un ejemplo minimal con un programa de Noir, como el que se puede ver en la figura \ref{fig:noir_ejemplo_mem_read}. Este programa recibe un arreglo de tamaño 4 y un índice público, y retorna el valor del arreglo en ese índice. Semánticamente, como el arreglo es privado y tanto el índice como el valor de retorno son públicos, este programa está demostrando la afirmación ''poseo un arreglo de 4 elementos de $\Fp$ que tiene un valor $x$ en la posición $idx$'' donde tanto $x$ como $idx$ son conocidos por el verifier. 
+
+\begin{figure} 
+\centering
+\begin{minipage}{\textwidth}
+\begin{verbatim}
+    fn main(arr: [Field; 4], idx: pub Field) -> pub Field {
+        arr[idx]
+    }
+\end{verbatim}
+\end{minipage}
+\caption{Programa de Noir minimal con lectura de memoria}
+\label{fig:noir_ejemplo_mem_read}
+\end{figure}
+
+Podemos ver el ACIR generado para este programa en la figura \ref{fig:ACIR_ejemplo_mem_read}. Vemos que el arreglo es representado inicialmente como 4 witnesses privados independientes, pero luego hay una operación de \texttt{INIT} que usa a esos 4 witnesses para inicializar un bloque de memoria con $id=0$. Luego, hay una operación de lectura que dice que se va a leer el bloque de memoria con $id=0$ en la posición denotada por el witness $w_4$ (que en nuestro caso, es la variable \texttt{idx}), y el valor leido será el mismo que el de $w_6$. Por último, el programa usa un AssertZero para restringir $w_5 = w_6$, ya que $w_5$ es el witness que representará el valor de retorno. 
+
+\begin{figure} 
+\centering
+\begin{minipage}{\textwidth}
+\begin{verbatim}
+    private parameters indices : [0, 1, 2, 3]
+    public parameters indices : [4]
+    return value indices : [5]
+    INIT (id: 0, len: 4, witnesses: [_0, _1, _2, _3]) 
+    MEM (id: 0, read at: _4, value: _6) 
+    EXPR [ (1, _5) (-1, _6) 0 ]
+\end{verbatim}
+\end{minipage}
+
+\caption{ACIR para el programa de con lectura de memoria}
+\label{fig:ACIR_ejemplo_mem_read}
+\end{figure}
+
+\subsubsection{\textbf{MemoryWrite}}
+Este opcode permite ''escribir'' una posición de memoria. Tiene campos similares a los del MemoryRead, pero con distínta semántica:
+\begin{itemize}
+    \item \textbf{blockId}: una constante para identificar el índice del bloque previamente creado.
+    \item \textbf{index}: un witness que representa el índice que se quiere leer del arreglo.
+    \item \textbf{value}: un witness que contiene el valor que se quiere escribir en el arreglo. 
+\end{itemize}
+Podemos pensar una operación de lectura como una restricción de la forma
+$$B_{blockId}[w_{index}] := w_{value}$$ 
+Veamos nuevamente un ejemplo minimal con un programa de Noir, como el que se puede ver en la figura \ref{fig:noir_ejemplo_mem_write}. Este programa recibe nuevamente un arreglo de tamaño 4 y un índice público, pero también un valor público que es el que será escrito en el arreglo. Este programa escribe el valor $val$ en la posición $idx$ y finalmente retorna el valor escrito. 
+
+
+
+\begin{figure} 
+\centering
+\begin{verbatim}
+fn main(mut arr: [Field; 4], idx: pub Field, val: pub Field) -> pub Field{
+    arr[idx] = val;
+    arr[idx]
+}
+\end{verbatim}
+\caption{Programa de Noir minimal con escritura de memoria}
+\label{fig:noir_ejemplo_mem_write}
+\end{figure}
+
+Podemos ver el ACIR generado para este programa en la figura \ref{fig:ACIR_ejemplo_mem_write}. Notamos que en este caso tenemos nuevamente 4 witnesses privados pero 2 públicos (uno para el índice y otro para el valor), y el witness $w_6$ reservado para el valor de retorno. Comenzamos al igual que en el ejemplo anterior con la inicialización del bloque de memoria. El siguiente opcode en este caso es un MemWrite que escribe en el bloque de memoria inicializado en el índice notado por el witness $w_4$ ($idx$) el valor del witness $w_5$ ($val$). Lo siguiente es una operación de lectura, que ''guarda'' el valor de ese índice en el witness $w_7$ y por último un AssertZero para igualarlo al witness de retorno con $w_6 = w_7$.
+
+\begin{figure} 
+\centering
+\begin{minipage}{\textwidth}
+\begin{verbatim}
+private parameters indices : [0, 1, 2, 3]
+public parameters indices : [4, 5]
+return value indices : [6]
+INIT (id: 0, len: 4, witnesses: [_0, _1, _2, _3]) 
+MEM (id: 0, write x5 at: x4) 
+MEM (id: 0, read at: x4, value: x7) 
+EXPR [ (1, _6) (-1, _7) 0 ]
+\end{verbatim}
+\end{minipage}
+
+\caption{ACIR para el programa de ejemplo con escritura de memoria}
+\label{fig:ACIR_ejemplo_mem_write}
+\end{figure}
+
+\subsection{BlackBoxFunctions}
+Las funciones de caja negra son una herramienta muy abstracta que tiene el código ACIR para delegar la implementación de una función concreta al proving system. La filosofía detrás de este opcode es la misma que las operaciones de memoria: un código ACIR podría modelar cualquier programa de Noir con una cantidad suficientemente grande de AssertZeros, sin embargo esto es potencialmente muy costoso y puede desaprovechar características propias del proving system que utilicen, como pueden ser las lookup tables mencionadas en la sección \ref{sec:plonk_lookup_tables}. 
+
+Cuando hablamos de ''delegar la implementación de una función concreta al proving system'', estamos diciendo que le decimos al proving system ''quiero restricciones en tu modelo para esta función especifica, donde los inputs  van a ser estos witnesses y los outputs estos otros witnesses''. Podemos pensarlas como restricciones extremadamente complejas de un sistema de ecuaciones cuya implementación es responsabilidad del prover que interprete el código ACIR.
+
+Algunos ejemplos de estas funciones son:
+\begin{itemize}
+    \item \texttt{RangeCheck(w, num\_bits)}: opcode que aparece cuando queremos restringir un witness a determinado rango de valores $[0,2^{num\_bits})$. Es útil por ejemplo cuando queremos trabajar con \texttt{u8, u16, u32}. Un ejemplo minimal de programa de Noir que dispararía el uso de un opcode \texttt{BlackBoxFunction::RangeCheck} sería el que se puede ver en la figura \ref{fig:noir_ejemplo_range}. Su ACIR generado se puede ver en \ref{fig:ACIR_ejemplo_range}.
+    \begin{figure} 
+        \centering
+        \begin{verbatim}
+        fn main(a: u32) -> pub u32 {
+            a
+        }
+        \end{verbatim}
+        \caption{Programa de Noir minimal con RangeCheck}
+        \label{fig:noir_ejemplo_range}
+    \end{figure}
+    \begin{figure} 
+        \centering
+        \begin{verbatim}
+        private parameters indices : [0]
+        public parameters indices : []
+        return value indices : [1]
+        BLACKBOX::RANGE [(_0, num_bits: 32)] [ ]
+        EXPR [ (-1, _0) (1, _1) 0 ]
+        \end{verbatim}
+        \caption{ACIR para el programa de ejemplo con RangeCheck}
+        \label{fig:ACIR_ejemplo_range}
+    \end{figure}
+
+    \item \texttt{XOR(num\_bits, w\textsubscript{left}, w\textsubscript{right}, w\textsubscript{out})}: restringe $w_{out}$ a ser el resultado de la operación de $XOR$ bit a bit entre los witnesses $w_{left}$ y $w_{right}$, asumiendo que estos tienen $num\_bits$ bits.
+    
+    \item \texttt{AND(num\_bits, w\textsubscript{left}, w\textsubscript{right}, w\textsubscript{out})}: restringe $w_{out}$ a ser el resultado de la operación de $AND$ bit a bit entre los witnesses $w_{left}$ y $w_{right}$, asumiendo que estos tienen $num\_bits$ bits.
+
+    \item Funciones de hash como Sha256, Poseidon2, Keccak256, PedersenHash, Blake2s, Blake3, etc.
+
+    \item Operaciones con puntos de curvas elípticas.
+    
+\end{itemize}
+
+\subsection{BrilligCall}
+Para explicar el opcode \texttt{BrilligCall} primero tenemos que hablar de las \textbf{unconstrained functions} en Noir. Noir permite definir funciones que no establecen restricciones sobre el código ACIR (de ahí el nombre \textit{unconstrained}). Estas se definen y se usan como se puede ver en la figura \ref{fig:noir_ejemplo_unconstrained}. El ACIR generado es bastante particular, y lo podemos ver en la figura \ref{fig:ACIR_ejemplo_unconstrained}. 
+
+\begin{figure} 
+    \centering
+    \begin{verbatim}
+    fn main(a: Field, b: Field) -> pub Field{
+        suma_insegura(a, b)
+    }
+    
+    unconstrained fn suma_insegura(a: Field, b: Field) -> Field {
+        a+b
+    }
+    \end{verbatim}
+    \caption{Programa de Noir con función \textit{unconstrained}}
+    \label{fig:noir_ejemplo_unconstrained}
+\end{figure}
+\begin{figure} 
+    \centering
+    \begin{verbatim}
+    private parameters indices : [0, 1]
+    public parameters indices : []
+    return value indices : [2]
+    BRILLIG CALL inputs: [_0,_1] outputs: [_3]
+    EXPR [ (1, _2) (-1, _3) 0 ]
+    \end{verbatim}
+    \caption{ACIR para el programa de ejemplo con función \textit{unconstrained}}
+    \label{fig:ACIR_ejemplo_unconstrained}
+\end{figure}
+
+El ACIR en la última linea genera una restricción de la forma $w_2 = w_3$, donde $w_2$ es el output del programa y $w_3$ es el output del \texttt{BrilligCall} de la linea anterior. Pero ¿qué significa esta Brillig Call para el prover que va a leer el código ACIR? Recordemos que en el flujo de Noir descrito en la sección \ref{sec:noir} el compilador de Noir hace 2 cosas: por un lado genera el código ACIR y por otro, calcula a partir de los inputs provistos por el usuario un diccionario con valores para todos los witnesses. Un valor obtenido como resultado de un llamado a una función no restringida es una \textbf{pista} para el prover, es decir, un valor que no tiene restricciones. No es más que un witness que en el diccionario va a aparecer con un valor dado. El prover no tiene que hacer nada respecto al brillig, no tiene que establecer ninguna restricción nueva, solo tiene que poder acceder a su valor al momento de generar la prueba. Vamos a re-visitar este tema cuando veamos el flujo concreto con Plonky2. 
+
+Por lo pronto, vamos a comentar que también existen usos implícitos de brillig call en la generación de código ACIR, por ejemplo cuando en un programa de Noir calculamos el inverso multiplicativo $\frac{1}{n}$ de un valor en $\Fp$. Esta cuenta requiere más operaciones para hacerse que para verificarse, por lo tanto la estrategia de optimización que utiliza Noir es resolver el valor por un lado (al momento de resolver los witnesses) y verificarlo por otro (a través de AssertZeros). Este es un caso donde la verificación no sigue el mismo camino que todas las operaciones que se hicieron para llegar al resultado. Así como esta operación está incorporada en Noir, las \texttt{unconstrained functions} permiten que el usuario pueda elegir qué operaciones serán verificadas y cuáles no. 
+
+\section{Barretenberg}
+El background técnico de este trabajo es extenso, pero el sentido de eso es poder decir lo siguiente y que tenga sentido: \textbf{Barretenberg es un proving system basado en Turbo-PLONK que usa KZG como su Polynomial Commitment Scheme}. Esta misma frase no hubiera significado nada sin haber pasado por todo lo anterior, y si bien hay muchos detalles implementativos y de protocolo involucrados en el desarrollo de la herramienta, ahora por lo menos tenemos los recursos para entender conceptualmente qué está ocurriendo por debajo. 
+
+Un proving system de estas características necesita un CRS para KZG, cuyo tamaño va a depender del largo de los programas que se deseen demostrar (ya que estos afectan directamente el tamaño de la traza). No hay mucha documentación sobre Barretenberg, por lo tanto la mayoría de la investigación relacionada a su funcionamiento está en el código fuente. Primeramente, Barretenberg tiene que tener la capacidad de leer e interpretar código ACIR y los witnesses generados por Noir. No casualmente, fue creado con este propósito, y esta funcionalidad está incorporada en la herramienta.
+
+Como ya mencioné en la introducción, la idea de este trabajo es atacar el problema del CRS en Barretenberg, habilitando a Noir para ser usado con un proving system que no lo requiera. El proving system elegido para esto es Plonky2. 

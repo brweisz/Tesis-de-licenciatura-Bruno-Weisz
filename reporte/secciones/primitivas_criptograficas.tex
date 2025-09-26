@@ -1,0 +1,374 @@
+\chapter{Primitivas Criptográficas}
+En esta sección se van a presentar algunos de los tópicos básicos necesarios para entender la problemática que se intenta resolver. Voy a buscar la mayor completitud posible en los temas no abarcados por la carrera de ciencias de la computación. Entre ellos se encuentran tópicos de la matemática, de la criptografía y más específicamente de la criptografía \zk.
+
+
+\section{Aritmética modular y cuerpos finitos}\label{sec:cuerpos}
+
+La primitiva más básica en el funcionamiento de un sistema de pruebas es la aritmética modular. Voy a dar un breve repaso.
+
+\vspace{1em}
+
+\textbf{Definición.} Sea $m>1$ un entero, decimos que los enteros $a$ y $b$ son \textit{congruentes módulo $m$} si su diferencia $(a-b)$ es divisible por $m$. Lo notamos
+$$a \equiv b~(m)$$ 
+y llamamos a $m$ el \textit{módulo}.
+
+\vspace{1em}
+
+Algunos ejemplos:
+\begin{itemize}
+    \item $1 \equiv 8 ~ (7)$ porque $7 ~ | ~~ (8-1)$.
+    \item $24 \equiv 4 ~ (5)$ porque $5 ~ | ~~ (24-4)$.
+\end{itemize}
+
+Coloquialmente vamos a decir que hacemos operaciones \textit{módulo m} si al completar una operación, tomamos como resultado el resto de la operación en la división por $m$. Por ejemplo, la operación $10 + 15$ módulo $5$ nos daría $0$ como resultado, ya que $(10+15)\%5 = 0$. Para referirnos al conjunto de los enteros módulo $m$ vamos a usar la notación $\mathbb{Z}/m\mathbb{Z}$, y todas las operaciones de $\mathbb{Z}/m\mathbb{Z}$ quedan definidas \textit{módulo m}. Por ejemplo, el conjunto de los enteros módulo $7$ es:
+$$\mathbb{Z}/7\mathbb{Z} = \{0,1,2,3,4,5,6\}$$
+
+La gran mayoría de las operaciones aritméticas que ocurrirán en los protocolos van a hacer uso de la aritmética modular. Otras nociones importantes que tenemos que tener son las de \textbf{grupo}, \textbf{anillo} y \textbf{cuerpo}.
+\vspace{2em}
+
+\textbf{Definición.} Un \textbf{grupo} es un par $(G, \cdot)$ donde $G$ es un conjunto y $\cdot$ es una operación binaria, a la que llamamos \textit{producto}, que cumple las siguientes propiedades:
+\begin{enumerate}
+    \item \textbf{Clausura:} $\forall a,b \in G$, $(a \cdot b) \in G$, es decir, la operación entre dos elementos de $G$ siempre vuelve a $G$.
+    \item \textbf{Asociatividad:} $\forall a,b,c \in G$, $(a \cdot b)\cdot c = a \cdot (b \cdot c)$, es decir, el producto cumple la propiedad asociativa. 
+    \item \textbf{Elemento neutro:} $\exists e \in G$ tal que $\forall a \in G$ se cumple $e \cdot a = a \cdot e = a$, es decir, hay un elemento neutro respecto al producto. 
+    \item \textbf{Elemento inverso: } $\forall a \in G, \exists a^{-1} \in G$ tal que $a \cdot a^{-1} = e$, es decir, cada elemento de $G$ tiene un inverso respecto al elemento neutro.
+    \item Decimos que un grupo es \textbf{conmutativo} o \textbf{abeliano} si su producto satisface la conmutatividad, es decir que $\forall a,b \in G, a \cdot b = b \cdot a$.
+\end{enumerate}
+
+
+Algunas definiciones importantes sobre un grupo $(G, \cdot)$ son:
+\begin{enumerate}
+    \item Si $G$ tiene una cantidad finita de elementos decimos que $(G, \cdot)$ es un grupo finito. El \textbf{orden} de $G$ se nota como $|G|$.
+    \item La \textbf{exponenciación} se define como la aplicación sucesiva del producto a varias copias de un mismo elemento. Formalmente, dados $g \in G, x \in \mathbb{Z}^+$, $g^x = \underbrace{g \cdot g \cdot ... \cdot g}_{x \text{ veces}}$.
+    \item Sean $a \in G, d \in \mathbb{Z}^+$, si $d$ es el menor número tal que $a^d = e$ decimos que $d$ es el \textbf{orden} de $a$ en $(G, \cdot)$. Si no existe tal $d$ entonces decimos que $a$ es de orden \textit{infinito}.
+    
+    Propiedades:
+    \begin{itemize}
+        \item Si $G$ es de orden finito entonces todos los elementos de $G$ tienen orden finito. 
+        \item \label{prop:division_de_orden} Sean $a \in G,~ k \in \mathbb{Z}^+$ y $e$ el elemento neutro. Si $a$ tiene orden $d$ y $a^k = e$ entonces $d|k$. 
+    \end{itemize}
+\end{enumerate}
+
+\vspace{1em}
+\newcommand{\zSiete}{(\mathbb{Z}/7\mathbb{Z})}
+
+Vamos a poner un ejemplo concreto con aritmética modular. El par $(\zSiete, +_{(7)})$ es un grupo, ya que cumple las 4 propiedades mencionadas anteriormente. Recordemos que en este caso la suma está definida módulo $7$:
+\begin{enumerate}
+    \item Siempre que sumemos 2 elementos de $\zSiete$ obtendremos 1 elemento de $\zSiete$, por lo tanto cumple la propiedad de \textbf{clausura}.
+    \item La suma es asociativa por lo tanto cumple la propiedad de \textbf{Asociatividad}.
+    \item Hay un \textbf{elemento neutro} que es el $0$.
+    \item Siempre podemos obtener el \textbf{elemento inverso} de un numero $a$, ya que alcanza con tomar $a^{-1}=7-a$.
+    \item Este es un grupo \textbf{conmutativo} ya que la suma cumple la propiedad conmutativa. 
+\end{enumerate}
+Revisando las propiedades, también tenemos que 
+\begin{enumerate}
+    \item $\zSiete$ es un grupo finito, ya que $|\zSiete| = 7$. 
+    \item La \textit{exponenciación} en $(\zSiete, +)$ sería lo que coloquialmente conocemos como multiplicación, es decir, la aplicación sucesiva de la suma. 
+    \item Podemos ver que todos los elementos de $\zSiete$ tienen un orden finito ya que $\forall i \in \{1,2,3,4,5,6\}$, $\underbrace{i+i+i+i+i+i+i}_{7 \text{ veces}} = 0$ exceptuando al 0 que tiene orden 1. Notamos que se cumple que en todos los casos el orden del grupo divide al módulo (en este caso, el orden siempre es $7$).
+\end{enumerate}
+
+\vspace{2em}
+
+\textbf{Definición.} Un anillo es una tripla $(R, +, \cdot)$ donde $R$ es un conjunto y $(\cdot, +)$ son operaciones binarias que llamamos \textit{suma} y \textit{producto} respectivamente. Se tiene que cumplir que
+\begin{enumerate}
+    \item El par $(R,+)$ es un grupo conmutativo.
+    \item El par $(R,\cdot)$ es un grupo pero donde no necesariamente los elementos tienen un inverso multiplicativo ni se cumple la propiedad conmutativa.
+    \item Se cumple la \textbf{propiedad distributiva}: $\forall a,b,c \in R,~~~(a+b)\cdot c = a\cdot c + b\cdot c$
+\end{enumerate}
+
+\vspace{1em}
+
+Si bien todos los elementos de $R$ tienen un inverso aditivo, un anillo no requiere que todos sus elementos tengan un inverso respecto al producto. Tomemos por ejemplo el anillo $(\mathbb{Z}, +, \cdot)$, es decir, los números enteros con la suma y el producto. Todos números $n \in \mathbb{Z}$ tiene un inverso aditivo que podemos obtener tomando $-n$. Si buscamos un inverso multiplicativo, tomamos por ejemplo al $2$ y notamos que $2^{-1}=\frac{1}{2} \notin \mathbb{Z}$.
+
+\vspace{2em}
+
+\textbf{Definición:} Un \textbf{cuerpo} es una tripla $(F, +, \cdot)$ donde $F$ es un conjunto y $(\cdot, +)$ son operaciones binarias que llamamos \textit{suma} y \textit{producto} respectivamente. Se tiene que cumplir que
+
+\begin{enumerate}
+    \item El par $(F,+)$ es un grupo conmutativo.
+    \item El par $(F,\cdot)$ es un grupo conmutativo.
+    \item Se cumple la \textbf{propiedad distributiva}.
+\end{enumerate}
+
+En otras palabras, un cuerpo es un anillo donde el grupo $(F,\cdot)$ sí tiene inverso para todos sus elementos y se cumple la propiedad conmutativa.
+
+\newcommand{\Fp}{\mathbb{F}_p}
+
+\vspace{1em}
+
+\textbf{Notación:} Sea $p \in \mathbb{N}$ primo, llamamos $\Fp = ((\mathbb{Z}/p\mathbb{Z}), +_{(p)}, \cdot_{(p)})$ al cuerpo finito conformado por los enteros módulo $p$, con la suma $+_{(p)}$ y el producto $\cdot_{(p)}$ definidos módulo $p$.
+
+\vspace{1em}
+
+Los cuerpos van a ser centrales en todo el desarrollo posterior, en particular aquellos de la forma $\Fp$. Ahora vamos a revisar algunas definiciones y propiedades de los cuerpos que van a resultar útiles cuando estemos explorando el protocolo PLONK. 
+
+\vspace{1em}
+
+\textbf{Definición.} Decimos que un elemento de un cuerpo $F$ es una \textbf{unidad} si tiene un inverso multiplicativo. Luego, $F^*$ es el conjunto de todos los elementos de $F$ que tienen inverso multiplicativo.
+
+\vspace{1em}
+\textbf{Propiedad.} En $\Fp$ todos los elementos distintos de $0$ son unidades.
+
+\vspace{1em}
+
+\textbf{Definición.} Sea $\Fp$ un cuerpo finito, decimos que $g \in Fp$ es un \textbf{generador} de $\Fp$ si todo elemento de $\Fp^* = \Fp - \{0\}$ es igual a algún $g^x$ con $g \in \mathbb{N}$. En otras palabras, si se cumple que $$\Fp^* = \{1, g, g^2, g^3, ..., g^{p-2}\}$$ Coloquialmente decimos que $g$ \textit{genera} a $\Fp$.
+
+\vspace{1em}
+
+\textbf{Teorema.} $\forall p$ primo, existe un generador en $\Fp$.
+
+\vspace{1em}
+
+Veamos esto con el ejemplo de $\mathbb{F}_7$ donde $F = \{0,1,2,3,4,5,6\}$. Para cada uno de los elementos de $F$, vemos que si aplicamos sucesivamente el producto por sig mismo obtenemos los siguientes conjuntos de elementos:
+\begin{itemize}
+    \item $1 \rightarrow 1,1,1,\cdots = \{1\}$.
+    \item $2 \rightarrow 2,4,1,2,4,1,\cdots = \{1,2,4\}$.
+    \item $3 \rightarrow 3,2,6,4,5,1,3,2,\cdots= \{1,2,3,4,5,6\}$
+    \item $4 \rightarrow 4,2,1,4,2,1,\cdots= \{1,2,4\}$
+    \item $5 \rightarrow 5,4,6,2,3,1,5,4,6,\cdots= \{1,2,3,4,5,6\}$
+    \item $6 \rightarrow 6,1,6,1,\cdots= \{1,6\}$
+\end{itemize}
+
+\vspace{1em}
+
+En el ejemplo anterior, vemos que $\{3,5\}$ es el conjunto de generadores de $\mathbb{F}_7$, no así el resto de sus elementos. Sin embargo, coloquialmente vamos a decir que cada uno de ellos es un \textbf{generador de grado n}, siendo $n$ el tamaño del conjunto de elementos que generan. 
+
+\vspace{1em}
+
+\textbf{Propiedad.} Sea $\Fp$ un cuerpo finito y $a$ un generador de grado $n$. Siempre se cumple que $n$ divide a $|\Fp|-1$. Vemos que esto se cumple en ejemplo, ya que los conjuntos generados son de tamaño $1,3,6,3,6 \text{ y } 2$, todos dividen a $7-1$.
+
+\subsection{Problema del logaritmo discreto} \label{sec:logaritmo_discreto}
+El Problema del Logaritmo Discreto es un problema matemático que surge en criptografía como una solución a muchos problemas y va a ser una pieza clave de todos los protocolos que vamos a ver a continuación. Muchos protocolos criptográficos se volverían inseguros si se hallara una solución tratable de este problema. 
+
+\vspace{1em}
+
+\textbf{Definición.} Sea $g$ un generador de $\Fp$ y $h \neq 0 \in \Fp$. El Problema del Logaritmo Discreto (DLP por sus siglas en inglés) es el problema de encontrar un exponente $x \in \mathbb{N}$ tal que $$g^x \equiv h ~ (p)$$ El número $x$ se conoce como logaritmo discreto de $h$ en base $g$ y se denota $log_g(h)$. Hay una cantidad infinita de soluciones al problema, ya que si $g^x = h$ entonces $g^{x+k\cdot(p-1)} = h$. Por esto mismo, el problema está definido módulo $p-1$ y existe una única solución. 
+
+DLP es un problema difícil en teoría de la computación, ya que los únicos algoritmos que se conocen para resolverlo son de tiempo exponencial en función del tamaño de $p$. Esto quiere decir que si $p$ es suficientemente grande entonces no es posible hallar $x$ en un tiempo tratable.  
+
+El algoritmo trivial para solucionar el problema es computar todos los exponentes de $g$ hasta hallar un exponente $x$ tal que $g^x = h$. Sin embargo, si analizamos la complejidad computacional y supongamos que $p$ se representa con $k$ bits (es decir que $p \in [2^k, 2^{k+1}]$), entonces el algoritmo tiene un costo de $\mathcal{O}(3^k)$.
+
+A continuación vamos a ver un protocolo criptográfico básico cuya seguridad depende de la dificultad de DLP: el intercambio de claves de Diffie-Hellman.
+
+\subsection{Diffie-Hellman}
+El intercambio de claves de Diffie-Hellman es un problema conocido de la criptografía simétrica. El problema que resuelve es el siguiente: supongamos que tenemos 2 partes (Alice y Bob) que quieren tener una clave compartida para usar un cifrado simétrico, pero el único medio que tienen para comunicarse es inseguro. Una forma de interpretar un medio inseguro es pensar que hay un adversario (llamémoslo Malcom) que puede observar toda la informacion que Alice y Bob intercambian. La dificultad de DLP en $\Fp$ provee una solución a este problema. El protocolo es el siguiente:
+
+\begin{enumerate}
+    \item Alice y Bob se ponen de acuerdo en un primo $p$ suficientemente grande y un valor $g \neq 0 \in \Fp$. No importa si $p$ y $g$ son valores públicos, es decir, Malcom puede conocer estos valores.
+    \item Alice y Bob eligen valores secretos $a \in \mathbb{N}$ y $b \in \mathbb{N}$ respectivamente y estos valores también deben ser suficientemente grandes.
+    \item Cada uno va a calcular $$A \equiv g^a ~(p)~~~y~~~ B \equiv g^b ~(p)$$ respectivamente.  
+    \item Cada uno comparte el valor que calculó con el otro, es decir, Alice le transmite $A$ a Bob a través del medio inseguro, y Bob hace lo mismo con $B$.
+    \item Por ultimo, cada uno va a calcular el valor de $K$ (la clave compartida) de la siguiente forma: Alice va a tomar el valor obtenido $B$ y va a calcular $$K \equiv B^a ~ (p)$$ y lo mismo va a Bcer bob con $A$ y $b$, es decir $$K' \equiv A^b ~ (p).$$ Es fácil ver que $K \equiv K' ~ (p)$ y que por ende ahora tienen una clave en común.
+\end{enumerate}
+
+La pregunta entonces es ¿que hace que Malcom no tenga la clave $K$ si pudo observar todas las comunicaciones? La respuesta es que la seguridad de este intercambio de claves depende de la dificultad de resolver DLP. Los valores que Malcom pudo observar son $p$, $g$, $A$ y $B$, sin embargo $$K \equiv g^{a\cdot b} \equiv A^b \equiv B^a ~ (p),$$ pero $K$ no puede calcularse sin conocer $a$ o $b$, que son valores privados. Uno podría pensar entonces que el valor de $a$ se puede deducir de saber que $A \equiv g^a~(p)$ pero ahí es donde DLP entra en juego y nos asegura que Malcom no puede realizar este despeje en un tiempo razonable. 
+
+Sin embargo, Malcom puede tener suerte, y con suerte me refiero a una probabilidad de $\frac{n}{p}$, si decide hacer $n$ intentos por encontrar el valor de $K$. Esto es lo que hace que este intercambio de claves, así como todos los protocolos cuya seguridad depende de DLP, sean protocolos probabilísticos. Sin embargo, como suele pasar que $p \gg n$ entonces $\frac{n}{p} \approx 0$. 
+
+\section{Polinomios} \label{sec:polinomios}
+Vamos a introducir brevemente el concepto de polinomios sobre un cuerpo finito $\Fp$. Decimos que $\Fp[x]$ es el anillo de polinomios sobre la variable libre $x$, compuesto por todos los símbolos de la forma $$a_0+a_1\cdot x + a_2 \cdot x^2 + ... + a_m \cdot x^m$$ donde $m$ es un entero no negativo y $\forall ~ 0\leq i \leq m, ~a_i \in \Fp$. El \textbf{grado} del polinomio es el mayor exponente del mismo, es decir, el mayor $k$ tal que $a_k \neq 0$. Lo notamos $deg(p)$.
+
+\vspace{1em}
+
+Dados 2 polinomios $p,q\in \Fp[x]$ tales que $$p(x) = a_0+a_1\cdot x + ... + a_n \cdot x^n$$ y $$q(x) = b_0+b_1\cdot x + ... + b_m \cdot x^m:$$
+\begin{itemize}
+    \item Decimos que $p(x)=q(x)$  sii todos sus coeficientes son iguales, es decir si $\forall 0\leq i \leq m, ~ a_i = b_i$. 
+    \item La suma de $p(x)$ y $q(x)$ es igual a $$p(x)+q(x) = a_0 + b_0 + (a_1 + b_1)\cdot x +...+ (a_m+b_m)\cdot x^m + ... + a_n\cdot x^n$$ asumiendo sin pérdida de generalidad que $m<n$. Es importante notar que la operación de suma $a_i+b_i$ es sobre el cuerpo $\Fp$.
+    \item El producto de $p(x)$ y $q(x)$ se obtiene a través de la multiplicación formal de sus símbolos, distribuyendo la suma. De esto se deduce que que el grado resultante es igual a la suma de los grados de $p$ y $q$. Nuevamente notamos que la operación de producto $a_i \cdot b_j$ es sobre el cuerpo $\Fp$.
+    
+    Por ejemplo, si tomamos $p(x) = 1 + x - x^2$ y $q(x) = 2 + x^2 + x^3$, obtenemos que $p(x) \cdot q(x) = 2 + 2\cdot x - x^2 +2\cdot x^3 - x^5.$ 
+    \item DIVISION DE POLINOMIOS
+\end{itemize}
+
+Dado un polinomio $p(x)$ podemos definir funciones asociadas a él. Por ejemplo, podemos tomar una función $f(x): \Fp \rightarrow \Fp$ sobre el polinomio mencionado. Es importante esta distinción entre el polinomio como objeto algebraico y la función asociada sobre un dominio.
+
+Las raíces de un polinomio $p$ sobre el dominio $\Fp$ son aquellos valores $x^* \in \Fp$ en donde la función asociada a $p$ se anula, es decir $p(x^*) = 0$.
+
+\begin{prop} \label{prop:preserva_raices}
+    Sean $K \subset \Fp$ el multiconjunto de raíces de $p \in \Fp[x]$ y $k\in K$, entonces el polinomio resultante de $p(x) / (x-k)$ tiene como raíces a $K -\{k\}$. En otras palabras, preserva al resto de sus raíces. 
+\end{prop}
+
+\begin{prop} \label{prop:unicidad_raices}
+    Sean $p,q \in \Fp[X]$ tal que $deg(p) = deg(q) = n$. Si el multiconjunto de raíces de $p$ es el mismo que el de $q$ entonces $p=q$.
+\end{prop}
+
+
+\subsection{Interpolación}
+
+En numerosas ocasiones nos va a interesar obtener el \textbf{polinomio interpolador} de una lista de elementos de $\Fp$ sobre un dominio determinado. Esto quiere decir que dado un dominio $D = \{d_0, d_1, d_2, ..., d_n\}$ y una serie de valores $p_0, p_1, p_2, ..., p_n \in \Fp$, nos interesa hallar el polinomio cuya función asociada $f: \Fp \rightarrow \Fp$ cumple que $$f(d_i) = p_i ~ \forall ~ 0 \leq i \leq n$$
+
+No me voy a adentrar en profundidad en los mecanismos para obtener dicho polinomio, pero me interesa hablar de algunas de sus propiedades:
+\begin{itemize}
+    \item Existencia: existe al menos un polinomio interpolador para cualquier conjunto de puntos.
+    \item Unicidad: dados $n+1$ puntos, el polinomio de grado a lo sumo $n$ que lo interpola es único.
+\end{itemize}
+
+\subsection{Lema de Schwartz-Zippel} \label{sec:zippel}
+El Lema de Schwartz-Zippel es una herramienta matemática usada en las Pruebas de Identidad de Polinomios que va a resultar central para los Proving Systems dado que será usado numerosas veces en diversos protocolos, dándoles a su vez la caracterización de pruebas probabilísticas.  
+
+Sea $p$ un primo grande, dos polinomios $P, Q \in \Fp[X]$ de grado $n$, y $k \in \Fp$ un valor aleatorio tomado de una distribución uniforme de $\Fp$. Si las funciones asociadas a $P$ y $Q$ en $\Fp$ ($p(x)$ y $q(x)$ respectivamente) cumplen que $p(k) = q(k)$ entonces la probabilidad de que $P$ y $Q$ sean distintos es de $\frac{n}{p}$. En un entorno donde $p \gg n$ (por ejemplo $p=2^{200}$ y $n=2^{32}$) podemos decir que si $p(k) = q(k)$ entonces es altamente probable que $P$ y $Q$ sean iguales, ya que $1 - \frac{2^{32}}{2^{200}} \approx 1$. 
+
+La intuición detrás de esto está dada por la propiedad de los polinomios de grado $n$ tienen como mucho $n-1$ puntos críticos, por lo tanto 2 polinomios con coeficientes en $\Fp$ se pueden cruzar a lo sumo en $n$ puntos. 
+
+
+\begin{figure}[h]
+\caption{Intuicion Shwartz-Zippel (usar imagen mejor por dios santisimo)}
+\centering
+\includegraphics[width=0.5\textwidth]{imagenes/intuicion_shwartz_zippel.png}
+\end{figure}
+
+Pensemos por un segundo qué pasaría si el valor elegido no fuera aleatorio, o más bien si el valor fuera elegido maliciosamente por un agente que conoce $P$ y $Q$. Supongamos también que $P \neq Q$. Si este agente conociera un valor $k^*$ tal que $p(k^*) = q(k^*)$ (alguno de los puntos donde los polinomios intersecan) podría alegar que $P = Q$ a los ojos de un protocolo que usa el lema de Schwartz-Zippel, dando lugar a una vulnerabilidad. Más adelante veremos cómo se resuelve esta obtención de números aleatorios en el contexto de los protocolos ZK. 
+
+Dijimos que para que este protocolo sea seguro se pide que $p \gg n$. El valor de $p - n$ se conoce como \textbf{blowup factor} y se usa en muchos casos para medir la seguridad de un protocolo. 
+
+\section{Curvas elípticas} \label{sec:curvas_elipticas}
+Una curva elíptica es el conjunto de soluciones $(x,y)$ a una ecuación de la forma 
+$$y^2 = x^3 + Ax + B$$
+donde $A$ y $B$ son constantes. Dos ejemplos de curva elíptica pueden verse en la figura \ref{fig:curvas_elipticas_ejemplos}. Un \textbf{punto} en una curva elíptica es un par ordenado $(x,y)$ que cumple con la ecuación de la curva. Las curvas elípticas, al igual que los cuerpos finitos como $\Fp$, van a ser herramientas muy útiles para los protocolos criptográficos que siguen. También, tienen algunas propiedades similares como vamos a ver a continuación.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{imagenes/curvas elipticas de ejemplo.png}
+    \caption{Dos ejemplos de curvas elípticas en el eje cartesiano de los reales}
+    \label{fig:curvas_elipticas_ejemplos}
+\end{figure}
+
+\subsubsection{\textbf{Operaciones básicas}}
+Vamos a explicar la \textbf{suma} de 2 puntos de curva elíptica a través de su intuición geométrica. Sean $P=(x_p,y_p)$ y $Q=(x_q, y_q)$ dos puntos sobre la curva. Primero proyectemos una recta que corta a ambos puntos. La naturaleza de la ecuación nos garantiza que siempre existe un tercer punto sobre la curva que interseca con esta recta, llamado $R =(x_r, y_r)$. Lo siguiente es reflejar este punto sobre el eje $x$, obteniendo $R'=(x_r, -y_r)$. Finalmente definimos 
+
+$$P \oplus Q = R'$$
+
+Una representación visual de la operación realizada puede verse en la figura \ref{fig:suma_curva_eliptica}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{imagenes/elliptic_curve_addition.png}
+    \caption{Suma de $P$ y $Q$ en una curva elíptica.}
+    \label{fig:suma_curva_eliptica}
+\end{figure}
+
+Un caso especial para la suma es en el cual queremos sumar un punto $P$ consigo mismo. En esa situación, alcanza con tomar la recta tangente a $P$ y la ecuación nos garantiza que siempre existe un segundo punto de la curva sobre esta recta. Un ejemplo se puede ver en la figura \ref{fig:suma_curva_eliptica_tangente}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{imagenes/suma tangente curva eliptica.png}
+    \caption{Suma de $P$ consigo mismo en una curva elíptica}
+    \label{fig:suma_curva_eliptica_tangente}
+\end{figure}
+
+Hay otro caso especial en el cual queremos sumar a un punto $P=(a,b)$ con su punto espejado en el eje $x$, es decir $P'=(a,-b)$. La recta definida entre estos puntos es paralela al eje vertical pero $P$ y $P'$ son los únicos puntos que tienen en común esta recta y la curva elíptica. ¿Dónde está el tercer punto? La solución es crear un tercer punto, un ''punto en el infinito'' que no existe en el plano pero sí en el infinito de toda linea vertical. Finalmente, definimos que 
+$$P \oplus P' = \infty$$
+Paralelamente, definimos la suma de cualquier punto $P$ con $\infty$ como
+$$P+\infty = P$$
+ya que si trazamos la recta entre $P$ y $\infty$, el tercer punto intersecado es $P'$, por lo tanto su punto espejado vuelve a ser $P$. Con este punto en el infinito, vamos a definir nuevamente una curva elíptica.
+
+\vspace{1em}
+
+\textbf{Definición.} Una curva elíptica $E$ es el conjunto 
+$$E = \{(x,y)~|~ y^2 = x^3 + Ax + B\} ~\cup~ \{\infty\} ~~ A,B\in \mathbb{Z}$$
+
+Los valores $A$ y $B$ deben cumplir que $4A^3 + 27B^2 \neq 0$. Esta condición se debe a que si factorizamos $X^3+AX+B$ como $y = (x-x_0)(x-x_1)(x-x_2)$ entonces $E$ no tiene raíces repetidas ($x_o \neq x_1 \neq x_2$) sii $4A^3 + 27B^2 \neq 0$.
+
+\vspace{1em}
+
+Sea $E$ una curva elíptica, la \textbf{multiplicación} entre un punto de curva $P\in E$ y un $n \in \mathbb{N}$ se define como la suma sucesiva de $P$ consigo mismo $n$ veces, es decir: 
+\[
+nP =  \underbrace{P+ P + \cdots + P}_{\text{$n$ veces}}
+\]
+
+\subsubsection{\textbf{Curvas Elípticas como grupos conmutativos}}
+Sea $E$ una curva elíptica. La operación de \textbf{suma} ($\oplus$) cumple con las propiedades:
+\begin{itemize}
+    \item \textbf{Clausura:} $P + Q \in E ~~~~~ \forall ~P,Q\in E$
+    \item \textbf{Elemento neutro:} $P + \infty = \infty + P = P ~~~~~ \forall ~P\in E$
+    \item \textbf{Elemento inverso:} $P + (-P) = \infty ~~~~~ \forall ~P\in E$
+    \item \textbf{Asociatividad:} $(P + Q) + R = P + (Q + R) ~~~~~ \forall ~P,Q,R\in E$
+    \item \textbf{Conmutatividad:} $P + Q = Q + P ~~~~~ \forall ~P,Q\in E$
+\end{itemize}
+
+En otras palabras, dada la definición de la sección \ref{sec:cuerpos}, podemos decir que la tupla $(E, +)$ es un grupo conmutativo.
+
+La \textbf{resta} de dos puntos de curva $P$ y $Q$ podemos pensarla como la suma del inverso aditivo, es decir, dados $P,Q\in E$, decimos que $P-Q = P + (-Q)$ siendo $-Q$ el punto espejado a $Q$ en el eje horizontal.
+
+\subsection{Curvas elípticas sobre cuerpos finitos}
+Para usar la teoría de curvas elípticas en el contexto de protocolos criptográficos tenemos que pensarlas como conjuntos de puntos con coordinadas en $\Fp$. Alteramos levemente la definición:
+
+\vspace{1em}
+
+\textbf{Definición.} Sea $p \geq 3\in \mathbb{N}$. Una curva elíptica sobre $\Fp$ es un conjunto 
+$$E(\Fp) = \{(x,y):x,y\in\Fp\ ~|~ y^2 = x^3+Ax+B\} \cup \{\infty\}$$
+Dado un $p$ fijo y una ecuación de curva elíptica $E$, para obtener los puntos, de la curva debemos recorrer todos los valores $x = \{0,1, \cdots, p-1\}$ y ver para cuáles de ellos, $E(x)$ es un cuadrado en $\Fp$ (es decir, que exista un $y$ tal que $y^2 = E(x)$). Si esto ocurre, decimos que $(x,y) \in E(\Fp)$.
+
+Por ejemplo, si tomamos $p=13$ y $E: y^2 = x^3 + 3x + 8$, el conjunto de puntos que obtendríamos sería 
+$E(\mathbb{F}_{13}) = \{\infty, (1, 5), (1, 8), (2, 3), (2, 10), (9, 6), (9, 7), (12, 2), (12, 11)\}$. Podemos ver una representación visual en la figura \ref{fig:curva_eliptica_fp}. Definimos al \textbf{orden} de la curva elíptica como la cantidad de puntos que la componen, incluyendo al punto en el infinito. Por ejemplo, la curva recién mencionada tiene orden $9$.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{imagenes/curva eliptica Fp.png}
+    \caption{Visualización de $E(\mathbb{F}_{13})$}
+    \label{fig:curva_eliptica_fp}
+\end{figure}
+Notamos que en este caso no podemos usar una intuición geométrica para sumar 2 puntos de curva, sin embargo podemos derivar el algoritmo necesario para calcularla, como se puede ver en el algoritmo \ref{alg:suma_curva_eliptica}. Se puede demostrar que el punto obtenido también forma parte de la curva, en otras palabras, $$P_1\in E(\Fp) \land P_2 \in E(\Fp) \implies P_1 + P_2  \in E(\Fp)$$. 
+
+También podemos afirmar que $(E(\Fp), +)$ es un grupo conmutativo, ya que cumple con todas las propiedades requeridas. 
+
+\begin{algorithm}
+\caption{Suma de puntos de curva elíptica}
+\begin{algorithmic}[1]
+\State \textbf{Entrada:} $P_1: E$, $P_2: E$
+\State \textbf{Salida:} $P_1 + P_2$
+
+\If{$P_1 = \infty$} \State \textbf{return} $P_2$ \EndIf 
+\If{$P_2 = \infty$} \State \textbf{return} $P_1$ \EndIf
+
+\State $P_1 = (x_1,y_1)$,  $P_2 = (x_2,y_2)$
+\If{$x_1 == x_2$ \textbf{y} $y_1 == -y_2$} // Son puntos espejados en el eje horizontal
+    \State \textbf{return} $\infty$
+\Else
+    \If{$P_1 \neq P_2$} // Calcular la recta que pasa por ambos puntos
+        \State $\lambda = \frac{y_2-y_1}{x_2-x_1}$
+    \Else  ~~~~~~~~~~~~~~~~~// Calcular la recta tangente
+        \State $\lambda = \frac{3x_1^2 + A}{2y_1}$
+    \EndIf
+    \State $x_3 = \lambda^2-x_1-x_2$
+    \State $y_3 = \lambda(x_1-x_3)-y_1$
+    \State \textbf{return} $(x_3, y_3)$
+\EndIf
+\end{algorithmic}
+\label{alg:suma_curva_eliptica}
+\end{algorithm}
+
+\textbf{Definición.} Dado un punto $P\in E(\Fp)$, definimos el \textbf{orden} de $P$ como el menor $s > 1\in \mathbb{N}$ tal que $sP = \infty$. 
+
+El orden de $P$ siempre existe ya que la cantidad de puntos en $P\in E(\Fp)$ es finita, por lo tanto si tomamos los valores $P, 2P, 3P, \cdots $ necesariamente vamos a tener valores repetidos. Sean $i>j \in \mathbb{N}$ los valores más chicos tales que $jP = iP$, tomamos $s=i-j$. Por la propiedad \ref{prop:division_de_orden}, sabemos que $s$ divide al orden de $E$.
+
+
+\subsection{Problema del logaritmo discreto para curvas elípticas} \label{sec:ecdlp}
+Recordamos que el problema del logaritmo discreto de la sección \ref{sec:logaritmo_discreto} está definido sobre un cuerpo finito $\Fp$. Queremos algo similar para $E(\Fp)$ que también sirva a nuestros propósitos.
+
+\vspace{1em}
+
+\textbf{Definición.} Sea $E$ una curva elíptica sobre $\Fp$ y sean $P,Q\in E(\Fp)$. El problema \textbf{ECDLP} (\textit{Problema del Logaritmo Discreto para Curvas Elípticas}) es el problema de encontrar un $n\in\mathbb{N}$ tal que 
+$$Q = \underbrace{P+P+\cdots+P}_{\text{n veces}} = nP$$
+Notamos $n = log_P(Q)$. Puede ocurrir que el problema no esté definido para algunos pares $P,Q\in E(\Fp)$, ya que $Q$ no necesariamente es un múltiplo de $P$. En la práctica, un agente de un protocolo criptográfico tomará un punto $P$ público y un valor secreto $n$ y computará $Q = nP$, por lo tanto el problema estará bien definido. 
+
+La dificultad ECDLP es similar a la del DLP para grupos genéricos, en el sentido de que dados $P,Q \in E(\Fp)$ conocidos, el mejor algoritmo conocido que computa $n = log_P(Q)$ es equivalente a sumar $P$ sucesivamente a sí mismo hasta alcanzar el valor de $Q$. Sin embargo, hay algunas curvas elípticas conocidas para las cuales existen algoritmos más eficientes para resolver ECDLP. 
+
+\subsection{BLS y Pairings}
+Paralelamente, también existen curvas elípticas más seguras y con propiedades deseables, como puede ser la curva BLS12385~\cite{Short_Signatures_from_the_Weil_Pairing}. Esta curva está definida como
+
+$$E(\Fp): Y^2=X^3+4 ~~~~~ p = 2^{255}-13$$
+
+Esta curva posee la propiedad de que calcular \textbf{\textit{pairings}} es una operación poco costosa respecto a otras curvas. Ahora bien, ¿qué son los pairings? No me interesa dar una definición formal, más bien enunciar algunas de las propiedades que nos interesan en el contexto de los SNARKs.
+
+\vspace{1em}
+
+Sea $E(\Fp)$ una curva elíptica, un pairing es una función $e$ que cumple lo siguiente:
+\begin{itemize}
+    \item $e: E(\Fp) \times E(\Fp) \rightarrow \Fp$.
+    \item $e(P,Q)$ puede computarse de manera eficiente.
+    \item $e(a\cdot P, b\cdot Q) = e(P,Q)^{a\cdot b} ~~~ \forall~a,b\in  \Fp$, propiedad conocida como \textbf{bilinealidad}. 
+\end{itemize}
+
+La definición de pairing es más general, pero esto es todo lo que nos va a interesar en el contexto de los SNARKs. 
+

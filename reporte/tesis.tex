@@ -1,0 +1,771 @@
+\documentclass[11pt,a4paper]{tesis}
+\usepackage{minted}
+\usepackage{amsmath}   
+\usepackage{booktabs}  
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[left=3cm,right=3cm,bottom=3.5cm,top=3.5cm]{geometry}
+\usepackage{float}
+\usepackage{amssymb} 
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{todonotes}
+\usepackage{xspace}
+\usepackage[hidelinks]{hyperref}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{dirtree}
+\usepackage{tikz}
+\usepackage{subcaption}
+\usetikzlibrary{arrows.meta, positioning}
+
+
+\newcommand\zeroknowledge{\textbf{Zero Knowledge}\xspace}
+\newcommand\zk{\textbf{ZK}\xspace}
+\newtheorem{prop}{Propiedad}
+
+\begin{document}
+
+%%%% CARATULA
+
+\def\autor{Bruno Weisz}
+\def\tituloTesis{Demostrando la ejecución de un  \vspace{.2cm} \\ programa de alto nivel con Plonky2}
+\def\runtitulo{Demostrando la correcta ejecución de un programa de alto nivel con Plonky2}
+\def\runtitle{}
+\def\director{Agustín Garassino}
+\def\codirector{Matías López y Rosenfeld}
+\def\lugar{Buenos Aires, 2025}
+\input{caratula}
+
+%%%% ABSTRACTS, AGRADECIMIENTOS Y DEDICATORIA
+\frontmatter
+\pagestyle{empty}
+\input{abs_esp.tex}
+
+% \input{abs_en.tex} % OPCIONAL: comentar si no se quiere
+
+% \input{agradecimientos.tex} % OPCIONAL: comentar si no se quiere
+\newpage
+%\input{dedicatoria.tex}  % OPCIONAL: comentar si no se quiere
+\newpage
+\tableofcontents
+
+\mainmatter
+\pagestyle{headings}
+
+%%%% ACA VA EL CONTENIDO DE LA TESIS
+
+\part{Introducción}
+\include{secciones/introduccion}
+\include{secciones/primitivas_criptograficas}
+\include{secciones/proving_systems}
+\include{secciones/pcs.tex}
+\include{secciones/problema_a_resolver}
+
+\part{Desarrollo}
+\include{secciones/noir}
+\include{secciones/plonky2}
+\include{secciones/noirky2}
+
+
+
+\chapter{Evaluación de la herramienta}
+
+
+\section{Validación con tests funcionales}
+Una parte crucial del proceso de desarrollo es validar a través de tests que la herramienta generada está cumpliendo con los requerimientos, sin embargo, en el contexto de los SNARKs y en particular con Plonky2 esto puede llegar a ser un desafío. Supongamos el siguiente escenario: Noirky2 recibe un código ACIR y un conjunto de witnesses como input y a partir de ellos crea un circuito en Plonky2, crea una prueba de este circuito con los valores de witnesses provistos y la verifica. Todo parece correcto, sin embargo, ¿Qué pasaría si la traducción de Noirky2 consistiera en hacer un circuito vacío que siempre verifica? Automáticamente cualquier programa generado debería verificar correctamente, sin embargo sabemos que la implementación no existe. 
+
+Tratamos de solucionar este problema haciendo tests por la negativa, es decir, proveyendo datos de entrada a la generación de la prueba que no satisfacen el sistema de ecuaciones y viendo que la verificación falla. Sin embargo no fue la verificación la que falló, sino la generación de la prueba misma. La explicación de esto es que Plonky2 resuelve todos los valores de sus Targets (o variables del sistema de ecuaciones). Si un valor provisto como input para la prueba es distinto a un valor que el motor de Plonky2 resuelve, este va a fallar en tiempo de resolución de circuito, ya que se trató de asignar a una misma variable del sistema de ecuaciones 2 valores distintos en momentos diferentes. El hecho de que falle la generación de la prueba también es útil para validar que la herramienta está haciendo lo previsto, sin embargo esto deja de lado un problema de seguridad.
+
+Plonky2 hace 2 cosas. Resuelve el valor de todos los Targets cuando genera la prueba y verifica que las restricciones polinomiales se cumplen cuando la verifica. Resolver el valor de los targets podemos pensarlo como ``llenar la traza'' (la matriz $T$) vista en la sección \ref{sec:plonk}. Sin embargo, estamos asumiendo que luego de que Plonky2 ``llena la traza'' nadie la modifica, lo cual es potencialmente incorrecto. Lo bueno es que si modificamos la traza, luego la verificación debería fallar, asumiendo que establecimos todas las restricciones correctamente. Ese es el centro de la cuestión, ¿cómo validamos que las restricciones están establecidas correctamente? Para hacer eso tendríamos que hacer tests por la negativa, pero no como los anteriores, sino modificando la traza luego de que esta sea generada por Plonky2 y viendo que es la verificación (y no la generación de la prueba) la que falla.
+
+El problema con esto es que Plonky2 no va a generar una traza incorrecta. La resolución de operaciones de Plonky2 está pensada para corresponderse con las ecuaciones que se intentan verificar. Por ejemplo, si se establece una restricción de la forma $t_3 = t_1 + t_2$ la resolución de targets de Plonky2 le va a asignar a $t_3$ el valor de $t_1 + t_2$. Si proveyéramos con valores inconsistentes a $t_1, t_2 \text{ y } t_3$ fallaría la generación de la prueba, pero nunca vamos a poder verificar que las restricciones están haciendo lo que nosotros queremos (o dicho con otras palabras, hacer que falle la verificación). 
+
+Al mismo tiempo, hacer tests por la negativa del primer tipo (que fallan en la generación de la prueba) no es tan malo como suena. El sistema de resolución de Targets de Plonky2 va a fallar si detecta una desconexión en el circuito (targets que no están resueltos), lo cual valida cierto grado de consistencia en la construcción del circuito. Si a eso le sumamos que las herramientas que se están usando para construir el circuito son propias de la API de Plonky2 (\texttt{CircuitBuilder} y las Custom Gates preexistentes) en realidad lo que estamos diciendo es que la confianza en lo que estamos construyendo depende directamente de la confianza que tengamos en que las herramientas preexistentes validan correctamente las operaciones que hacen. 
+
+Lo anterior no quita que no se puedan hacer tests adicionales para asegurar que se están verificando las operaciones, sin embargo la cantidad de trabajo requerido para intervenir la generación de la prueba de Plonky2 descarta esta alternativa en pos de un modelo de confianza más débil. 
+
+Todos los tests usados para validar la funcionalidad pueden encontrarse en el repositorio del proyecto.
+
+%https://github.com/eryxcoop/acvm-backend-plonky2/tree/main/plonky2-backend/src/circuit_translation/tests
+
+
+\section{Profiling}\label{sec:materiales_y_metodos}
+En la sección \ref{sec:problema} planteamos como último objetivo del trabajo hacer un reporte de performance de la herramienta creada. Sin embargo, decir que la performance está atada únicamente a Noirky2 sería incorrecto: recordemos que la herramienta no hace más que una adaptación de un lenguaje a otro. El procesamiento de cada prover (Plonky2 y Barretenberg) va a influir enormemente en la performance de los distintos comandos, así como en en el tamaño de los artefactos generados (prueba y verifying key).
+
+Nos interesa evaluar ciertas familias de programas, cada una de ellas orientada a uno de los opcodes del código ACIR. Estas familias de programas son: 
+\begin{enumerate}
+    \item Orientada a AssertZero.
+    \item Orientada a operaciones de memoria.
+    \item Orientada a RangeCheck.
+    \item Orientadas a XOR.
+\end{enumerate}
+
+Por cada una de ellas queremos variar el tamaño de los programas. Esto quiere decir que queremos generar códigos ACIR que posean \textbf{distintas cantidades de opcodes}. \texttt{N} es la meta-variable que vamos a usar en los templates de Noir para parametrizar estas cantidades. A su vez, para los programas orientados a RangeCheck y XOR también nos interesa variar la cantidad de bits de las operaciones, siendo las posibles variantes 8, 16 y 32 bits. Esta variación será parametrizada con la meta-variable \texttt{K}. 
+
+\subsubsection{\textbf{Programas orientados a AssertZero}}
+El template de programa utilizado es el que se puede ver en el programa de Noir \ref{lst:familia_assert_zero}.
+\begin{center}
+\begin{minipage}{0.6\textwidth}
+\begin{minted}[frame=single, framesep=10pt, bgcolor=white]{rust}
+fn main(a: [Field; N]) -> pub Field {
+    let mut acc: Field = 0;
+    for i in 0..N {
+        acc += a[i];
+        acc *= a[i];
+    }
+    acc
+}
+\end{minted}
+\captionof{listing}{Familia de programas orientada a AssertZero}
+\label{lst:familia_assert_zero}
+\end{minipage}
+\end{center}
+
+Este programa recibe como input una lista de $N$ elementos de cuerpo y luego toma una variable \texttt{acc} para acumular valores. La intención con este programa es generar muchas operaciones de tipo AssertZero, como veremos a continuación. Más en general, la idea es crear programas a partir del template con valores de $N$
+$$N = \{1000, 10000, 100000, 1000000\}$$
+Al compilar esos programas de Noir, el código ACIR generado tendrá $N$ opcodes AssertZero que usen términos lineales y cuadtráticos, de la forma 
+
+$$(1 \cdot w_0 \cdot w_1) + (1 \cdot w_2) + (-1 \cdot w_3) == 0 $$
+
+La forma del programa es relativamente arbitraria, su único objetivo es generar la cantidad adecuada de opcodes AssertZero con la forma deseada. A su vez, los inputs para cada programa serán $N$ valores aleatorios en el rango $[0,p)$, donde usamos $p_{plonky2}$ para aquellos que serán procesados por Noirky2 y $p_{barretenberg}$ para los que serán procesados por Barretenberg. 
+
+\subsubsection{\textbf{Programas orientados a operaciones de memoria}}
+El template de programa utilizado es el que se puede ver en el programa \ref{lst:familia_memoria}. 
+
+\begin{listing}[H]
+\caption{Familia de programas orientada a operaciones de memoria, variando cantidad de iteraciones}
+\label{lst:familia_memoria}
+\begin{minted}[frame=single, framesep=10pt, bgcolor=white]{rust}
+fn main(idx: Field, val: Field) -> pub Field {
+    let mut arr: [Field; 100] = [0; 100];
+    for _ in 0..N {
+        arr[idx] = val;
+        assert(arr[idx] == val);
+    }
+    arr[idx]
+}
+\end{minted}
+\end{listing}
+
+El codigo ACIR generado se compone de $N$ bloques consecutivos como los que se pueden ver en la figura \ref{fig:ACIR_familia_memoria}.
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+    EXPR [ (-1, v) 0 ]
+    INIT (id: 0, len: 100) 
+    MEM (id: 0, write w at: z) 
+    MEM (id: 0, read at: w, value: x)
+    \end{verbatim}
+    \caption{Bloque de ACIR para la familia de programas orientada a memoria}
+    \label{fig:ACIR_familia_memoria}
+\end{figure}
+
+Concretamente, el programa recibe un índice $idx < N$ y un $val \in [0,p)$. Se declara una lista de tamaño $100$ llena de ceros y se realiza $N$ veces la acción de asignar el valor en la posición. Tanto el valor como la posición tienen que ser inputs para que Nargo no resuelva la operación con AssertZeros y podamos ver operaciones de memoria en el ACIR. Por otro lado, la comparación de \texttt{assert(arr[idx] == val);} es necesaria porque sino Nargo simplifica el programa y tampoco genera opcodes de memoria. 
+
+En este caso resultó imposible aislar opcodes únicamente de memoria en el código ACIR y por lo tanto tenemos 1 AssertZero involucrado por bloque. Debido al alto costo estimado de las operaciones de memoria en relación a los AssertZero, vamos a asumir que estos últimos no van a afectar significativamente la performance ya que el cuello de botella se encuentra en las operaciones de memoria. Una forma de verificar esta hipótesis con resultados será comparar la performance de los programas orientados a AssertZero con la de los programas orientados a memoria. 
+
+También vamos a usar una familia de programas orientada a operaciones de memoria, donde a diferencia del caso anterior vamos a variar el tamaño la lista preservando la cantidad de iteraciones. El template de Noir utilizado se puede ver en el programa \ref{lst:familia_memoria_wide}.
+
+\begin{listing}[H]
+\caption{Familia de programas orientada a operaciones de memoria, variando tamaño de la lista}
+\label{lst:familia_memoria_wide}
+\begin{minted}[frame=single, framesep=10pt, bgcolor=white]{rust}
+fn main(idx: Field, val: Field) -> pub Field {
+    let mut arr: [Field; N] = [0; N];
+    for _ in 0..100 {
+        arr[idx] = val;
+        assert(arr[idx] == val);
+    }
+    arr[idx]
+}
+\end{minted}
+\end{listing}
+
+Es importante notar también que al medir la performance o el tamaño de los artefactos generados, no afectan ni los valores de la lista o los índices que se leen. 
+
+\subsubsection{\textbf{Programas orientados a RangeCheck}}
+El template de programa utilizado es el que se puede ver en el programa \ref{lst:familia_range_check}.
+
+\begin{listing}[H]
+\caption{Familia de programas orientada a RangeCheck}
+\label{lst:familia_range_check}
+\begin{minted}[frame=single, framesep=10pt, bgcolor=white]{rust}
+fn main(a: [uK; N]) {}
+\end{minted}
+\end{listing}
+
+En este caso la meta-variable $K$ tomará los valores de $\{8, 16, 32\}$, generando programas donde se chequea el rango de $u8$, $u16$ y $u32$ respectivamente. También se usará la meta-variable $N$ para generar programas que varíen en la cantidad de estas operaciones. Como se puede ver, el cuerpo del programa está vacío, alcanza con declarar a los inputs como $u8$, $u16$ o $u32$ para que el ACIR generado necesite chequear el rango de estas variables. 
+
+
+\subsubsection{\textbf{Programas orientados a XOR}}
+El template de programa utilizado es el que se puede ver en el programa \ref{lst:familia_xor}. Al igual que en el ejemplo anterior, la meta-variable $K$ sirve para identificar el tamaño en bits de los operandos y $N$ para determinar la cantidad de operaciones. 
+
+\begin{listing}[H]
+\caption{Familia de programas orientada a XOR}
+\label{lst:familia_xor}
+\begin{minted}[frame=single, framesep=10pt, bgcolor=white]{rust}
+fn main(a: uK, b: uK) -> pub uK {
+    let mut c: uK = a;
+    for _ in 0..N {
+        c = c ^ b;
+    }
+    c
+}
+\end{minted}
+\end{listing}
+
+En este caso, el programa va a realizar $N$ operaciones de XOR que va a acumular en una variable. La forma del programa nuevamente es arbitraria, pero sirve para que el ACIR generado tenga $N$ opcodes de tipo XOR. 
+
+\subsection{Variantes de Noirky2}
+Para el análisis (tanto de tiempos como de tamaño de artefactos) vamos a tomar 2 posibles variaciones para Noirky2:
+\begin{enumerate}
+    \item Propiedad de \textbf{Blinding}. Los circuitos de Plonky2 pueden ser configurados para procesarse con o sin blinding en sus polinomios. Una forma de blinding fue vista en la sección \ref{sec:blinding}, sin embargo cada implementación de un protocolo puede tener sus propias variantes. Vamos a considerar 2 opciones: \textbf{con blinding} y \textbf{sin blinding}.
+    \item \textbf{Lookup Tables vs. operaciones de bits}. Para las operaciones de RangeCheck y de XOR consideramos 2 alternativas a la hora de traducirlas en las secciones \ref{sec:traduccion_range} y \ref{sec:traduccion_xor} respectivamente. Vamos a querer estudiar ambas variantes en las operaciones pertinentes. 
+\end{enumerate}
+
+Con estas opciones en mente vemos que tenemos 4 variantes de Noirky2 (con blinding y operaciones de bits, con blinding y operaciones con lookup table, sin blinding y operaciones de bits, sin blinding y operaciones con lookup table). A la hora de estudiar las familias de programa de AssertZero y operaciones de memoria solo nos van a interesar la primera y la tercera, ya que no nos interesa variar cómo se resuelven los RangeCheck ni el XOR. 
+
+\subsection{Blowup factor}
+El \textbf{blowup factor} (también conocido como ''bits de seguridad'') fue explicado en la sección \ref{sec:zippel}. Tanto Plonky2 como Barretenberg cuentan con ciertos bits de seguridad para distintas partes del protocolo, y para realizar una comparación justa es necesario que estén equiparados en este sentido. En ambos casos, los bits de seguridad se encuentran entre $100$ y $110$, con lo cual podemos decir que son comparables en la seguridad que brindan.
+
+\subsection{Medición de tiempos}
+Las mediciones de tiempos de ejecución se realizaran en una PC con las siguientes características:
+\begin{itemize}
+    \item OS: Ubuntu 22.04 LTS (64 bits)
+    \item CPU: 11th Gen Intel® Core™ i7-1165G7 @ 2.80GHz × 8
+    \item GPU: Mesa Intel® Xe Graphics (TGL GT2)
+    \item RAM: 16GB
+\end{itemize}
+
+Hay 3 tiempos que nos interesa medir: la generación de la prueba, la generación de la verifying key y la verificación de la prueba. Cada una de estas operaciones se corresponde con la ejecución de los comandos \textbf{prove}, \textbf{write\_vk} y \textbf{verify} respectivamente, descritos en la sección \ref{sec:noir}. En todos los casos caso se realizarán $20$ mediciones bajo las mismas condiciones sobre un mismo experimento para normalizar el ruido del ambiente. 
+
+
+Plantear hipótesis que involucren comparaciones entre Plonky2 y Barretenberg está fuera del alcance de este trabajo debido a que para hacer eso deberíamos hacer un análisis profundo de la complejidad teórica de ambas herramientas (una de las cuales no se encuentra documentada). Si bien ambas son implementaciones del protocolo Turbo-PLONK, usan dos Polynomial Commitment Schemes distintos con implementaciones propias, las cuales tampoco se encuentran documentadas. Dicho esto, es de interés hacer una comparación de performance entre ambas en forma de reporte.
+
+Por otro lado, RangeCheck y XOR son 2 opcodes que tienen 2 posibles implementaciones en Noirky2, es decir, con o sin lookup tables. En este caso sí vamos a plantear una hipótesis concreta que queremos verificar a través de la experimentación:
+
+\textit{Las implementaciones tanto de RangeCheck como de XOR con lookup tables tienen un costo adicional relacionado con la creación de las tablas. Para programas donde se hagan pocas operaciones de estos tipos, el tiempo dedicado a la creación de la tabla es muy grande para que valga la pena crearlas. Sin embargo, cuando un programa contiene una cantidad suficiente de estas operaciones, la suma de los costos de las operaciones bit a bit será mayor que la combinación del costo de la creación de la tabla y todas las operaciones de búsqueda en ella.}
+
+Dicho en otras palabras, esperamos que exista un $N$ a partir del cual es conveniente usar operaciones con lookup tables. 
+
+\subsection{Medición de tamaño de artefactos}
+Los artefactos que nos interesa medir son la \textbf{Verifying Key} y la \textbf{prueba} de cada uno de los ejemplos, tanto de Barretenberg como de cada una de las variantes de Noirky2. Hay un par de hipótesis a validar en este aspecto. 
+\begin{enumerate}
+    \item Las pruebas de Barretenberg van a tener un menor tamaño respecto a las de Noirky2. Esto se debe a que el tamaño de la prueba depende principalmente del Ploynomial Comitment Scheme (FRI o KZG). En el caso de Barretenberg, el tamaño de la prueba debería ser constante, compuesto por algunos puntos de curva elíptica. En el caso de Plonky2, el PCS usado es FRI, que para obtener el mismo grado de seguridad que en KZG se obtiene eligiendo una curva adecuada, en FRI se consigue aumentando la cantidad de iteraciones y por ende el tamaño del transcript (ver sección \ref{sec:shamir}). 
+\end{enumerate}
+
+En este caso alcanza con realizar una única iteración por experimento, ya que el tamaño de los artefactos no depende del azar o del ambiente. 
+
+
+\part{Resultados y discusión}
+%La tesis está en https://github.com/eryxcoop/acvm-backend-plonky2
+%Hacer un repo para la tesis, fork, meter lo de experimentación ahi, ahí después también va a estar el pdf con la tesis.
+%Explicar como se conforma el repo brevemente. ¿Qué hay en el repo?
+
+
+A continuación vamos a ver un reporte y análisis de los resultados obtenidos en las mediciones de tiempos de los comandos \textbf{prove}, \textbf{write\_vk} y \textbf{verify} y tamaños de los 2 artefactos generados en los comandos \textbf{prove} y \textbf{write\_vk}. Los resultados se corresponden con la experimentación planteada en la sección \ref{sec:materiales_y_metodos}. La idea es mostrar 
+
+Las distintas cantidades de operaciones usadas para cada familia de programas pueden verse en la tabla \ref{tab:tamanio_por_programa}. Notamos que no en todos los casos la cantidad de operaciones elegida es la misma, y esto se debe a que hay operaciones que llevan más tiempo que otras. Hubo un proceso de estimación manual orientado a que la experimentación completa pueda correrse en menos de 24hs. Además, se pudo observar que hacer mediciones con una cantidad tan grande de operaciones no aportaba información tan relevante, por lo que vamos a ver a continuación.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lccccc} 
+
+AssertZero   & 100 & 1000 & 10000 & 100000 & 1000000 \\
+Memory       & 100 & 500  & 1000  & 3000  & - \\
+Memory Wide  & 100 & 500  & 1000  & 3000  & - \\
+Range u8     & 1000 & 2000 & 5000 & 10000 & 20000 \\
+Rango u16    & 1000 & 2000 & 5000 & 10000 & 20000 \\
+Rango u32    & 1000 & 2000 & 5000 & 10000 & 20000 \\
+Xor u8       & 1000 & 2000 & 5000 & 10000 & 20000 \\
+Xor u16      & 1000 & 2000 & 5000 & 10000 & 20000 \\
+Xor u32      & 1000 & 2000 & 5000 & 10000 & 20000 \\
+\hline
+\end{tabular}
+\caption{Tamaños elegidos para cada familia de programas}
+\label{tab:tamanio_por_programa}
+\end{table}
+
+
+\section{Análisis de tiempos}
+
+Vamos a hacer algunas observaciones a grandes rasgos de cada uno de los comandos (prove, write\_vk y verify) para luego pasar a un estudio más enfocado en cada operación individual, en los casos donde esto tenga sentido. En este análisis tenemos que tener en cuenta, como se dijo en la sección \ref{sec:noir}, que el comando \texttt{write\_vk} realiza un subconjunto de las acciones del comando \texttt{prove}. Por esto mismo esperamos ver que los tiempos de ejecución del segundo sean estrictamente superiores que los del primero. A su vez, podemos usar este hecho para aislar el tiempo de ejecución del comando \texttt{prove}, substrayendo para cada (backend, operación, tamaño) el valor obtenido en el \texttt{write\_vk} del valor obtenido en el \texttt{prove}.
+
+Comencemos viendo los resultados del comando \textbf{prove} en la figura \ref{fig:prove_tiempos}. Hay una generalidad que podemos observar en todos los gráficos. A grandes rasgos tenemos 2 variantes de Noirky2 para implementar las operaciones de Range y de XOR. Estas son bit a bit o usando lookup tables. Para cada una de estas también tenemos la opción de aplicar un blinding sobre la traza o no hacerlo. Podemos ver que en todos los casos, aplicar ese blinding incurre en un costo adicional, es decir, la versión que aplica este blinding siempre tiene un tiempo de ejecución mayor a la que no. Esto tiene sentido, ya que la fase de procesamiento de la traza en la generación de la prueba va a tener un costo mayor porque tienen que interpolarse polinomios de grado mayor. 
+
+\begin{figure}[htbp!]
+    \centering
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Assert Zero.png}
+        \caption{AssertZero}
+        \label{fig:tiempo-prove-assert-zero}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Memoria (varía operaciones).png}
+        \caption{Memoria (operaciones)}
+        \label{fig:tiempo-prove-mem}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Memoria (varía tamaño de lista).png}
+        \caption{Memoria (tamaño)}
+        \label{fig:tiempo-prove-mem-wide}
+    \end{minipage}
+    
+    \vspace{0.5cm} 
+    
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Range-u8.png}
+        \caption{Range u8}
+        \label{fig:tiempo-prove-range-u8}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Range-u16.png}
+        \caption{Range u16}
+        \label{fig:tiempo-prove-range-u16}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Range-u32.png}
+        \caption{Range u32}
+        \label{fig:tiempo-prove-range-u32}
+    \end{minipage}
+    
+    \vspace{0.5cm}  % Espacio entre las filas de subgráficos
+    
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Xor-u8.png}
+        \caption{XOR u8}
+        \label{fig:tiempo-prove-xor-u8}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Xor-u16.png}
+        \caption{XOR u16}
+        \label{fig:tiempo-prove-xor-u16}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Xor-u32.png}
+        \caption{XOR u32}
+        \label{fig:tiempo-prove-xor-u32}
+    \end{minipage}
+    
+    \caption{Mediciones de tiempos para el comando \textbf{prove} para todas las familias de programas de Noir}
+    \label{fig:prove_tiempos}
+\end{figure}
+
+A continuación, veamos el caso de la operación \textbf{write\_vk}. Volviendo a la observación anterior del comando prove, vemos que se mantiene la propiedad anterior, de forma marcada en el caso de la operación \textbf{range} y más sutilmente en la operación de \textbf{xor}. 
+
+
+
+\begin{figure}[htbp!]
+    \centering
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Assert Zero.png}
+        \caption{AssertZero}
+        \label{fig:tiempo-write_vk-assert-zero}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Memoria (varía operaciones).png}
+        \caption{Memoria (op)}
+        \label{fig:tiempo-write_vk-mem}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Memoria (varía tamaño de lista).png}
+        \caption{Memoria (tamaño)}
+        \label{fig:tiempo-write_vk-mem-wide}
+    \end{minipage}
+    
+    \vspace{0.5cm} 
+    
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Range-u8.png}
+        \caption{Range u8}
+        \label{fig:tiempo-write_vk-range-u8}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Range-u16.png}
+        \caption{Range u16}
+        \label{fig:tiempo-write_vk-range-u16}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Range-u32.png}
+        \caption{Range u32}
+        \label{fig:tiempo-write_vk-range-u32}
+    \end{minipage}
+    
+    \vspace{0.5cm}  % Espacio entre las filas de subgráficos
+    
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Xor-u8.png}
+        \caption{XOR u8}
+        \label{fig:tiempo-write_vk-xor-u8}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Xor-u16.png}
+        \caption{XOR u16}
+        \label{fig:tiempo-write_vk-xor-u16}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Xor-u32.png}
+        \caption{XOR u32}
+        \label{fig:tiempo-write_vk-xor-u32}
+    \end{minipage}
+    
+    \caption{Mediciones de tiempos para el comando \textbf{write\_vk} para todas las familias de programas de Noir}
+    \label{fig:write_vk_tiempos}
+\end{figure}
+
+Finalmente, vamos a ver los tiempos de la operación \textbf{verify}. Los resultados pueden verse en la figura \ref{fig:verify_tiempos}. Si bien en esta operación estamos viendo órdenes de magnitud mucho menores (del orden de $5ms$ a $25ms$ contra $1s$ a $50s$ en las operaciones de \texttt{prove} y \texttt{write\_vk}), podemos notar  en todos los casos que:
+\begin{itemize}
+    \item Los tiempos de ejecución parecen estabilizarse en un tiempo constante, o por lo menos de crecimiento muy leve frente al aumento de cantidad de operaciones. Esto se ve especialmente en el caso del AssertZero, donde incluso ejecutando $1000000$ de operaciones se observa un crecimiento muy leve.
+    \item Barretenberg (con KZG) tarda siempre un tiempo cercano a los $25ms$ mientras que todas las versiones de Noirky2 (con FRI) tardan alrededor de $5ms$. Esta comparación está más relacionada con la implementación de los provers en sí que con la implementación realizada en este trabajo. 
+\end{itemize}
+
+Estos provers (Barretenberg y Plonky2) están diseñados para depositar el costo de la ejución en la generación de la prueba, permitiendo que la verificación sea rápida o \texttt{succint} (recordemos que ese es uno de los principios básicos de los SNARKs descritos en la sección \ref{sec:snarks}).
+
+\begin{figure}[htbp!]
+    \centering
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Assert Zero.png}
+        \caption{AssertZero}
+        \label{fig:tiempo-verify-assert-zero}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Memoria (varia operaciones).png}
+        \caption{Memoria (op)}
+        \label{fig:tiempo-verify-mem}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Memoria (varía tamaño de lista).png}
+        \caption{Memoria (tamaño)}
+        \label{fig:tiempo-verify-mem-wide}
+    \end{minipage}
+    
+    \vspace{0.5cm} 
+    
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Range-u8.png}
+        \caption{Range u8}
+        \label{fig:tiempo-verify-range-u8}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Range-u16.png}
+        \caption{Range u16}
+        \label{fig:tiempo-verify-range-u16}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Range-u32.png}
+        \caption{Range u32}
+        \label{fig:tiempo-verify-range-u32}
+    \end{minipage}
+    
+    \vspace{0.5cm}  % Espacio entre las filas de subgráficos
+    
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Xor-u8.png}
+        \caption{XOR u8}
+        \label{fig:tiempo-verify-xor-u8}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Xor-u16.png}
+        \caption{XOR u16}
+        \label{fig:tiempo-verify-xor-u16}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Xor-u32.png}
+        \caption{XOR u32}
+        \label{fig:tiempo-verify-xor-u32}
+    \end{minipage}
+    
+    \caption{Mediciones de tiempos para el comando \textbf{verify} para todas las familias de programas de Noir}
+    \label{fig:verify_tiempos}
+\end{figure}
+
+\subsection{Análisis particular de opcodes}
+A continuación vamos a hacer un un foco en las operaciones, en lugar de mirar operación por operación. En este caso también vamos a querer comparar las distintas implementaciones. Vamos a centrarnos en particular en el comando \texttt{prove} porque consideramos que es el más representativo, ya que ejecuta el flujo completo que incluye la traducción de Noir a Plonky2, la generación de la verifying key y la generación de la prueba. Vamos a dejar a la verificación de lado ya que como vimos, su análisis no presenta tanto interés. 
+
+\subsubsection{AssertZero}
+Comencemos por el AssertZero. En este caso vamos a ver el comportamiento con muchas operaciones pero también con pocas operaciones, ya que puede llegar a ser de interés ver cómo se comporta esta herramienta para programas de Noir relativamente pequeños. Para ver el comportamiento con muchas operaciones (específicamente, $1000000$) nos remitimos a la figura \ref{fig:tiempo-prove-assert-zero} presentada previamente. Podemos ver, cuando la cantidad de operaciones crece, que el tiempo de ejecución aparenta tener un crecimiento lineal, teniendo el backend de Barretenberg una pendiente más pronunciada que aquellos de Noirky2. En particular, para $1000000$ de operaciones, la ejecución de este comando tarda $20$ segundos más con Barretenberg que con Noirky2, representando aproximadamente un $50\%$ más de tiempo de ejecución. 
+
+Para ver el comportamiento en casos más pequeños, veamos el gráfico de la figura  \ref{fig:prove_log}. En este caso, la escala del eje horizontal es logarítmica para facilitar la vista. Lo que es interesante de este gráfico es que existe una cantidad de operaciones $k$ tal que si queremos generar una prueba de menos de $k \approx 20000$ opcodes de tipo AssertZero, opera más rápido el backend de Barretenberg. Sin embargo para valores mayores a $k$ ya es conveniente usar Noirky2, en lo que respecta a tiempo de ejecución de la prueba. Por completitud aclaramos que si no fuera de interés aplicar un blinding sobre los datos, siempre es conveniente usar Noirky2 sin blinding, pero compararlos de forma directa no sería del todo justo ya que esta variante no posee el mismo grado de seguridad que las otras dos. 
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{imagenes/tiempos/prove-Assert Zero-log.png}
+    \caption{Comando \textbf{prove} del opcode AssertZero, tiempos de ejecución}
+    \label{fig:prove_log}
+\end{figure}
+
+\subsubsection{Operaciones de memoria}
+Avancemos entonces a las operaciones de memoria. Recordemos que tenemos 2 variantes en los programas: uno que aumenta la cantidad de lecturas y escrituras en una lista de tamaño 100; y otra que aumenta el tamaño de la lista pero siempre realiza 100 lecturas y escrituras. 
+
+Antes de comenzar vamos a validar una pequeña hipótesis que planteamos en la sección \ref{sec:materiales_y_metodos}: una operación de AssertZero es despreciable en cuanto a tiempo de procesamiento en comparación con una operación de memoria. Tuvimos que plantear esta hipótesis porque no fue posible armar un programa que tuviera operaciones de memoria aisladas del AssertZero. Para validarla, vamos a tomar 2 Backends: Barretenberg y Noirky2 con blinding, y comparar directamente los tiempos de ejecución de las operaciones de memoria con los de AssertZero. La comparación puede verse en la figura \ref{fig:mem_vs_assert_zero}. 
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.45\textwidth} 
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-AssertZero-vs-mem-Noirky2.png}
+        \caption{Memoria vs. Assert Zero, Noirky2 con blinding}
+        \label{fig:mem_vs_assert_zero_noirky}
+    \end{subfigure}%
+    \hfill 
+    \begin{subfigure}[t]{0.45\textwidth}  
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-AssertZero-vs-mem-Barretenberg.png}
+        \caption{Memoria vs. Assert Zero, Barretenberg}
+        \label{fig:mem_vs_assert_zero_barretenberg}
+    \end{subfigure}
+    \caption{Comparación de opcodes de memoria vs opcodes de AssertZero}
+    \label{fig:mem_vs_assert_zero}
+\end{figure}
+
+Notamos que en el caso de Noirky2 esta diferencia es notable , el crecimiento de los tiempos de ejecución es marcadamente diferente (como se ve en la figura \ref{fig:mem_vs_assert_zero_noirky}). Sin embargo, cuando usamos Barretenberg esta diferencia no es tan marcada (como se ve en la figura \ref{fig:mem_vs_assert_zero_barretenberg}). A su vez, si prestamos atención a la escala de ambos gráficos, vemos que los tiempos de ejecución con Noirky2 para las operaciones de memoria son mucho mayores que los de Barretenberg. Para ver mejor este fenómeno podemos remitirnos a las figuras \ref{alg:fig:tiempo-prove-mem} y \ref{alg:fig:tiempo-prove-mem-wide}. 
+
+La diferencia en los tiempos de ejecución de ambos backends (Noirky2 y Barretenberg) es tan marcada que nos hace pensar que las implementaciones de lectura y escritura hechas por Barretenberg se basan en restricciones polinomiales distintas a las de Noirky2. Esto puede dar lugar a una investigación más profunda sobre Barretenberg para ver cómo esta herramienta simula con restricciones polinomiales la lectura y escritura en un bloque de memoria. 
+
+
+\subsubsection{Operaciones de Range}\label{sec:tiempo_range}
+%Voy a rehacer los graficos de Range porque no les confío 
+Finalmente llegamos a familias de programas donde tenemos variantes implementativas entre los backends de Noirky2. Con esto me refiero que tenemos por un lado implementaciones basadas en lookup tables y por otro lado implementaciones basadas en operaciones de bits. Vamos a dejar de lado para este análisis las implementaciones de Noirky2 sin blinding.
+
+
+\subsubsection{Operaciones de XOR}\label{sec:tiempo_xor}
+En el caso del XOR, tenemos nuevamente una implementación de Noirky2 basada en Lookup Tables y una basada en operaciones de bits, además de Barretenberg. Al igual que en el caso anterior, vamos a ignorar las variantes de Noirky2 sin blinding ya que se comportan de modo muy similar a sus correspondientes variantes con blinding, en lo que respecta a tiempos de ejecución.
+
+Los gráficos para realizar este análisis fueron presentados en las figuras \ref{fig:tiempo-prove-xor-u8} (XOR u8), \ref{fig:tiempo-prove-xor-u16} (XOR u16) y \ref{fig:tiempo-prove-xor-u32} (XOR u32). En ellos podemos ver claramente que todos se comportan de forma lineal, pero Barretenberg tiene la pendiente más pronunciada y por ende peores tiempos de ejecución. Por otro lado, comparando ambas implementaciones de Noirky2, notamos que la que usa Lookup Tables tiene una pendiente mucho más llana que aquella con operaciones de bits. En el caso de XOR u8 incluso parecería no haber variaciones entre la ejecución de $1000$ y $20.000$ operaciones, siendo el grueso del cómputo el overhead de la creación de las Lookup Tables y la generación de la prueba y la verification key. A su vez, notamos un crecimiento lineal en la cantidad de operaciones en el caso de Noirky2 con operaciones bit-a-bit. 
+
+Por otro lado, notamos que en las variantes con Noirky2, pasar de XOR u8 a XOR u16 y XOR u32 presenta pendientes cada vez más pronunciadas, mientras que Barretenberg tiene los mismos tiempos de ejecución para todas las operaciones de XOR, dada una cantidad de operaciones. 
+
+
+\section{Análisis de tamaños de artefactos}
+En esta sección vamos a hacer un reporte de los tamaños de los artefactos generados en el flujo de trabajo. Estos artefactos son la \textbf{Verification Key} en el caso del comando \textbf{write\_vk} y la \textbf{prueba} en el caso del comando \textbf{prove}.
+
+\subsection{Tamaño de la Verification Key}
+Comencemos por ver los tamaños que tiene cada verification key, segun la cantidad de opcodes de cada tipo. Los resultados completos pueden verse en la figura \ref{fig:tamanios-vk}. Algo que notamos en todos los gráficos es que tanto Barretenberg como Noirky2 con operaciones de bits tienen el mismo tamaño de Verification Key para todas las familias de programas (por una cuestión de escala, esto no se percibe en el gráfico de las operaciones de XOR, pero fue constatado con los datos). Además, aplicar blindings no afecta en ningún caso el tamaño de la Verification Key. 
+
+Las diferencias pueden empezar a verse cuando usamos Lookup Tables. Recordemos que estas permiten tener tablas pre-computadas en la Verification Key, permitiendo tiempos de ejecución mucho más rápidos como vimos en las secciones \ref{sec:tiempo_range} y \ref{sec:tiempo_xor}. Sin embargo, acá podemos ver cómo esto trae desventajas en los tamaños de la verification key. 
+
+
+\begin{figure}[htbp!]
+    \centering
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Assert Zero.png}
+        \caption{AssertZero}
+        \label{fig:tamanio-vk-assert-zero}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Memoria (varía operaciones).png}
+        \caption{Memoria (op)}
+        \label{fig:tamanio-vk-mem}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Memoria (varía tamaño de lista).png}
+        \caption{Memoria (tamaño)}
+        \label{fig:tamanio-vk-mem-wide}
+    \end{minipage}
+    
+    \vspace{0.5cm} 
+    
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Range-u8.png}
+        \caption{Range u8}
+        \label{fig:tamanio-vk-range-u8}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Range-u16.png}
+        \caption{Range u16}
+        \label{fig:tamanio-vk-range-u16}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Range-u32.png}
+        \caption{Range u32}
+        \label{fig:tamanio-vk-range-u32}
+    \end{minipage}
+    
+    \vspace{0.5cm}  
+    
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Xor-u8.png}
+        \caption{XOR u8}
+        \label{fig:tamanio-vk-xor-u8}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Xor-u16.png}
+        \caption{XOR u16}
+        \label{fig:tamanio-vk-xor-u16}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Xor-u32.png}
+        \caption{XOR u32}
+        \label{fig:tamanio-vk-xor-u32}
+    \end{minipage}
+    
+    \caption{Tamaño de la Verification Key para todas las familias de programas de Noir}
+    \label{fig:tamanios-vk}
+\end{figure}
+
+En el caso de las operaciones de Range con Lookup Tables, estas usan una tabla simple de $2^8$ elementos de cuerpo, y eso se ve reflejado en el aumento visible en las figuras \ref{fig:tamanio-vk-range-u8}, \ref{fig:tamanio-vk-range-u16} y \ref{fig:tamanio-vk-range-u32}, que es igual en todos los casos. Por otro lado, cuando nos movemos al caso del XOR, estamos usando tablas de $2^{16}$ elementos, por lo cual el grueso de la Verification Key se ve ocupado por esta tabla. Esto hace que se opaque casi en su totalidad a las otras implementaciones en las figuras \ref{fig:tamanio-vk-xor-u8}, \ref{fig:tamanio-vk-xor-u16} y \ref{fig:tamanio-vk-xor-u32}, superando el tamaño de 250kb. 
+
+\subsection{Tamaño de la prueba}
+Nos movemos ahora al tamaño de las pruebas generadas. Los resultados pueden verse en la figura \ref{fig:tamanios-prueba}. En este caso, podemos ver que Barretenberg presenta una clara ventaja frente a Plonky2: los tamaños de sus pruebas son constantes. En todos los casos, la prueba pesa $2176$ bytes o $2.125$ kb. Esto se debe a que el Polynomial Commitment Scheme usado es KZG, explorado en la sección \ref{sec:kzg}.
+Esto no es así en el caso de Plonky2, que usa FRI. 
+
+Notamos que en todas las variantes de Noirky2 la prueba es igual o más grande cuando se aplica un blinding, comparado con su respectiva variante. También notamos que esta diferencia tiende a igualarse a medida que aumenta la cantidad de operaciones. 
+
+Por otro lado, vemos que las variantes de Noirky2 operaciones de bits tienden a aumentara de tamaño cuando crece la cantidad de operaciones, mientras que la variante que usa Lookup Tables con blinding tiende a mantenerse constante. Lo que resulta extraño es que la variante de Lookup Tables sin blinding tiende a aumentar su tamaño a medida que aumenta la cantidad de operaciones producidas, mientras que la variante con blinding no lo hace. 
+
+\begin{figure}[htbp!]
+    \centering
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Assert Zero.png}
+        \caption{AssertZero}
+        \label{fig:tamanio-prueba-assert-zero}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Memoria (varía operaciones).png}
+        \caption{Memoria (op)}
+        \label{fig:tamanio-prueba-mem}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Memoria (varía tamaño de lista).png}
+        \caption{Memoria (tamaño)}
+        \label{fig:tamanio-prueba-mem-wide}
+    \end{minipage}
+    
+    \vspace{0.5cm} 
+    
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Range-u8.png}
+        \caption{Range u8}
+        \label{fig:tamanio-prueba-range-u8}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Range-u16.png}
+        \caption{Range u16}
+        \label{fig:tamanio-prueba-range-u16}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Range-u32.png}
+        \caption{Range u32}
+        \label{fig:tamanio-prueba-range-u32}
+    \end{minipage}
+    
+    \vspace{0.5cm}  
+    
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Xor-u8.png}
+        \caption{XOR u8}
+        \label{fig:tamanio-prueba-xor-u8}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Xor-u16.png}
+        \caption{XOR u16}
+        \label{fig:tamanio-prueba-xor-u16}
+    \end{minipage}%
+    \begin{minipage}[b]{0.33\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Xor-u32.png}
+        \caption{XOR u32}
+        \label{fig:tamanio-prueba-xor-u32}
+    \end{minipage}
+    
+    \caption{Tamaño de la prueba para todas las familias de programas de Noir}
+    \label{fig:tamanios-prueba}
+\end{figure}
+
+\subsection{Comparación entre artefactos y el CRS}
+Como última observación quiero hacer una comparación entre los tamaños de las pruebas generadas y el tamaño del CRS de KZG visto en la sección \ref{sec:costo_crs}. La idea central de este trabajo fue librarnos de tener que usar una herramienta que requiriera un CRS potencialmente muy pesado para generar pruebas. Es interesante ver en este contexto si esto efectivamente aporta algún valor. Por ejemplo, si el tamaño de las pruebas fuera mucho mayor a las del CRS necesario para un programa con un tamaño dado, usar FRI en lugar de KZG no presentaría una ventaja tan grande ya que el cuello de botella no estaría en el CRS requerido por KZG. 
+
+Para hacer este análisis vamos a comparar el tamaño del CRS necesario para procesar una traza de largo $N$ con el tamaño de los artefactos generados para esa misma traza (Prueba y Verification Key). Vamos a usar únicamente la familia de programas orientados a AssertZero para acotar este análisis. Recordemos de la sección \ref{sec:plonky2} que el ancho de la traza es de 135 y que Plonky2 empaqueta restricciones polinomiales del mismo tipo en una misma fila de la traza. Esto sumado a que una operación de AssertZero como las que usamos en el ejemplo ocupa 9 casillas de la traza (ya que son 3 términos matemáticos donde cada uno ocupa 3 casillas en la traza) nos permite saber un largo aproximado de la traza para una cantidad de operaciones dada. El resultado es 
+$$\frac{9\cdot N}{135} = \frac{N}{15} $$
+
+Entonces por ejemplo, si realizamos 10000 operaciones de tipo AssertZero, Noirky2 va a generar una traza de Plonky2 con un estimado de $10000/15 \approx 666$ filas. Volviéndonos a la tabla \ref{tab:costo_crs} el CRS tendría que tener un tamaño mínimo de $62kb$. Para esta cantidad de operaciones, la figura \ref{fig:tamanio-prueba-assert-zero} nos muestra que una prueba de Plonky2 para este programa pesa aproximadamente $125kb$, que es un tamaño mayor al del CRS. Sin embargo, si tomamos un programa con $1.000.000$ de AssertZeros, la traza de Plonky2 tendría un largo de aproximadamente $66.666$ y por ende el CRS tendría un tamaño mínimo de $6.200kb$, superando ampliamente a los aproximadamente $150kb$ de la prueba para este mismo tamaño.
+
+¿Qué nos dice esto? Para programas chicos, en términos espaciales, usar Noirky2 en lugar de Barretenberg no presenta ventajas. Sin embargo, cuando los programas crecen, el crecimiento del CRS en función de la cantidad de operaciones es mucho más pronunciado que el del tamaño de las pruebas. Resultados más detallados pueden verse en la tabla \ref{tab:CRS_vs_prueba}.
+
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{N} & 100 & 1000 & 10000 & 10000 & 100000\\ \hline
+\textbf{Prueba} & 118kb& 115kb& 120kb& 126kb& 145kb\\ \hline
+\textbf{CRS} & 0.6kb& 6.2kb& 62kb& 620kb& 6201kb \\ \hline
+\end{tabular}
+\caption{Comparación entre el tamaño del CRS y el tamaño de la prueba}
+\label{tab:CRS_vs_prueba}
+\end{table}
+
+\part{Conclusiones y trabajo futuro}
+
+Trabajo futuro
+
+*Hacer tests por la negativa para verificar que las restricciones están presentes. 
+
+*Explicar mirando el código de barretenberg por qué es tanto más liviando barretenberg
+
+*Explicar en detalle mirando la implementación por qué se dan los saltos en las operaciones de range de bits
+
+*Explorar por que en la variante con lookup tables sin blindings crece el tamaño de la prueba. 
+
+*Explorar en más de talle la forma en la que cada opcode va a ocupar la traza de plonky2 / hacer un análisis de la traza en sí misma
+
+Conclusiones 
+* trade-off tiempos de ejecusion-tamaño lookup tables
+* el crs sigue siendo mucho más grande que el resto de los artefactos, por lo tanto este sigue siendo un gran cuello de botella
+* Hablar de que el crs no tiene que viajar por red cada vez que se quiere demostrar algo
+
+
+%%%% BIBLIOGRAFIA
+\newpage
+\bibliographystyle{unsrt}
+\bibliography{bibliografia.bib}
+
+\end{document}

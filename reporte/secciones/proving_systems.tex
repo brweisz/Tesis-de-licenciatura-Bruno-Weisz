@@ -1,0 +1,747 @@
+\chapter{Proving Systems}
+Llegó el momento de hablar de uno de los temas centrales de la tesis: los \textbf{sistemas de pruebas} o \textit{proving systems} en inglés. Vamos a mencionar en particular una familia de protocolos llamados \textbf{SNARKs} (\textbf{S}uccint \textbf{N}on-Interactive \textbf{AR}gument of \textbf{K}nowledge) que sirven para demostrar la ''ejecución'' de un programa con determinados inputs. 
+
+La idea general es modelar a un programa cualquiera como una o varias matrices. Algunas de estas matrices van a representar al programa en sí y otras van a representar la ejecución concreta del programa modelado. A estas últimas las llamamos la \textbf{traza} del programa. Luego tomaremos las columnas de estas matrices de forma independiente y las interpolaremos sobre un dominio específico para obtener un conjunto de polinomios que caractericen al programa y a la ejecución. Luego de eso, vamos a comprometernos a estos polinomios ante un observador externo usando algún \textbf{Polynomial Commitement Scheme} y con esta información, aprovechándonos de la heurística de Fiat-Shamir tendremos una prueba de tamaño reducido que contiene toda la información encriptada de la ejecución del programa, de manera que puede ser verificada a través de operaciones sobre cuerpos finitos. Esta verificación será de carácter probabilístico, lo cual quiere decir que habrá una probabilidad despreciable de que se demuestre correctamente una ejecución incorrecta o que falle la demostración de una ejecución correcta.
+
+La mayoría de los conceptos mencionados (como los Polynomial Commitement Schemes o la heurística de Fiat-Shamir) serán tratados a su debido tiempo. Mi intención es descomponer poco a poco el funcionamiento de esta familia de protocolos, hablar de sus propiedades y dar un ejemplo: \textbf{PLONK}. 
+
+\section{Provers y verifiers}
+En general en estos protocolos vamos a tener 2 agentes representados por programas informáticos: un \textbf{prover} y un \textbf{verifier}. El prover es quien ejecuta un programa, genera una prueba de su ejecución y se la pasa al verifier para que la verifique y se convenza de que la prueba es correcta. El prover y el verifier deberían tener un setup para ponerse de acuerdo en un conjunto de elementos. Estos elementos dependen del protocolo y suelen estar comprimidas dentro de una \textbf{Verifiying Key}. Algunos de estos elementos son comunes entre protocolos:
+\begin{itemize}
+    \item Un cuerpo finito sobre el cual operar, es decir, un primo $p$ suficientemente grande para dar seguridad al protocolo que será el grado de $\Fp$. En general el cuerpo finito usado depende del sistema de pruebas elegido.
+    \item Un generador de $\Fp$ al cual vamos a llamar $g$.
+    \item Un modelo del programa (lo que coloquialmente llamamos 'circuito') que depende del sistema de pruebas y la forma de aritmetización, algo que vamos a ver más adelante. Es intuitivo pensar que ambas partes deben conocer el programa cuya ejecución se está demostrando, ya que una prueba no tendría sentido de otro modo.
+\end{itemize}
+
+\section{Protocolo de Schnorr} \label{sec:schnorr}
+Antes de entrar de lleno en la descripción de un protocolo complejo como PLONK, me gustaría introducir un protocolo interactivo más simple pero que sirve para poner en práctica algunos de los conceptos que mencionamos con anterioridad, como los cuerpos finitos y la idea de un agente que prueba algo y otro que lo verifica. El Protocolo de Schnorr permite a un prover comprometerse a un valor en $\Fp$ ante un verifier. 
+
+Sean los valores conocidos tanto por el prover como por el verifier: 
+\begin{itemize}
+    \item $p$ un primo suficientemente grande
+    \item $\Fp$ un cuerpo finito
+    \item $g$ un generador de $\Fp$ tal que $\Fp = \{g^i:~0\leq i < p\}$
+\end{itemize} 
+
+El protocolo se dispone de la siguiente forma:
+
+\textbf{Round 1 (commitement):} el prover genera un valor privado $a \in \Fp$ y computa $A=g^a$. A continuación le envía $A$ al verifier. Notamos que gracias a la dificultad del problema del logaritmo discreto, el verifier no puede deducir $a$ ni aún conociendo $A$ y $g$. 
+
+\textbf{Round 2 (random sampling):} El prover elige un valor aleatorio $r \in \Fp$ y computa $R=g^r$. A continuación le envía $R$ al verifier.
+
+\textbf{Round 3 (challenge):} el verifier elige un valor $c \in \Fp$ y se lo envía al prover.
+
+\textbf{Round 4:} el prover calcula $s = r + a\cdot c$ y se lo envía al verifier.
+
+\textbf{Round 5 (verificación):} el verifier comprueba la igualdad $R \cdot A^c = g^s$ para convencerse de que el prover conoce un $a$ tal que $g^a = A$. Notemos que el verifier puede realizar esta cuenta porque conoce todos los valores involucrados: $R$ fue recibido en el round 2, $A$ fue recibido en el round 1, $c$ fue elegido por el verifier en el round 3 y $s$ fue recibido en el round 4.
+
+Vamos a descomponer esta última operación:
+$$R \cdot A^c = g^s \Leftrightarrow$$
+$$g^r \cdot (g^a)^c = g^s \Leftrightarrow$$
+$$g^r \cdot g^{a \cdot c} = g^{r+a\cdot c} \Leftrightarrow$$
+$$g^{r+a\cdot c} = g^{r+a\cdot c}$$
+
+Más allá del detalle de las cuentas, tratemos de entender lo que está pasando. El prover conoce una pieza de información privada ($a$) y ambos conocen una pieza de información pública ($A$). El prover quiere demostrarle al verifier que conoce $a$ tal que $A=g^a$, pero no quiere revelar ninguna información sobre $a$ más que la que ya es de público conocimiento. Para esto, el round 2 introduce un factor de aleatoriedad que sirve para ocultar el valor de $a$ en la verificación. El verifier quiere convencerse de que el prover conoce $a$ sin ser engañado.  Es por eso que el round 3 introduce un challenge por parte del verifier. Este challenge no puede ser conocido de antemano por el prover, ya que le permitiría generar una prueba de conocimiento de $a$ sin conocer $a$ verdaderamente. 
+
+La pregunta que cabe hacernos entonces es \textbf{¿pudo el prover haber generado un valor $s$ tal que la verificación se cumpla sin conocer $a$?} Veamos primero el caso mencionado anteriormente donde el prover conoce de antemano el challenge $c$ y puede hacer trampa. En este escenario, el prover generó un valor $A$ que no es el resultado de ninguna cuenta, y desconoce el valor de $a$, sin embargo quiere hacer creer al verifier que conoce un $a$ tal que $A = g^a$. El objetivo del prover es que verifique la ecuación $R \cdot A^c = g^s$ y como en este escenario conoce $c$, también conoce $A^c$. Luego, puede tomar un valor de $s$ cualquiera, llamado $s^*$ y calcular $S = g^{s^*}$. Finalmente, solo tiene que despejar el valor de $R$ para que se cumpla la ecuación. Concretamente, pasaría que 
+$$R \cdot A^c = g^s$$ $A^c$ es conocido por el prover, fijamos $s:=s^*$ y calculamos $S:=g^{s^*}$ para obtener
+$$R\cdot A^c = S$$ por lo tanto tomamos
+$$R := S \cdot \frac{1}{A^c}$$ y la ecuación se verifica, engañando de esa manera al verifier.
+
+Dicho esto, el protocolo impide que el prover conozca el challenge de antemano, en particular no conoce el challenge al momento de comprometerse a los valores de $A$ y $R$. Esta temporalidad impide hacer este truco, ya que por el orden de los rounds el verifier conoce el valor de $R$ antes de mandar el challenge $c$, y por ende el prover no puede hacer cuentas previas en función de $c$. 
+
+
+Se llama \textbf{Soundness} a la propiedad de un protocolo criptográfico que dicta que un verifier honesto no puede ser convencido por un prover deshonesto de que una afirmación falsa es verdadera.En este caso, el protocolo de Schnorr tiene soundness, ya que el prover no puede demostrar al verifier la afirmación ''conozco $a$ tal que $A = g^a$''.
+
+\textbf{¿Qué pasa entonces con el ocultamiento de $a$?}¿Es posible para el verifier deducir el valor de $a$ con los datos provistos por el prover? El verifier conoce $A$, pero no puede deducir $a$ a partir de ello por la dificultad del problema del logaritmo discreto. Por otro lado, conoce $R$, pero tampoco puede calcular $r$ a partir de ese dato por el mismo motivo. Conoce $b$ porque él mismo lo generó, pero eso no le aporta información de por sí. Por último, conoce $s = r + a\cdot b$, sin embargo no conoce $r$, entonces no puede deducir $a$ con esa información (para cada valor fijo de $r$ correspondería un valor de $a$ distinto). Acá es donde se ve la importancia de la aleatoriedad introducida en el round 2, sin la cual este protocolo estaría revelando información confidencial ($a$). 
+
+Se llama \textbf{Zero Knowledge} a la propiedad de un protocolo criptográfico que dicta que el verifier no aprende nada más que la afirmación que se está probando. Esta es una categorización coloquial que alcanza por el momento, para no adentrarnos en definiciones más complejas. En este caso podemos decir que el prover pudo demostrar al verifier el conocimiento de $a$ sin revelar ningún tipo de información nueva sobre $a$. La ecuación $s = r + a\cdot b$ no aporta ningún tipo de información, ya que $r$ es un valor ''basura'', convirtiendo a $s$ en otro valor ''basura''.
+
+\section{Propiedades de los SNARKS} \label{sec:snarks}
+Cuando hablamos de SNARKs, no es enteramente correcto hablar de ''demostrar la ejecución de un programa'' aunque sea una frase que coloquialmente usamos con frecuencia. En la realidad lo que ocurre es que el prover \textbf{demuestra que conoce la traza una posible ejecución del programa}. Es decir, no es necesario que el prover ejecute el programa en cuestión, aunque en general esa es la forma de obtener dicha traza. 
+
+Los protocolos son interactivos por lo que hay una comunicación entre el prover y el verifier que sirve para garantizar que un prover malicioso no pueda demostrar que conoce un dato que en realidad no, como vimos recientemente con el protocolo de Schnorr.  
+
+Veamos entonces como se descompone el término SNARK:
+\begin{itemize}
+    \item \textbf{Succint}: la traducción más correcta de esta palabra sería 'conciso'. La propiedad de succintness de los SNARKs nos dice que las pruebas generadas tienen que tener un tamaño pequeño respecto al de la ejecución o 'traza' del programa cuya ejecución demuestra. También nos dice que la verificación de dicha prueba tiene que ser rápida, por ejemplo, en tiempo constante $\mathcal{O}(1)$. Esto no establece ninguna limitación sobre el tiempo de generación de una prueba, o sobre el overhead de almacenamiento que generar dicha prueba conlleva.
+    
+    \item \textbf{Non-interactive}: esta propiedad nos habla de la ausencia de interactividad en el protocolo, es decir, una prueba puede ser generada de forma offline y luego ser verificada en cualquier momento del futuro. Dijimos que los protocolos SNARK eran interactivos, pero esta interactividad puede ser removida con la heurística de Fiat-Shamir, que será vista más adelante.
+
+    \item \textbf{ARgument of Knowledge}: esto hace referencia a la pieza de conocimiento que tiene el prover, cuya posesión quiere demostrarle a un verifier.
+\end{itemize}
+
+Una pregunta que puede surgir es: si el objetivo de un SNARK es que un prover demuestre que conoce una traza válida de ejecución de un programa, ¿por qué simplemente la demostración no es la traza en sí? o más concretamente, ¿por qué simplemente el verifier no ejecuta el mismo programa? La respuesta a eso es que la verificación en esos caso no sería succint, tanto la ejecución del programa como la verificación elemento a elemento de la traza tendrían un costo mucho más alto de lo que se busca. Sin embargo, también hay otro motivo que tiene que ver con el ocultamiento. 
+
+En este punto es importante distinguir entre un SNARK y un ZK-SNARK. Un ZK-SNARK cumple la propiedad de \textbf{Zero Knowledge}. Esta propiedad busca que la pieza de conocimiento no sea revelada al verifier, permitiendo sin embargo que este último pueda convencerse de que el prover la posee. Concretamente, esto se puede materializar en la existencia de inputs privados en la ejecución de un programa. Dicho de otra forma y para resumir, un ZK-SKARK permite a un prover demostrar que \textbf{conoce una traza válida correspondiente a un programa sin revelar esta traza}. 
+
+\section{Heurística de Fiat-Shamir}\label{sec:shamir}
+La heurística de Fiat-Shamir~\cite{bernhard2012not} es un truco usado frecuentemente que permite convertir protocolos interactivos en \textbf{no interactivos} usando una función de hash que se comporta como un oráculo aleatorio. Un \textbf{oráculo aleatorio} es una función que se comporta como una caja negra y para cada input produce un output aleatorio y uniformemente distribuido de forma determinista. Podemos asumir que una función de hash se comporta como un oráculo aleatorio.
+
+La idea general consiste en tener un \textit{transcript} append-only: un log de todo lo que circula entre el prover y el verifier. Cada vez que el prover necesita un \textit{challenge} por parte del verifier, en lugar de recurrir a la interactividad lo que va a hacer es hashear el contenido del transcript y usar el digest del hash para samplear un valor, que va a ser el reemplazo del challenge. Inmediatamente después, se realiza un append del sample obtenido al final del transcript. 
+
+Para que el protocolo sea seguro es necesario inicializar el transcript con un string común, conocido por ambos agentes del protocolo. También notamos que como el transcript solo contiene aquello que viaja del prover al verifier y vice-versa, ambos agentes pueden reconstruirlo. Veamos cómo se vería la heurística de Fiat-Shamir aplicada al protocolo de Schnorr descrito en la sección \ref{sec:schnorr}:
+
+\begin{enumerate}
+    \item Setup: El prover \textbf{inicializa} el transcript con un string común $init$.
+    \item Round 1: El prover \textbf{extiende} el transcript con el valor binario de $A=g^a$.
+    \item Round 2: El prover \textbf{extiende} el transcript con el valor binario de $R = g^r$.
+    \item Round 3: El prover \textbf{calcula el hash} del transcript hasta el momento, que es $init || A || R$, obteniendo así $c = hash(init||A||R)$. \textbf{Extiende} el transcript de forma que queda $init || A || R || c$.
+    \item Round 4: El prover calcula $s = r + a\cdot c$ y extiende el transcript con ese valor, de manera que queda $init||A||R||c||s$. 
+    \item Generación de prueba: El prover debe \textbf{enviar al verifier toda la información necesaria para que este pueda replicar sus acciones}. La prueba entonces es  $\pi := \{A, R, s\}$.
+\end{enumerate}
+
+Luego de todo esto, le toca al verifier replicar todas las acciones que hizo el prover respecto al transcript. Esto es necesario para obtener el valor de $c$, el cual no forma parte de la prueba $\pi$. En otras palabras, el verifier no fue partícipe de la elección del challenge $c$, pero este fue generado por una función de hash que se comporta como un oráculo aleatorio, lo cual para nuestros fines es suficiente. Entonces, el verifier:
+
+\begin{enumerate}
+    \item \textbf{recibe} $A,R$ y $s$.
+    \item \textbf{inicializa} el transcript con $init||A||R$.
+    \item \textbf{hashea} el contenido del transcript para obtener $c = hash(init||A||R)$.
+    \item \textbf{verifica} la ecuación $R \cdot A^c = g^s$ igual que en el protocolo original.
+\end{enumerate}
+
+Las ventajas de usar un protocolo no interactivo son evidentes. Un prover puede generar una prueba en cualquier momento y entregarla al verifier cuando desee. Esto no requiere una conectividad sincrónica entre ambos agentes, y por sobre todas las cosas, si lo aplicamos a protocolos SNARK nos da la propiedad de \textbf{Non-interactive} mencionada en la sección \ref{sec:snarks}.
+
+\section{PLONK}\label{sec:plonk}
+Hablamos de que para demostrar la ejecución de un programa primero tenemos que tener ese programa modelado como un sistema de ecuaciones que tanto el prover como el verifier tienen que conocer. Demostrar su ejecución es equivalente a demostrar que conocemos una solución para este sistema de ecuaciones. La forma que este sistema tiene depende del proving system, y a continuación vamos a presentar uno que resultó muy influyente en el área: PLONK.
+
+Las siglas de PLONK no son importantes ya que son un retroacrónimo. PLONK es un protocolo que provee principalmente 2 cosas:
+\begin{enumerate}
+    \item Una convención para expresar programas como sistemas de ecuaciones.
+    \item Una forma de tomar estos programas y sus trazas y convertirlos en algo útil para demostrar su conocimiento. 
+\end{enumerate}
+
+\subsection{Matrices de PLONK}
+Vamos a centrarnos en lo primero para comenzar. Supongamos que tenemos un programa $P$ con las siguientes características:
+\begin{itemize}
+    \item \textbf{Public Input:} $x$
+    \item \textbf{Private Input:} $e$
+    \item \textbf{Cómputo:} $e*x + x - 1$
+\end{itemize}
+En la familia de programas que vamos a tratar a partir de ahora vamos a hacer una distinción entre aquellos inputs que son públicos (conocidos tanto por el prover como por el verifier) como los privados (conocidos solo por el prover). Estamos trabajando con un caso sencillo, pero un caso de uso real podría ser uno donde el input publico es el digest de un hash, el input privado es la preimagen de ese hash y el cómputo está definido como $hash(e) == x$. Ese es un caso donde tiene sentido ocultar el valor de $e$ y donde es no trivial obtenerlo por medios propios. 
+
+Otra forma útil de ver los programas es la de un circuito binario. En este caso para el programa mencionado sería algo como lo que se ve en la figura \ref{fig:circuito_plonk}. En esta representación, cada caja es una operación, los inputs entran por encima y el output sale por abajo. Notemos que como el $-1$ es una constante en nuestro programa, en el circuito lo representamos como una operación unaria en sí misma. Esta representación es ideal ya que en la aritmetización que propone PLONK vamos a representar a un programa como una serie de compuertas, con un operando izquierdo, uno derecho y un output. En nuestro caso tenemos 3 compuertas: una de multiplicación, una de suma, y una de suma constante. 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.4\linewidth]{imagenes/Circuito Plonk.png}
+    \caption{Representación en forma de circuito del programa de ejemplo. Usar imagen mejor por dios, no se puede asi}
+    \label{fig:circuito_plonk}
+\end{figure}
+
+En la práctica lo que vamos a tener son valores concretos para estas variables, en este caso el circuito estaría completo como se puede ver en la figura \ref{fig:circuito_plonk_valores}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.4\linewidth]{imagenes/circuito plonk valores.png}
+    \caption{Representación en forma de circuito del programa de ejemplo, con valores concretos}
+    \label{fig:circuito_plonk_valores}
+\end{figure}
+
+
+Para modelar nuestro programa de ejemplo PLONK usa \textbf{matrices}. La primera matriz que vamos a mencionar es la matriz $T$: la \textbf{Traza}. En nuestro caso esta sería la que vemos en la tabla \ref{tab:matriz_t}:
+\begin{table}
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+\textbf{A} & \textbf{B} & \textbf{C} \\
+\midrule
+2 & 3 & 6 \\
+6 & 3 & 9 \\
+9 & - & 8 \\
+\bottomrule
+\end{tabular}
+\caption{Matriz $T$ del programa de ejemplo.}
+\label{tab:matriz_t}
+\end{center}
+\end{table}
+
+Acá podemos ver cómo cada fila de esta matriz se corresponde con una de las compuertas mencionadas anteriormente. En todos los casos la columna $A$ es el operando izquierdo, $B$ el derecho y $C$ el output. Por el momento no nos vamos a preocupar por el hecho de que no existe un segundo operando para la tercera operación, el símbolo $-$ quiere decir que puede ir cualquier valor en ese lugar, y que este no será tomado en cuenta. La traza plasmada en la tabla \ref{tab:matriz_t} es válida para nuestro programa, sin embargo no todas las posibles trazas lo son. Entonces ¿qué significa que sea válida para el protocolo? La pregunta surge de que no tenemos modelado nuestro programa todavía.
+
+Para empezar a modelar nuestro programa de juguete vamos a necesitar 2 matrices: $Q$ y $V$. Estas matrices son públicas tanto para el prover como para el verifier, y nos definen el programa en su totalidad.
+
+\subsubsection{\textbf{La matriz Q}}
+
+La matriz $Q$ tiene 5 columnas: $Q_L$, $Q_R$, $Q_M$, $Q_O$, $Q_C$. Con estas columnas podemos codificar todas las compuertas habilitadas por PLONK y están diseñadas para relacionarse con la traza bajo la siguiente ecuación:
+
+\newcommand{\PlonkFormula}{
+$${Q_L}_i \cdot A_i + {Q_R}_i \cdot B_i + Q_M\cdot A_i\cdot B_i + Q_O\cdot C_i + Q_C = 0 ~~ \forall i$$
+}
+
+\PlonkFormula
+
+Cada una de las columnas tiene un rol, como se puede deducir de la ecuación:
+\begin{itemize}
+    \item $Q_L$ es un valor que multiplica al operando izquierdo ($A$ en la traza)
+    \item $Q_R$ es un valor que multiplica al operando derecho ($B$ en la traza)
+    \item $Q_M$ es un valor que multiplica al producto entre el operando izquierdo y el derecho.
+    \item $Q_O$ es un valor que multiplica al output. En general este valor va a ser negativo porque queremos que operaciones sobre los inputs menos el output sea igual a $0$.
+    \item $Q_C$ es un valor constante que se suma al resto de los términos.
+\end{itemize}
+
+\textbf{Compuerta de suma}
+
+Antes de analizarla en detalle veamos un ejemplo de qué pinta podría tener una fila de $Q$, en particular una que defina la compuerta de suma entre 2 inputs. Esta se puede ver en la tabla \ref{tab:q_suma}.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{$Q_L$} & \textbf{$Q_R$} & \textbf{$Q_M$} & \textbf{$Q_O$} & \textbf{$Q_C$} \\
+\midrule
+1 & 1 & 0 & -1 & 0 \\
+\bottomrule
+\end{tabular}
+\caption{Fila de la matriz $Q$ con operación de suma.}
+\label{tab:q_suma}
+\end{center}
+\end{table}
+
+¿Por qué esta disposición nos define una compuerta de suma? Veamos que pasa cuando reemplazamos los valores en la ecuación:
+\begin{samepage}
+$$\textcolor{red}{{Q_L}_i} \cdot A_i + \textcolor{red}{{Q_R}_i} \cdot B_i + \textcolor{red}{Q_M}\cdot A_i\cdot B_i + \textcolor{red}{Q_O}\cdot C_i + \textcolor{red}{Q_C} = 0$$
+$$\textcolor{red}{1} \cdot A_i + \textcolor{red}{1} \cdot B_i + \textcolor{red}{0}\cdot A_i\cdot B_i + \textcolor{red}{(-1)} \cdot C_i + \textcolor{red}{0} = 0$$
+$$\textcolor{red}{1} \cdot A_i + \textcolor{red}{1} \cdot B_i + \textcolor{red}{(-1)} \cdot C_i = 0$$
+$$A_i + B_i = C_i$$
+\end{samepage}
+
+\textbf{Compuerta de multiplicación}
+
+Veamos ahora qué elección de valores resultaría en una compuerta de multiplicación. El resultado es el que se puede ver en la figura \ref{tab:q_multiplicacion}. Paralelamente, podemos ver que esto se verifica:
+
+\begin{table}
+\begin{center}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{$Q_L$} & \textbf{$Q_R$} & \textbf{$Q_M$} & \textbf{$Q_O$} & \textbf{$Q_C$} \\
+\midrule
+0 & 0 & 1 & -1 & 0 \\
+\bottomrule
+\end{tabular}
+\caption{Fila de la matriz $Q$ con operación de multiplicación.}
+\label{tab:q_multiplicacion}
+\end{center}
+\end{table}
+
+\begin{samepage}
+$$\textcolor{red}{{Q_L}_i} \cdot A_i + \textcolor{red}{{Q_R}_i} \cdot B_i + \textcolor{red}{Q_M}\cdot A_i\cdot B_i + \textcolor{red}{Q_O}\cdot C_i + \textcolor{red}{Q_C} = 0$$
+$$\textcolor{red}{0} \cdot A_i + \textcolor{red}{0} \cdot B_i + \textcolor{red}{1}\cdot A_i\cdot B_i + \textcolor{red}{(-1)} \cdot C_i + \textcolor{red}{0} = 0$$
+$$\textcolor{red}{1}\cdot A_i\cdot B_i + \textcolor{red}{(-1)} \cdot C_i = 0$$
+$$A_i \cdot B_i = C_i$$
+\end{samepage}
+
+\textbf{Compuerta de suma constante}
+
+Por último, vamos a ver cómo sería una compuerta para sumar una constante a un número. El resultado es el que se puede ver en la figura \ref{tab:q_suma_constante}. Veamos nuevamente que se cumple:
+
+\begin{table}
+\begin{center}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{$Q_L$} & \textbf{$Q_R$} & \textbf{$Q_M$} & \textbf{$Q_O$} & \textbf{$Q_C$} \\
+\midrule
+1 & 0 & 0 & -1 & -1 \\
+\bottomrule
+\end{tabular}
+\caption{Fila de la matriz $Q$ con operación de suma constante del valor $-1$.}
+\label{tab:q_suma_constante}
+\end{center}
+\end{table}
+
+\begin{samepage}
+$$\textcolor{red}{{Q_L}_i} \cdot A_i + \textcolor{red}{{Q_R}_i} \cdot B_i + \textcolor{red}{Q_M}\cdot A_i\cdot B_i + \textcolor{red}{Q_O}\cdot C_i + \textcolor{red}{Q_C} = 0$$
+$$\textcolor{red}{1} \cdot A_i + \textcolor{red}{0} \cdot B_i + \textcolor{red}{0}\cdot A_i\cdot B_i + \textcolor{red}{(-1)} \cdot C_i \textcolor{red}{-1} = 0$$
+$$\textcolor{red}{1} \cdot A_i + \textcolor{red}{(-1)} \cdot C_i \textcolor{red}{-1} = 0$$
+$$A_i - 1 = C_i$$
+\end{samepage}
+
+
+\textbf{El programa completo}
+
+Podemos ver entonces que nuestro programa completo está dado por la matriz $Q$ que se puede ver en la tabla \ref{tab:matrices_completas}.
+
+\begin{table}
+\centering
+\begin{minipage}{0.45\textwidth}
+\centering
+\begin{tabular}{ccccc}
+\toprule
+\textbf{$Q_L$} & \textbf{$Q_R$} & \textbf{$Q_M$} & \textbf{$Q_O$} & \textbf{$Q_C$} \\
+\midrule
+0 & 0 & 1 & -1 & 0 \\
+1 & 1 & 0 & -1 & 0 \\
+1 & 0 & 0 & -1 & -1 \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\begin{minipage}{0.45\textwidth}
+\centering
+\begin{tabular}{ccc}
+\toprule
+A & B & C \\
+\midrule
+2 & 3 & 6 \\
+6 & 3 & 9 \\
+9 & - & 8 \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+
+\caption{Matriz $Q$ y matriz $T$ del programa de ejemplo.}
+\label{tab:matrices_completas}
+\end{table}
+
+\subsubsection{\textbf{La matriz V}}
+
+Es trivial ver cómo en cada fila independiente se cumple la ecuación \PlonkFormula Sin embargo, ¿alcanza $Q$ para definir el programa que estamos queriendo representar? Veamos la traza alternativa de la figura \ref{tab:matrices_completas_invalida}.
+
+\begin{table}
+\centering
+\begin{minipage}{0.45\textwidth}
+\centering
+\begin{tabular}{ccccc}
+\toprule
+\textbf{$Q_L$} & \textbf{$Q_R$} & \textbf{$Q_M$} & \textbf{$Q_O$} & \textbf{$Q_C$} \\
+\midrule
+0 & 0 & 1 & -1 & 0 \\
+1 & 1 & 0 & -1 & 0 \\
+1 & 0 & 0 & -1 & -1 \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\begin{minipage}{0.45\textwidth}
+\centering
+\begin{tabular}{ccc}
+\toprule
+A & B & C \\
+\midrule
+2 & 3 & 6 \\
+\textcolor{red}{10} & \textcolor{red}{10} & \textcolor{red}{20} \\
+\textcolor{red}{3} & - & \textcolor{red}{2} \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+
+\caption{Matriz $Q$ del programa de ejemplo, con una traza inválida.}
+\label{tab:matrices_completas_invalida}
+\end{table}
+
+En el ejemplo se puede ver cómo cada fila cumple con su propia compuerta, sin embargo como un todo, esa traza no tiene sentido. No es suficiente con que cada fila en sí misma sea consistente con una compuerta, además necesitamos alguna forma de dar \textbf{consistencia entre las filas}. Necesitamos la capacidad de expresar que \textbf{el output de una compuerta tiene que tener el mismo valor que el operando de otra} o que dos operandos pueden provenir de la misma variable y por ende tener el mismo valor. En otras palabras, nos gustaría tener una consistencia como la que se ve en la tabla \ref{tab:matriz_t_consistencia}.
+
+
+
+
+
+\begin{table}
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+A & B & C \\
+\midrule
+2 & \textcolor{red}{3} & \textcolor{blue}{6} \\
+\textcolor{blue}{6} & \textcolor{red}{3} & \textcolor{orange}{9} \\
+\textcolor{orange}{9} & - & 8 \\
+\bottomrule
+\end{tabular}
+\caption{Matriz $T$ del programa de ejemplo con consistencias resaltadas.}
+\label{tab:matriz_t_consistencia}
+\end{center}
+\end{table}
+
+En este contexto entra en juego la matriz \textbf{V}. Esta nos permite ''nombrar'' operandos y volverlos a referenciar más adelante. Estas matrices tienen la forma que se ve en la tabla \ref{tab:matriz_v}. Los casilleros que tienen el mismo número en la matriz $V$ deberán tener el mismo valor en la matriz $T$ (la traza).
+
+\begin{table}
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+L & R & O \\
+\midrule
+1 & \textcolor{red}{2} & \textcolor{blue}{3} \\
+\textcolor{blue}{3} & \textcolor{red}{2} & \textcolor{orange}{4} \\
+\textcolor{orange}{4} & - & 5 \\
+\bottomrule
+\end{tabular}
+\caption{Matriz $V$ del programa de ejemplo.}
+\label{tab:matriz_v}
+\end{center}
+\end{table}
+
+Finalmente con esta nueva matriz podemos definir la validez de una traza respecto a un programa expresado como matrices de PLONK.
+
+\label{def:validez_traza}
+\textbf{Definición.} Sea $T$ una traza con columnas $A$, $B$ y $C$. Esta refleja una evaluación del circuito dado por las matrices $Q$ y $V$ si solo si:
+\begin{enumerate}
+    \item $\forall i$ se satisface la ecuación \PlonkFormula
+    \item $\forall i,j,k,l$, $V_{i,j} = V_{k,l} \implies T_{i,j} = T_{k,l}$.
+\end{enumerate}
+
+Este segundo chequeo impide que el ejemplo de la traza en \ref{tab:matrices_completas_invalida} no sea válido, dada la matriz $V$ de \ref{tab:matriz_v}.
+
+
+\vspace{1em}
+
+
+\subsubsection{\textbf{Compuertas personalizadas} (o \textit{Custom Gates})} \label{sec:plonk_custom_gates}
+
+Hasta ahora vimos algunas configuraciones que pueden tener filas de la matriz $Q$, en particular para operaciones basicas como sumar y multiplicar. Sin embargo, PLONK nos permite definir compuertas personalizadas, customizando como querramos la matriz $Q$ para conseguir la operación deseada. En particular, vemos que podemos comprimir todo nuestro programa de ejemplo en una sola fila de la matriz Q, quedándonos de esta manera un conjunto de matrices como se puede ver en \ref{tab:matrices_completas_comprimidas}.
+
+
+\begin{table}
+\centering
+\begin{minipage}{0.32\textwidth}
+\centering
+\begin{tabular}{ccccc}
+\toprule
+\textbf{$Q_L$} & \textbf{$Q_R$} & \textbf{$Q_M$} & \textbf{$Q_O$} & \textbf{$Q_C$} \\
+\midrule
+0 & 1 & 1 & -1 & -1 \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\hspace{0.01cm}  
+\begin{minipage}{0.32\textwidth}
+\centering
+\begin{tabular}{ccc}
+\toprule
+L & R & O \\
+\midrule
+0 & 1 & 2 \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\hspace{0.01cm} 
+\begin{minipage}{0.32\textwidth}
+\begin{tabular}{ccc}
+\toprule
+A & B & C \\
+\midrule
+2 & 3 & 8 \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\caption{Matrices $Q$, $V$ y $T$ comprimidas del programa de ejemplo.}
+\label{tab:matrices_completas_comprimidas}
+\end{table}
+
+
+Recordemos que nuestro programa busca computar $p(x,e) = e \cdot x + x - 1$, veamos que las matrices de \ref{tab:matrices_completas_comprimidas} reflejan esto:
+
+\begin{samepage}
+$$\textcolor{red}{{Q_L}_i} \cdot A_i + \textcolor{red}{{Q_R}_i} \cdot B_i + \textcolor{red}{Q_M}\cdot A_i\cdot B_i + \textcolor{red}{Q_O}\cdot C_i + \textcolor{red}{Q_C} = 0$$
+$$\textcolor{red}{0} \cdot A_i + \textcolor{red}{1} \cdot B_i + \textcolor{red}{1}\cdot A_i\cdot B_i + \textcolor{red}{(-1)} \cdot C_i \textcolor{red}{-1} = 0$$
+$$A_i + A_i\cdot B_i -C_i - 1 = 0$$
+$$A_i + A_i\cdot B_i - 1 = C_i$$
+\end{samepage}
+
+Si tomamos a $x$ como el operando izquierdo y $e$ como el derecho, la fórmula final obtenida es la que queríamos, y las matrices de \ref{tab:matrices_completas_comprimidas} son las que vamos a seguir usando a partir de ahora. En la práctica no siempre vamos a poder comprimir nuestro programa en una sola fila. 
+
+\vspace{1em}
+
+\subsubsection{\textbf{Public Inputs y Output}}
+
+Reflexionemos un poco sobre lo que tenemos hasta ahora y el objetivo que estamos persiguiendo. Queremos permitir que un prover le demuestre a un verifier que posee una matriz $T$ (una traza) que sea válida respecto al programa dado por las matrices $Q$ y $V$. La validez está dada por la definición \ref{def:validez_traza}. Sin embargo, también queremos poder demostrar que el programa fue ejecutado con ciertos inputs públicos. Actualmente, teniendo en cuenta que la traza $T$ no será revelada en ningún momento al verifier, no tenemos herramientas para demostrar esto. Además, queremos poder demostrar que el resultado de un cómputo es el que decimos ser, y tampoco tenemos forma de hacer esto. 
+
+PLONK modela al output del cómputo como uno o más inputs públicos, y esto se debe a que el resultado del programa modelado tiene que ser conocido tanto por el prover como por el verifier y funcionar como un input para el software verificador. Tomando esto en cuenta, solo nos queda solucionar el problema de los Public Inputs. Para esto vamos a agregar una nueva matriz pública llamada $PI$ para almacenar los públic inputs explicitamente, y además vamos a agregar filas al comienzo de todas las matrices para asegurarnos de que los public inputs están ocupando los lugares debidos en la traza. Esto también va a requerir modificar ligeramente la ecuación de \ref{def:validez_traza}. Las matrices resultantes pueden verse en las tablas de \ref{tab:matrices_completas_con_pi}.
+
+\newcommand{\PlonkFormulaPI}{
+$${Q_L}_i \cdot A_i + {Q_R}_i \cdot B_i + Q_M\cdot A_i\cdot B_i + Q_O\cdot C_i + Q_C + PI_i = 0 ~~ \forall i$$
+}
+
+
+\begin{table}
+\centering
+\begin{minipage}{0.45\textwidth}
+\centering
+\begin{tabular}{ccccc}
+\toprule
+\textbf{$Q_L$} & \textbf{$Q_R$} & \textbf{$Q_M$} & \textbf{$Q_O$} & \textbf{$Q_C$} \\
+\midrule
+\textcolor{blue}{-1} & \textcolor{blue}{0} & \textcolor{blue}{0} & \textcolor{blue}{0} & \textcolor{blue}{0} \\
+\textcolor{blue}{-1} & \textcolor{blue}{0} & \textcolor{blue}{0} & \textcolor{blue}{0} & \textcolor{blue}{0} \\
+0 & 1 & 1 & -1 & -1 \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hspace{0.5cm}  
+\begin{minipage}{0.45\textwidth}
+\centering
+\begin{tabular}{ccc}
+\toprule
+L & R & O \\
+\midrule
+\textcolor{blue}{0} & \textcolor{blue}{-} & \textcolor{blue}{-} \\
+\textcolor{blue}{1} & \textcolor{blue}{-} & \textcolor{blue}{-} \\
+2 & 0 & 1 \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+
+\vspace{0.5cm}  
+
+\begin{minipage}{0.45\textwidth}
+\centering
+\begin{tabular}{ccc}
+\toprule
+A & B & C \\
+\midrule
+\textcolor{blue}{3} & \textcolor{blue}{0} & \textcolor{blue}{0} \\
+\textcolor{blue}{8} & \textcolor{blue}{0} & \textcolor{blue}{0} \\
+2 & 3 & 8 \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hspace{0.5cm}  
+\begin{minipage}{0.45\textwidth}
+\centering
+\begin{tabular}{c}
+\toprule
+PI\\
+\midrule
+\textcolor{blue}{3} \\
+\textcolor{blue}{8} \\
+0 \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+
+\caption{Matrices $Q$, $V$, $T$ y $PI$ del programa de ejemplo.}
+\label{tab:matrices_completas_con_pi}
+\end{table}
+
+Para que las modificaciones en las matrices tengan sentido, la ecuación tiene que ser modificada acordemente:
+
+$${Q_L}_i \cdot A_i + {Q_R}_i \cdot B_i + {Q_M}_i\cdot A_i\cdot B_i + {Q_O}_i\cdot C_i + {Q_C}_i \textcolor{blue}{+ PI_i} = 0 ~~ \forall i$$
+
+Al comienzo de su única columna, la matriz $PI$ tiene los valores de los inputs públicos y luego 0 de ahí en adelante. A partir de las filas agregadas en $Q$ y en $V$, respetando la ecuación modificada, podemos asegurarnos de que los valores de los public inputs están siendo usados para el cómputo. Esto lo podemos ver en 2 partes:
+\begin{enumerate}
+    \item Las dos primeras filas de la matriz $Q$ junto con las dos primeras filas de la Traza $T$ y las dos primeras filas de $PI$ le aseguran al verifier que los valores de la traza son los mismos que los public inputs, en el mismo orden.
+    \item La matriz $V$ nos asegura que esos valores son los mismos que se usan en el cómputo. Particularmente en el caso del ejemplo, le asegura al verifier que el segundo input público es el resultado final, que es lo que queríamos ver.
+\end{enumerate}
+
+Veamos que el punto 1. se cumple con los valores concretos de las matrices de \ref{tab:matrices_completas_con_pi}.
+
+\textbf{Fila 0:}
+$${Q_L}_0 \cdot A_0 + {Q_R}_0 \cdot B_0 + {Q_M}_0\cdot A_0\cdot B_0 + {Q_O}_0\cdot C_0 + {Q_C}_0 + PI_0 = 0$$
+$$-1 \cdot 3 + 0 \cdot 0 + 0\cdot 0\cdot 0 + 0\cdot 0 + 0 + 3 = 0$$
+$$-3 + 3 = 0$$
+$$0 = 0$$
+
+\textbf{Fila 1:}
+$${Q_L}_1 \cdot A_1 + {Q_R}_1 \cdot B_1 + {Q_M}_1\cdot A_1\cdot B_1 + {Q_O}_1\cdot C_1 + {Q_C}_1 + PI_1 = 0$$
+$$-1 \cdot 8 + 0 \cdot 0 + 0\cdot 0\cdot 0 + 0\cdot 0 + 0 + 8 = 0$$
+$$-8 + 8 = 0$$
+$$0 = 0$$
+
+\textbf{Fila 2:}
+$${Q_L}_2 \cdot A_2 + {Q_R}_2 \cdot B_2 + {Q_M}_2\cdot A_2\cdot B_2 + {Q_O}_2\cdot C_2 + {Q_C}_2 + PI_2 = 0$$
+$$0 \cdot 2 + 1 \cdot 3 + 1\cdot 2\cdot 3 + (-1)\cdot 8 + (-1) + 0 = 0$$
+$$3+6-8-1=0$$
+$$0=0$$
+
+Por último, es fácil ver como la consistencia requerida por la matriz $V$ se cumple en la matriz $T$.
+
+\subsection{De matrices a polinomios}
+Vamos a darle uso a toda la teoría de cuerpos y polinomios que tratamos en las secciones \ref{sec:cuerpos} y \ref{sec:polinomios} en lo que sigue del protocolo. Lo siguiente es interpolar. 
+%Por el momento vamos a dejar de lado a la matriz $V$ y centrarnos en un protocolo limitado que le va a permitir demostrar al prover que conoce una traza que cumple cada compuerta del programa \textit{por separado}. 
+
+\begin{itemize}
+    \item Tenemos las columnas $Q_L$, $Q_R$, $Q_M$, $Q_O$, $Q_C$, $A$, $B$, $C$ y $PI$ por separado. 
+    \item Asumamos que nuestro programa tiene $2^n = N$ filas, con $n \in \mathbb{N}$. Si esto no es así, completamos las filas de todas las matrices con $0$ (es fácil ver que las ecuaciones se cumplen para todas las filas, alcanza con tener reservado el índice $0$ en la matriz $V$ para el valor $0$).
+    \item Tenemos un cuerpo dado por $\Fp$, con un generador de grado $N$ al que llamamos $\omega$. \textcolor{red}{CITAR DE DONDE SALE EL GENERADOR DE GRADO N.} 
+    \item Tenemos un dominio de interpolación $D=[\omega^i : 0 \leq i < N] = [1, \omega, \omega^2, ..., \omega^{N-1}]$.
+\end{itemize}
+
+\textbf{Vamos a interpolar cada una de las columnas} sobre el dominio $D$. Esto nos va a dejar como resultado los 9 polinomios interpoladores, los cuales vamos a nombrar respectivamente (al igual que sus funciones asociadas en $\Fp$) $q_L$, $q_R$, $q_M$, $q_O$, $q_C$, $a$, $b$, $c$ y $pi$. Conceptualmente, lo que acabamos de hacer es crear 9 polinomios que cumplen una propiedad muy interesante. Tomemos por ejemplo el polinomio $a$, obtenido a partir de interpolar los valores de la columna $A$. Sin perder generalidad, vamos a notar $A[i]$ al valor en la i-ésima fila de la columna $A$. Dado el dominio de interpolación elegido y los valores que estamos interpolando, podemos ver que se cumple la igualdad
+
+$$a(w^i) = A[i]$$
+
+ya que el polinomio $a$ está armado para que se cumpla. Esto mismo pasa en el resto de las columnas. A continuación, vamos a armar un nuevo polinomio 
+$$f = q_L \cdot a + q_R \cdot b + q_M \cdot a \cdot b + q_O \cdot c + q_C$$
+
+Si resulta familiar, es porque es una formula que vimos anteriormente predicando sobre las columnas de las matrices, pero en este caso aplicada a los polinomios asociadas a ellas. Si tomamos $f(x)$ la función asociada a $f$ en $\Fp$ obtenemos que 
+$$f(x) = 0 ~~ \forall x \in D$$
+si la traza $T$ está bien formada respecto al programa $Q$ y a los Public Inputs $PI$. ¿Por qué? Bueno, veamos que pasa si evaluamos $f(x)$ en un $\omega^i$ cualquiera:
+
+\begin{align*}
+f(\omega^i) &= \\
+q_L(\omega^i) \cdot a(\omega^i) + q_R(\omega^i) \cdot b(\omega^i) + q_M(\omega^i) \cdot a(\omega^i) \cdot b(\omega^i) + q_O(\omega^i) \cdot c(\omega^i) + q_C(\omega^i) &= \\
+Q_L[i] \cdot A[i] + Q_R[i] \cdot B[i] + Q_M[i] \cdot A[i] \cdot B[i] + Q_O[i] \cdot C[i] + Q_C[i] &= 0\\
+\forall ~0 \leq i < N
+\end{align*}
+
+Otra forma de expresar esta propiedad es diciendo que el polinomio $f$ tiene raíces en todos los valores de $D$, que son $N$ raíces distintas. Esto implica directamente por la propiedad \ref{prop:preserva_raices} que 
+$$f(x) = 0 ~~~~~ \forall x \in \{\omega^i : 0 \leq i < N\} ~~~ \implies$$
+$$(x - \omega^i)~|~ f(x) ~~~~~ \forall x \in \{\omega^i : 0 \leq i < N\} ~~~ \implies$$
+$$[\prod_{i=0}^{N-1} (x - \omega^i)]~|~ f(x) ~~~~~ \forall x \in \{\omega^i : 0 \leq i < N\} ~~~ \implies$$
+\begin{center}
+Si nombramos $z_D := [\prod_{i=0}^{N-1} (x - \omega^i)]$
+\end{center}
+
+$$\exists t, ~~ f(x) = t(x) * z_D(x) ~~~~~ \forall x \in \{\omega^i : 0 \leq i < N\}$$
+
+Más aún, podemos afirmar que 
+$$z_D(x) = x^N-1$$
+%Recordemos que 
+%$$z_D = [\prod_{i=0}^{N-1} (x - \omega^i)] = (x-1)(x-\omega)(x-\omega^2)\cdot \cdot \cdot (x-\omega^{N-1})$$
+Para probar esto vamos a notar que $z_D$ es de grado $N$ y sus raíces son los elementos de $D$. El polinomio $x^N-1$ también es de grado $N$ y si podemos demostrar que sus raices son las mismas que las de $z_D$, entonces por la propiedad \ref{prop:unicidad_raices} de los polinomios podemos probar que $z_D(x) = x^N-1$. 
+
+Para llegar a eso vamos a usar el hecho de que $\omega$ es una raíz de $\Fp$ de grado $N$. Esto nos dice que 
+$$1=\omega^0=\omega^N=\omega^{2N}=\omega^{kN} ~~ \forall k\in \mathbb{N}$$
+Vemos que $1$ es una raíz de $x^N-1$, ya que $1^N-1 = 0$. También vemos que $\omega$ es una raíz de $x^N-1$ ya que por lo dicho anteriormente $\omega^N = 1$ y por ende $\omega^N - 1 = 0$. Lo mismo ocurre para $\omega^i$ en general. Por ende, podemos afirmar que todos los elementos de $D$ son raíz de $x^N-1$ y de esta forma terminamos de verificar la igualdad buscada.
+
+Finalmente, podemos expresar a $f$ como
+$$f = t \cdot z_D$$
+
+\vspace{1em}
+
+\subsubsection{\textbf{Oráculos de polinomios}} \label{sec:oraculos}
+
+Sea $p \in \Fp[X]$, definimos a $[p]$ como el \textbf{oráculo} de $p$. Este oráculo es un observador de $p$ al cual podemos pedirle la evaluación de la función asociada $p(x)$ en un valor aleatorio $z$. Notamos $[p]_z$ al valor devuelto por el oráculo, tal que $[p]_z = p(z)$. 
+
+Dado un conjunto de $k$ polinomios $p_1,p_2,...,p_k \in \Fp[x]$, podemos pedirle al conjunto de oráculos $[p_1], [p_2],..., [p_k]$ una evaluación conjunta, que nos devuelve para un mismo $z$ su evaluación en todos los polinomios, es decir $[p_1]_z, [p_2]_z,..., [p_k]_z$ que equivale a $p_1(z), p_2(z),...,p_k(z)$.
+
+Esta abstracción nos va a resultar útil en el protocolo para abstraernos de algunos temas que veremos más adelante. La motivación concretamente está relacionada a que el prover no quiere dar al verifier los polinomios $a$, $b$ y $c$, ya que haciendo esto estaría revelando los valores de la traza. El verifier simplemente podría completar la traza $T$ haciendo las operaciones que se pueden ver en la matriz \ref{tab:matriz_t_trampa}. En cambio, al pasar un oráculo polinomio se evita este problema, permitiendo hacer la verificación deseada con las limitadas capacidades del oráculo.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+A & B & C \\
+\midrule
+$a(1)$ & $b(1)$ & $c(1)$ \\
+$a(\omega)$ & $b(\omega)$ & $c(\omega)$ \\
+$a(\omega^2)$ & $b(\omega^2)$ & $c(\omega^2)$ \\
+... & ... & ... \\
+\bottomrule
+\end{tabular}
+\caption{Matriz $T$ recompuesta por el verifier.}
+\label{tab:matriz_t_trampa}
+\end{center}
+\end{table}
+
+\subsection{Protocolo parcial}
+Veamos entonces cómo funciona el protocolo usando estos oráculos y todas las propiedades vistas anteriormente. Empecemos por ver qué elementos prover y verifier.
+
+\begin{itemize}
+    \item Ambos conocen $\Fp$ y  $\omega$ un generador de grado $N$.
+    \item Ambos conocen la matriz $Q$ y la matriz $PI$.
+    \item Solo el prover conoce la matriz $T$.
+\end{itemize}
+
+Podemos ver los pasos a continuación:
+
+\begin{enumerate}
+    \item El prover computa los polinomios $a$, $b$, $c$, $pi$, $q_L$, $q_R$, $q_M$, $q_O$, $q_C$
+    \item El verifier computa los polinomios $pi$, $q_L$, $q_R$, $q_M$, $q_O$, $q_C$
+    \item El prover computa el polinomio $f = q_L \cdot a + q_R \cdot b + q_M \cdot a \cdot b + q_O \cdot c + q_C$
+    \item El prover computa el polinomio $t(x) = \frac{f(x)}{x^n-1}$
+    \item El prover le pasa al verifier los oráculos $[a], [b], [c], [t]$
+    \item El verifier toma un valor aleatorio $z$ y verifica la ecuación 
+    $$q_L(z) \cdot [a]_z + q_R(z) \cdot [b]_z + q_M(z) \cdot [a]_z \cdot [b]_z + q_O(z) \cdot [c]_z + q_C(z) = [t]_z \cdot (z^N-1)$$
+\end{enumerate}
+
+Los pasos 1-4 deberían ser triviales y en el paso 5 estamos tomando el modelo de oráculo explicado en \ref{sec:oraculos}, lo importante ahora es entender la verificación del paso 6 como la culminación de todas las explicaciones anteriores.
+
+Primero, notemos que si en lugar de tomar la evaluación de oráculos y polinomios en la ecuación hubiéramos comparado directamente a los polinomios, la igualdad sería trivial y el verifier podría convencerse fácilmente de que el prover posee $a$, $b$ y $c$ válidos para el programa dado por $q_L$, $q_R$, $q_M$, $q_O$ y $q_C$. Sin embargo hacer esto sería revelar la totalidad de la traza, cosa que queremos evitar. El prover quiere que el verifier se convenza de esto mismo pero sin revelar $a$, $b$ y $c$. Utilizando el lema de Schwartz-Zippel de la sección \ref{sec:zippel} observamos que si 2 polinomios que desconocemos evalúan al mismo valor en un mismo elemento del aleatorio del dominio, entonces con probabilidad arrasadora ambos polinomios son iguales. En esto nos estamos apoyando ahora mismo: el verifier no necesita conocer los polinomios completos para convencerse de la igualdad, necesita conocer una evaluación de todos ellos en un mismo punto generado aleatoriamente, que es lo que nos proveen los oráculos. 
+
+El prover no podría haber falseado $a$, $b$, $c$ y $t$ para que la igualdad se mantenga solo en un punto, ya que no puede saber de antemano cuál es el punto $z$ en el que se van a evaluar. De esto se deduce que $a$, $b$ y $c$ tienen que ser validos y por ende el prover conoce una traza válida del programa.
+
+\subsection{\textcolor{red}{Protocolo para la matriz V}}
+Para completar el protocolo tenemos que hablar sobre cómo demostramos la segunda propiedad de validez de la matriz $T$ respecto a un programa dado por $Q$ y $V$, es decir
+$$\forall i,j,k,l,~~~ V_{i,j} = V_{k,l} \implies T_{i,j} = T_{k,l}$$
+Para esto vamos a usar la idea de \textbf{permutación}. Una permutación es un ordenamiento de un conjunto, denotado con $\sigma$. Dado un conjunto $A = \{a_i\}_{0\leq i < n}$, definimos a un ordenamiento como una función biyectiva $\sigma: A \rightarrow A$. 
+
+En nuestro caso particular, queremos una permutación sobre el conjunto de posiciones de la traza $T$, es decir, los pares 
+$$I = \{(i,j) ~|~ 0 \leq i < N ~ \land ~ 0 \leq j < 3\}$$
+Llamamos $T_{i,j}$ al valor de la matriz $T$ en la posición $(i,j)$, y lo mismo para la matriz $V$. De la matriz $V$ podemos obtener una permutación $\sigma$ donde $\sigma((i,j))$ es igual al par de índices de la \textbf{siguiente} ocurrencia del valor $V_{i,j}$. Si en la posición $(i,j)$ está la última ocurrencia de $V_{i,j}$ en $V$, $\sigma((i,j))$ es igual al par de índices de la primera aparición de $V_{i,j}$.
+
+Veamos un ejemplo. La tabla $V$ de la figura \ref{tab:matriz_v} induce una permutación tal que 
+\begin{itemize}
+    \item $\textcolor{black}{\sigma((0,0)) = (0,0)}$ 
+    \item$\textcolor{black}{\sigma((0,1)) = (1,1), ~\sigma((1,1)) = (0,1)}$
+    \item$\sigma((0,2)) = (1,0), ~\sigma((1,0)) = (0,2)$
+    \item$\textcolor{black}{\sigma((1,2)) = (2,0), ~\sigma((2,0)) = (1,2)}$
+    \item$\textcolor{black}{\sigma((2,2)) = (2,2)}$    
+\end{itemize}
+En otras palabras, vemos que una permutación forma \textbf{ciclos} dentro de un conjunto. 
+
+La restricción que establecida por la matriz $V$ es equivalente a decir que 
+$$T_{i,j} = T_{\sigma((i,j))} ~~~ \forall (i,j)\in I$$
+y esto a su vez equivale a decir que los conjuntos 
+$$A = \{((i,j), T_{i,j}) ~ | ~ (i,j)\in I\}$$
+$$B = \{(\sigma((i,j)), T_{i,j}) ~ | ~ (i,j)\in I\}$$
+son iguales. En otras palabras, $T_{i,j} = T_{\sigma((i,j))} \Leftrightarrow A = B$. La demostración de esto es por absurdo en ambas direcciones. La pregunta entonces es ¿cómo podemos reducir la verificación $A=B$ a ecuaciones polinomiales?
+
+\subsubsection{\textbf{Igualdad de conjuntos}}
+Si quisiéramos demostrar que dos conjuntos arbitrarios $A = \{a_i\}_{0\leq i<k}$ y $B = \{b_i\}_{0\leq i<k}$ son iguales, podemos multiplicar todos sus elementos y ver si el producto de cada conjunto es el mismo. Sin embargo, vemos como esto se rompe para los conjuntos $\{3,4\}$ y $\{2,6\}$, donde el producto de los elementos de ambos es $12$ y sin embargo no son iguales. Pero esto no ocurriría si se tratara de conjuntos de polinomios irreducibles, debido a su factorización única.
+
+Entonces tomemos ahora los conjuntos $A' = \{x+a_i\}_{0\leq i<k} \subset \Fp[x]$ y $B' = \{x+b_i\}_{0\leq i<k} \subset \Fp[x]$ construidos a partir de $A$ y $B$ respectivamente. En el ejemplo anterior, pasaríamos a tener los conjuntos de polinomios $\{x+3,x+4\}$ y $\{x+2,x+6\}$ y los productos ya serían distintos. Con esta construcción, $A=B \Leftrightarrow A'= B'$.
+
+El truco consiste en usar el lema de Schwartz-Zippel trabajado en la sección \ref{sec:zippel}. Tomamos un $\gamma$ aleatorio (en el contexto de un protocolo, sería un challenge por parte del verifier que el prover no puede conocer de antemano) y computamos el producto de los polinomios de $A'$ y $B'$ evaluados en $\gamma$. Formalmente
+$$\prod_{0 \leq i < k}(\gamma + a_i) = \prod_{0 \leq i < k}(\gamma + b_i) \Leftrightarrow A = B$$
+con probabilidad altísima. Ahora, ¿cómo pasamos de esto a ecuaciones polinomiales? 
+
+Sea $H = \{1, \omega, \omega^2, \cdots, \omega^{k-1}\}$ donde $\omega$ es una raíz de orden $k$, y sean $f$ y $g$ los polinomios que interpolan en el dominio $H$ a los valores $(a_0+\gamma, \cdots, a_{k-1} + \gamma)$ y $(b_0+\gamma, \cdots, b_{k-1} + \gamma)$ respectivamente. Decimos que $\prod_{0 \leq i < k}(\gamma + a_i) = \prod_{0 \leq i < k}(\gamma + b_i)$ si solo si existe un polinomio $Z$ tal que 
+$$Z(\omega^0) = 1 ~~~ \land ~~~ Z(h)f(h) = g(h)Z(\omega h) ~~ \forall h \in H$$
+
+Si tomamos a $Z$ como el polinomio que interpola en el dominio $H$ a los valores
+$$(1, \frac{a_0 + \gamma}{b_0 + \gamma}, \frac{(a_0 + \gamma)(a_1 + \gamma)}{(b_0 + \gamma)(b_1 + \gamma)}, \cdots, \prod_{0\leq i < k-1}\frac{a_i+\gamma}{b_i+\gamma})$$
+la propiedad se cumple en ambas direcciones.  
+
+
+\subsection{Blindings}\label{sec:blinding}
+Un \textbf{blinding} es un proceso por el que pasa un polinomio generado por el prover para permanecer indescifrable para el verifier, haciendo que todos sus valores evaluados sean aparentemente random. Tomemos por ejemplo el polinomio $a$ (el que interpola la columna $A$ de la traza). El prover provee al verifier con un oráculo de $a$ llamado $[a]$ y el verifier puede evaluar este polinomio a través de su oráculo en un punto aleatorio $[a]_z = a(z)$. Al hacer esto, el verifier está obteniendo información parcial sobre los puntos de la traza, haciendo que se pierda la propiedad de Zero Knowledge. 
+
+Para preservar esta propiedad, los polinomios que deban permanecer secretos deben pasar por un proceso de \textit{blinding} (ocultamiento). Este proceso toma a un polinomio original $a$ de grado $N$ y devuelve un nuevo polinomio $a_{blinding}$ de grado $M \geq N$. Estos polinomios cumplen la propiedad de que 
+$$a(\omega^i) = a_{blinding}(\omega^i) ~~~ \forall i \in D=\{\omega^0, \omega^1, \cdots,  \omega^{N-1}\}$$
+
+Para obtener este nuevo polinomio, tomemos nuevamente al polinomio $x^N-1$, el cual sabemos que se anula en todos los puntos de $D$. Sea $k = M-N$, el prover va a generar $k+1$ valores aleatorios $b_0, b_1, \cdots, b_k$ y definir 
+$$a_{blinded}(x) := (b_0 + b_1\cdot x + \cdots + b_k \cdot x^k)(X^N-1) + a$$
+Vemos que la propiedad deseada se cumple ya que el término de la derecha se anula en todos los puntos del dominio $D$ y en todo el resto de los puntos la evaluación del polinomio devuelve valores calculados a partir de $b_i$ aleatorios. 
+
+
+\section{Turbo-PLONK}\label{sec:turbo_plonk}
+Turbo-PLONK~\cite{gabizon2020proposal} extiende PLONK con 2 recursos para el armado de programas. Estos recursos son \textbf{custom gates} y \textbf{lookup tables}. La idea no es meterse en detalle con estos temas pero vamos a mencionar brevemente qué son y cómo funcionan ya que tienen relevancia en el desarrollo del trabajo y en las tecnologías concretas que serán usadas.
+
+\subsection{Custom Gates}\label{sec:turbo_plonk_custom_gates}
+En la sección \ref{sec:plonk_custom_gates} hablamos de \textit{custom gates} en el contexto de PLONK, sin embargo estas custom gates son de naturaleza distinta. Antes mencionamos la posibilidad de elegir valores personalizados para $Q_L, Q_R, Q_M, Q_O, Q_C$ que nos permitieran definir operaciones en el marco de la ecuación \PlonkFormula
+Sin embargo, Turbo-PLONK permite la definición de ecuaciones distintas, es decir, salirse del esquema definido por la matriz $Q$ y definir ecuaciones \textbf{arbitrarias}. En este esquema, la traza no se ve limitada a las columnas $A$, $B$ y $C$ sino que el estado del programa tiene un ancho arbitrario $\omega$ definido por el programador. A su vez, la matriz $Q$ tiene otra semántica: ahora va a tener un ancho arbitrario y cada columna representará una \textit{custom gate}, con un $1$ si está encendida y un $0$ si está apagada. 
+
+Dado un estado $v \in \Fp^\omega$, una traza válida de Turbo-PLONK es una matriz $T \in \Fp^{\omega \times n}$ que cumple con la función de transición $P$ y respeta las restricciones impuestas por la matriz $V$.
+
+La función de transición $P$ es un polinomio de grado a lo sumo $d$ en $2\omega + \mathcal{l}$ variables, donde $l$ es el número de selectores (por ende, el ancho de la matriz $Q$). Estos selectores nos permiten ''prender'' y ''apagar'' compuertas. La restricción establecida sobre $P$ es la siguiente:
+
+$$P(T_{i,1}, T_{i,2}, \cdots, T_{i,\omega}, T_{i+1, 1}, T_{i+1, 2}, \cdots, T_{i+1, \omega}, q_{i,1}, \cdots, q_{i, l}) = 0 ~~~ \forall 0 \leq i < n$$
+
+Analizando los índices, podemos ver la función de transición predica sobre la fila $i$-esima y la siguiente de la traza $T$. A su vez, los selectores permiten encender y apagar ciertas restricciones como veremos a continuación. 
+
+Supongamos que tenemos una traza $T$ de ancho $3$ al igual que en PLONK y queremos 2 restricciones distintas, digamos por ejemplo $A_i^3=B_i$ y $A^2+B^2 =C^2$. Para esto, alcanza con definir una matriz $Q$ con dos columnas $CUBO$ y $NORMA$: la primera estará asignada a la primera restricción ($A_i^3=B_i$) y la segunda a la segunda ($A+B =C^2$). Usaremos solo unos y ceros para llenar la matriz $Q$. Con todo esto, definimos la función de transición $P$ como
+$$P(A_i, B_i, C_i, \textcolor{gray}{A_{i+1}}, \textcolor{gray}{B_{i+1}}, \textcolor{gray}{C_{i+1}}, CUBO_i, NORMA_i) $$$$ = CUBO_i \cdot (A^3-B) + NORMA_i\cdot (A^2+B^2 - C^2)$$
+Es decir, si la matriz $Q$ se ve como la de la tabla \ref{tab:Q_turbo_plonk} significa que está restringiendo los valores de la primera fila de la traza $T$ a respetar la restricción $CUBO$ y los valores de la segunda fila a respetar la restricción $NORMA$. Por eso llamamos a las columnas de $Q$ \textbf{selectoras}.
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{cc}
+\toprule
+$CUBO$ & $NORMA$ \\
+\midrule
+1 & 0 \\
+0 & 1 \\
+
+\bottomrule
+\end{tabular}
+\caption{Matriz $Q$ de turbo-PLONK con operaciones $CUBO$ y $NORMA$.}
+\label{tab:Q_turbo_plonk}
+\end{center}
+\end{table}
+
+Notemos que en el ejemplo no estamos usando el hecho de que podemos predicar sobre 2 filas consecutivas de la traza al mismo tiempo, pero eso no es más que una decisión de diseño. Es fácil ver también cómo el esquema de PLONK descrito anteriormente es un caso particular de Turbo-PLONK, solo que usando la matriz $Q$ de una forma distinta: en lugar de encender o apagar compuertas, se usa para parametrizar una ecuación que se repite en todas las filas. La matriz $T$ se comporta igual en ambos protocolos. 
+
+\subsection{Lookup Tables}\label{sec:plonk_lookup_tables}
+
+Las \textit{lookup tables}~\cite{gabizon2020plookup} son una herramienta que permite chequear de forma eficiente que un conjunto de elementos de la traza es un subconjunto de una lista prefijada de valores. Esto es útil en el contexto de chequear el \textbf{rango} de un valor (ver que cierto elemento tiene como mucho $n$ bits) y calcular \textbf{operaciones bit a bit} como $xor$, $and$, $or$, etc. Por ejemplo, para ver que un número $e$ es de 8 bits alcanza con definir una tabla
+$$t_{u8} = \{0,1,2,..., 255\}$$
+y luego verificar que $\{e\} \subset t_{u8}$. Otro ejemplo sería el de definir una tabla de múltiples columnas para una operación $xor$ de 1 bit, por ejemplo:
+$$t_{xor} = \{(0,0,0),(0,1,1),(1,0,1),(1,1,0)\}$$
+para luego verificar que una operación $\{(x,y,x\oplus y)\} \subset t_{xor}$. 
+
+Para hacer esto existe un protocolo interactivo que puede incluirse dentro del protocolo principal. Dada una lookup table $\{t_i\}$ y un multiconjunto de valores en la traza $\{f_i\}$, expresamos ambos multiconjuntos como polinomios donde sus raíces son sus elementos respectivamente.
+$$F(X):= \prod_{0 \leq i < |t|}(X-f_i), ~~~ G(X):= \prod_{0 \leq i < |f|}(X-t_i)$$
+El protocolo consiste en ver que ambos polinomios tienen las mismas raíces, ignorando multiplicidades, pero no voy a entrar en detalles sobre eso. 
