@@ -292,222 +292,41 @@ Xor u32      & 1000 & 2000 & 5000 & 10000 & 20000 \\
 
 \section{Análisis de tiempos}
 
-Vamos a hacer algunas observaciones a grandes rasgos de cada uno de los comandos (prove, write\_vk y verify) para luego pasar a un estudio más enfocado en cada operación individual, en los casos donde esto tenga sentido. En este análisis tenemos que tener en cuenta, como se dijo en la sección \ref{sec:noir}, que el comando \texttt{write\_vk} realiza un subconjunto de las acciones del comando \texttt{prove}. Por esto mismo esperamos ver que los tiempos de ejecución del segundo sean estrictamente superiores que los del primero. A su vez, podemos usar este hecho para aislar el tiempo de ejecución del comando \texttt{prove}, substrayendo para cada (backend, operación, tamaño) el valor obtenido en el \texttt{write\_vk} del valor obtenido en el \texttt{prove}.
+Vamos a hacer algunas observaciones a grandes rasgos de cada uno de los comandos (prove, write\_vk y verify) para luego pasar a un estudio más enfocado en cada operación individual, en los casos donde esto tenga sentido. En este análisis tenemos que tener en cuenta, como se dijo en la sección \ref{sec:noir}, que el comando \texttt{write\_vk} realiza un subconjunto de las acciones del comando \texttt{prove}. Por esto mismo esperamos ver que los tiempos de ejecución del segundo sean estrictamente superiores que los del primero. Por esto mismo también nos vamos a enfocar más en los tiempos de generación de la prueba, ya que representa el flujo más completo de operaciones. Los gráficos completos pueden encontrarse en el apéndice \ref{sec:apendice_graficos}. En esta sección solo vamos a mostrar aquellos que sean de interés para conclusiones determinadas. 
 
-Comencemos viendo los resultados del comando \textbf{prove} en la figura \ref{fig:prove_tiempos}. Hay una generalidad que podemos observar en todos los gráficos. A grandes rasgos tenemos 2 variantes de Noirky2 para implementar las operaciones de Range y de XOR. Estas son bit a bit o usando lookup tables. Para cada una de estas también tenemos la opción de aplicar un blinding sobre la traza o no hacerlo. Podemos ver que en todos los casos, aplicar ese blinding incurre en un costo adicional, es decir, la versión que aplica este blinding siempre tiene un tiempo de ejecución mayor a la que no. Esto tiene sentido, ya que la fase de procesamiento de la traza en la generación de la prueba va a tener un costo mayor porque tienen que interpolarse polinomios de grado mayor. 
+Comencemos viendo los resultados del comando \textbf{prove} en la figura \ref{fig:prove_tiempos}. Hay una generalidad que podemos observar en todos los casos. A grandes rasgos tenemos 2 variantes de Noirky2 para implementar las operaciones de Range y de XOR. Estas son bit a bit o usando lookup tables. Para cada una de estas también tenemos la opción de aplicar un blinding sobre la traza o no hacerlo. Podemos ver que en todos los casos, aplicar ese blinding incurre en un costo adicional, es decir, la versión que aplica este blinding siempre tiene un tiempo de ejecución mayor a la que no. Esto tiene sentido, ya que la fase de procesamiento de la traza en la generación de la prueba va a tener un costo mayor porque tienen que interpolarse polinomios de grado mayor. Podemos ver un representante de este fenómeno en la figura \ref{fig:prove_tiempo_representante}, con el caso del comando \textbf{XOR u8}.
 
-\begin{figure}[htbp!]
-    \centering
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Assert Zero.png}
-        \caption{AssertZero}
-        \label{fig:tiempo-prove-assert-zero}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Memoria (varía operaciones).png}
-        \caption{Memoria (operaciones)}
-        \label{fig:tiempo-prove-mem}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Memoria (varía tamaño de lista).png}
-        \caption{Memoria (tamaño)}
-        \label{fig:tiempo-prove-mem-wide}
-    \end{minipage}
-    
-    \vspace{0.5cm} 
-    
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Range-u8.png}
-        \caption{Range u8}
-        \label{fig:tiempo-prove-range-u8}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Range-u16.png}
-        \caption{Range u16}
-        \label{fig:tiempo-prove-range-u16}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Range-u32.png}
-        \caption{Range u32}
-        \label{fig:tiempo-prove-range-u32}
-    \end{minipage}
-    
-    \vspace{0.5cm}  % Espacio entre las filas de subgráficos
-    
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Xor-u8.png}
-        \caption{XOR u8}
-        \label{fig:tiempo-prove-xor-u8}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Xor-u16.png}
-        \caption{XOR u16}
-        \label{fig:tiempo-prove-xor-u16}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/prove-Xor-u32.png}
-        \caption{XOR u32}
-        \label{fig:tiempo-prove-xor-u32}
-    \end{minipage}
-    
-    \caption{Mediciones de tiempos para el comando \textbf{prove} para todas las familias de programas de Noir}
-    \label{fig:prove_tiempos}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.6\linewidth]{imagenes/tiempos/prove-Xor-u8.png}
+	\caption{Representante de los tiempos de ejecución del comando \textbf{Prove}}
+	\label{fig:prove_tiempo_representante}
 \end{figure}
 
-A continuación, veamos el caso de la operación \textbf{write\_vk}. Volviendo a la observación anterior del comando prove, vemos que se mantiene la propiedad anterior, de forma marcada en el caso de la operación \textbf{range} y más sutilmente en la operación de \textbf{xor}. 
 
+A continuación, veamos el caso de la operación \textbf{write\_vk}. Este puede verse en la figura \ref{fig:write_vk_tiempos}. Retomamos en este caso la observación realizada en el comando prove y vemos que esta se mantiene, de forma marcada en el caso de la operación \textbf{range} y más sutilmente en la operación de \textbf{xor}.
 
-
-\begin{figure}[htbp!]
-    \centering
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Assert Zero.png}
-        \caption{AssertZero}
-        \label{fig:tiempo-write_vk-assert-zero}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Memoria (varía operaciones).png}
-        \caption{Memoria (op)}
-        \label{fig:tiempo-write_vk-mem}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Memoria (varía tamaño de lista).png}
-        \caption{Memoria (tamaño)}
-        \label{fig:tiempo-write_vk-mem-wide}
-    \end{minipage}
-    
-    \vspace{0.5cm} 
-    
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Range-u8.png}
-        \caption{Range u8}
-        \label{fig:tiempo-write_vk-range-u8}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Range-u16.png}
-        \caption{Range u16}
-        \label{fig:tiempo-write_vk-range-u16}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Range-u32.png}
-        \caption{Range u32}
-        \label{fig:tiempo-write_vk-range-u32}
-    \end{minipage}
-    
-    \vspace{0.5cm}  % Espacio entre las filas de subgráficos
-    
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Xor-u8.png}
-        \caption{XOR u8}
-        \label{fig:tiempo-write_vk-xor-u8}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Xor-u16.png}
-        \caption{XOR u16}
-        \label{fig:tiempo-write_vk-xor-u16}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Xor-u32.png}
-        \caption{XOR u32}
-        \label{fig:tiempo-write_vk-xor-u32}
-    \end{minipage}
-    
-    \caption{Mediciones de tiempos para el comando \textbf{write\_vk} para todas las familias de programas de Noir}
-    \label{fig:write_vk_tiempos}
-\end{figure}
 
 Finalmente, vamos a ver los tiempos de la operación \textbf{verify}. Los resultados pueden verse en la figura \ref{fig:verify_tiempos}. Si bien en esta operación estamos viendo órdenes de magnitud mucho menores (del orden de $5ms$ a $25ms$ contra $1s$ a $50s$ en las operaciones de \texttt{prove} y \texttt{write\_vk}), podemos notar  en todos los casos que:
 \begin{itemize}
-    \item Los tiempos de ejecución parecen estabilizarse en un tiempo constante, o por lo menos de crecimiento muy leve frente al aumento de cantidad de operaciones. Esto se ve especialmente en el caso del AssertZero, donde incluso ejecutando $1000000$ de operaciones se observa un crecimiento muy leve.
+    \item Los tiempos de ejecución parecen estabilizarse en un tiempo constante, o por lo menos de crecimiento muy leve frente al aumento de cantidad de operaciones. Esto se ve especialmente en el caso del AssertZero, donde incluso ejecutando $1.000.000$ de operaciones se observa un crecimiento muy leve.´
     \item Barretenberg (con KZG) tarda siempre un tiempo cercano a los $25ms$ mientras que todas las versiones de Noirky2 (con FRI) tardan alrededor de $5ms$. Esta comparación está más relacionada con la implementación de los provers en sí que con la implementación realizada en este trabajo. 
 \end{itemize}
 
-Estos provers (Barretenberg y Plonky2) están diseñados para depositar el costo de la ejución en la generación de la prueba, permitiendo que la verificación sea rápida o \texttt{succint} (recordemos que ese es uno de los principios básicos de los SNARKs descritos en la sección \ref{sec:snarks}).
+Para dejar constancia de este comportamiento vamos a tomar como representante el caso del AssertZero, como podemos ver en la figura \ref{fig:verify_tiempo_representante}, pero teniendo en mente que todas las familias de programas se comportan de manera similar. 
 
-\begin{figure}[htbp!]
-    \centering
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Assert Zero.png}
-        \caption{AssertZero}
-        \label{fig:tiempo-verify-assert-zero}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Memoria (varia operaciones).png}
-        \caption{Memoria (op)}
-        \label{fig:tiempo-verify-mem}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Memoria (varía tamaño de lista).png}
-        \caption{Memoria (tamaño)}
-        \label{fig:tiempo-verify-mem-wide}
-    \end{minipage}
-    
-    \vspace{0.5cm} 
-    
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Range-u8.png}
-        \caption{Range u8}
-        \label{fig:tiempo-verify-range-u8}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Range-u16.png}
-        \caption{Range u16}
-        \label{fig:tiempo-verify-range-u16}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Range-u32.png}
-        \caption{Range u32}
-        \label{fig:tiempo-verify-range-u32}
-    \end{minipage}
-    
-    \vspace{0.5cm}  % Espacio entre las filas de subgráficos
-    
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Xor-u8.png}
-        \caption{XOR u8}
-        \label{fig:tiempo-verify-xor-u8}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Xor-u16.png}
-        \caption{XOR u16}
-        \label{fig:tiempo-verify-xor-u16}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tiempos/verify-Xor-u32.png}
-        \caption{XOR u32}
-        \label{fig:tiempo-verify-xor-u32}
-    \end{minipage}
-    
-    \caption{Mediciones de tiempos para el comando \textbf{verify} para todas las familias de programas de Noir}
-    \label{fig:verify_tiempos}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.6\linewidth]{imagenes/tiempos/verify-Assert Zero.png}
+	\caption{Representante de los tiempos de ejecución del comando \textbf{Verify}}
+	\label{fig:verify_tiempo_representante}
 \end{figure}
+
+
+
+Estos provers (Barretenberg y Plonky2) están diseñados para depositar el costo de la ejecución en la generación de la prueba, permitiendo que la verificación sea rápida o \texttt{succint} (recordemos que ese es uno de los principios básicos de los SNARKs descritos en la sección \ref{sec:snarks}). Este es un resultado muy esperable, y no vamos a prestar más atención a los tiempos de ejecución del comando \textbf{verify} en el análisis que viene. 
+
+
 
 \subsection{Análisis particular de opcodes}
 A continuación vamos a hacer un un foco en las operaciones, en lugar de mirar operación por operación. En este caso también vamos a querer comparar las distintas implementaciones. Vamos a centrarnos en particular en el comando \texttt{prove} porque consideramos que es el más representativo, ya que ejecuta el flujo completo que incluye la traducción de Noir a Plonky2, la generación de la verifying key y la generación de la prueba. Vamos a dejar a la verificación de lado ya que como vimos, su análisis no presenta tanto interés. 
@@ -762,6 +581,210 @@ Conclusiones
 * el crs sigue siendo mucho más grande que el resto de los artefactos, por lo tanto este sigue siendo un gran cuello de botella
 * Hablar de que el crs no tiene que viajar por red cada vez que se quiere demostrar algo
 
+\appendix
+\chapter{Gráficos de resultados de la experimentación}\label{sec:apendice_graficos}
+\begin{figure}[htbp!]
+	\centering
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Assert Zero.png}
+		\caption{AssertZero}
+		\label{fig:tiempo-prove-assert-zero}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Memoria (varía operaciones).png}
+		\caption{Memoria (operaciones)}
+		\label{fig:tiempo-prove-mem}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Memoria (varía tamaño de lista).png}
+		\caption{Memoria (tamaño)}
+		\label{fig:tiempo-prove-mem-wide}
+	\end{minipage}
+	
+	\vspace{0.5cm} 
+	
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Range-u8.png}
+		\caption{Range u8}
+		\label{fig:tiempo-prove-range-u8}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Range-u16.png}
+		\caption{Range u16}
+		\label{fig:tiempo-prove-range-u16}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Range-u32.png}
+		\caption{Range u32}
+		\label{fig:tiempo-prove-range-u32}
+	\end{minipage}
+	
+	\vspace{0.5cm}  % Espacio entre las filas de subgráficos
+	
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Xor-u8.png}
+		\caption{XOR u8}
+		\label{fig:tiempo-prove-xor-u8}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Xor-u16.png}
+		\caption{XOR u16}
+		\label{fig:tiempo-prove-xor-u16}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Xor-u32.png}
+		\caption{XOR u32}
+		\label{fig:tiempo-prove-xor-u32}
+	\end{minipage}
+	
+	\caption{Mediciones de tiempos para el comando \textbf{prove} para todas las familias de programas de Noir}
+	\label{fig:prove_tiempos}
+\end{figure}
+
+
+
+\begin{figure}[htbp!]
+	\centering
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Assert Zero.png}
+		\caption{AssertZero}
+		\label{fig:tiempo-write_vk-assert-zero}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Memoria (varía operaciones).png}
+		\caption{Memoria (op)}
+		\label{fig:tiempo-write_vk-mem}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Memoria (varía tamaño de lista).png}
+		\caption{Memoria (tamaño)}
+		\label{fig:tiempo-write_vk-mem-wide}
+	\end{minipage}
+	
+	\vspace{0.5cm} 
+	
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Range-u8.png}
+		\caption{Range u8}
+		\label{fig:tiempo-write_vk-range-u8}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Range-u16.png}
+		\caption{Range u16}
+		\label{fig:tiempo-write_vk-range-u16}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Range-u32.png}
+		\caption{Range u32}
+		\label{fig:tiempo-write_vk-range-u32}
+	\end{minipage}
+	
+	\vspace{0.5cm}  % Espacio entre las filas de subgráficos
+	
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Xor-u8.png}
+		\caption{XOR u8}
+		\label{fig:tiempo-write_vk-xor-u8}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Xor-u16.png}
+		\caption{XOR u16}
+		\label{fig:tiempo-write_vk-xor-u16}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/write_vk-Xor-u32.png}
+		\caption{XOR u32}
+		\label{fig:tiempo-write_vk-xor-u32}
+	\end{minipage}
+	
+	\caption{Mediciones de tiempos para el comando \textbf{write\_vk} para todas las familias de programas de Noir}
+	\label{fig:write_vk_tiempos}
+\end{figure}
+
+\begin{figure}[htbp!]
+	\centering
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/verify-Assert Zero.png}
+		\caption{AssertZero}
+		\label{fig:tiempo-verify-assert-zero}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/verify-Memoria (varia operaciones).png}
+		\caption{Memoria (op)}
+		\label{fig:tiempo-verify-mem}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/verify-Memoria (varía tamaño de lista).png}
+		\caption{Memoria (tamaño)}
+		\label{fig:tiempo-verify-mem-wide}
+	\end{minipage}
+	
+	\vspace{0.5cm} 
+	
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/verify-Range-u8.png}
+		\caption{Range u8}
+		\label{fig:tiempo-verify-range-u8}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/verify-Range-u16.png}
+		\caption{Range u16}
+		\label{fig:tiempo-verify-range-u16}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/verify-Range-u32.png}
+		\caption{Range u32}
+		\label{fig:tiempo-verify-range-u32}
+	\end{minipage}
+	
+	\vspace{0.5cm}  % Espacio entre las filas de subgráficos
+	
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/verify-Xor-u8.png}
+		\caption{XOR u8}
+		\label{fig:tiempo-verify-xor-u8}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/verify-Xor-u16.png}
+		\caption{XOR u16}
+		\label{fig:tiempo-verify-xor-u16}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/verify-Xor-u32.png}
+		\caption{XOR u32}
+		\label{fig:tiempo-verify-xor-u32}
+	\end{minipage}
+	
+	\caption{Mediciones de tiempos para el comando \textbf{verify} para todas las familias de programas de Noir}
+	\label{fig:verify_tiempos}
+\end{figure}
 
 %%%% BIBLIOGRAFIA
 \newpage
