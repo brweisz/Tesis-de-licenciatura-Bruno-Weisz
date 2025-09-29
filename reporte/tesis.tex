@@ -418,16 +418,50 @@ La diferencia en los tiempos de ejecución de ambos backends (Noirky2 y Barreten
 
 
 \subsubsection{Operaciones de Range}\label{sec:tiempo_range}
-%Voy a rehacer los graficos de Range porque no les confío 
-Finalmente llegamos a familias de programas donde tenemos variantes implementativas entre los backends de Noirky2. Con esto me refiero que tenemos por un lado implementaciones basadas en lookup tables y por otro lado implementaciones basadas en operaciones de bits. Vamos a dejar de lado para este análisis las implementaciones de Noirky2 sin blinding.
+Finalmente llegamos a familias de programas donde tenemos variantes implementativas entre los backends de Noirky2. Con esto me refiero que tenemos por un lado implementaciones basadas en Lookup Tables y por otro lado implementaciones basadas en operaciones de bits. Vamos a dejar de lado para este análisis las implementaciones de Noirky2 sin blinding. 
 
+Si comparamos únicamente las implementaciones de Noirky2 con Lookup Tables y con Bits, podemos ver que parece cumplirse una de las hipótesis planteadas anteriormente: las Lookup Tables tienen mejor performance cuando crece la cantidad de operaciones pero a un costo de inicialización muy alto. Un ejemplo de esto lo podemos ver en la figura \ref{fig:range_table_vs_bit}, que muestra el ejemplo de los opcodes de tipo \textbf{Range-u8}, para el comando \textbf{prove}.
+
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\linewidth]{imagenes/tiempos/prove-Range-u8-table-vs-bits.png}
+	\caption{Prove - Range-u8 - Noirky2: Lookup Tables vs. operaciones bit a bit}
+	\label{fig:range_table_vs_bit}
+\end{figure}%
+
+Por otro lado, nos interesa comparar la performance de Barretenberg con la de Noirky2. Los gráficos completos pueden verse en las figuras \ref{fig:tiempo-prove-range-u8}, \ref{fig:tiempo-prove-range-u16} y \ref{fig:tiempo-prove-range-u32}. Estos resultados tienen sin embargo una particularidad que resulta anti-intuitiva para explicar: tanto la implementación de Noirky2 con operaciones de bits como Barretenberg presentan saltos discretos en sus tiempos de ejecución. Estas mediciones fueron repetidas en varias ocasiones para descartar un posible problema de ambiente. Estos saltos dificultan la comparación, y se necesitaría un análisis más exhaustivo de las implementaciones de las Custom Gates de Barretenberg y Plonky2 para explicarlos. Un representante de este comportamiento se puede ver en el gráfico \ref{fig:range_noirky_vs_barretenberg}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\linewidth]{imagenes/tiempos/prove-Range-u16-Noirky2-vs-Barretenberg.png}
+	\caption{Prove - Range-u16 - Noirky2 vs. Barretenberg}
+	\label{fig:range_noirky_vs_barretenberg}
+\end{figure}%
 
 \subsubsection{Operaciones de XOR}\label{sec:tiempo_xor}
 En el caso del XOR, tenemos nuevamente una implementación de Noirky2 basada en Lookup Tables y una basada en operaciones de bits, además de Barretenberg. Al igual que en el caso anterior, vamos a ignorar las variantes de Noirky2 sin blinding ya que se comportan de modo muy similar a sus correspondientes variantes con blinding, en lo que respecta a tiempos de ejecución.
 
-Los gráficos para realizar este análisis fueron presentados en las figuras \ref{fig:tiempo-prove-xor-u8} (XOR u8), \ref{fig:tiempo-prove-xor-u16} (XOR u16) y \ref{fig:tiempo-prove-xor-u32} (XOR u32). En ellos podemos ver claramente que todos se comportan de forma lineal, pero Barretenberg tiene la pendiente más pronunciada y por ende peores tiempos de ejecución. Por otro lado, comparando ambas implementaciones de Noirky2, notamos que la que usa Lookup Tables tiene una pendiente mucho más llana que aquella con operaciones de bits. En el caso de XOR u8 incluso parecería no haber variaciones entre la ejecución de $1000$ y $20.000$ operaciones, siendo el grueso del cómputo el overhead de la creación de las Lookup Tables y la generación de la prueba y la verification key. A su vez, notamos un crecimiento lineal en la cantidad de operaciones en el caso de Noirky2 con operaciones bit-a-bit. 
+Los gráficos para realizar este análisis fueron presentados en las figuras \ref{fig:tiempo-prove-xor-u8} (XOR u8), \ref{fig:tiempo-prove-xor-u16} (XOR u16) y \ref{fig:tiempo-prove-xor-u32} (XOR u32). En ellos podemos ver claramente que todos se comportan de forma lineal, pero Barretenberg tiene la pendiente más pronunciada y por ende peores tiempos de ejecución. Por otro lado, comparando ambas implementaciones de Noirky2, notamos que la que usa Lookup Tables tiene una pendiente mucho más llana que aquella con operaciones de bits. En el caso de XOR u8 incluso parecería no haber variaciones entre la ejecución de $1000$ y $20.000$ operaciones, siendo el grueso del cómputo el overhead de la creación de las Lookup Tables. A su vez, notamos un crecimiento lineal en la cantidad de operaciones en el caso de Noirky2 con operaciones bit-a-bit. Un ejemplo de esto podemos verlo concretamente en el caso del opcode \textbf{XOR-u16} en la figura \ref{fig:tiempo-prove-xor-u16-representante}.
 
-Por otro lado, notamos que en las variantes con Noirky2, pasar de XOR u8 a XOR u16 y XOR u32 presenta pendientes cada vez más pronunciadas, mientras que Barretenberg tiene los mismos tiempos de ejecución para todas las operaciones de XOR, dada una cantidad de operaciones. 
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\textwidth]{imagenes/tiempos/prove-Xor-u16-Noirky2-vs-Barretenberg.png}
+	\caption{Prove - XOR u16}
+	\label{fig:tiempo-prove-xor-u16-representante}
+\end{figure}%
+
+
+Por otro lado, notamos que en las variantes con Noirky2, pasar de XOR u8 a XOR u16 y XOR u32 presenta pendientes cada vez más pronunciadas, mientras que Barretenberg tiene los mismos tiempos de ejecución para todas las operaciones de XOR, dada una cantidad de operaciones. Esto se ve especialmente en el caso Noirky2 con operaciones de bits, como podemos apreciar en la figura \ref{fig:prove-Xor-Noirky2-bits}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\textwidth]{imagenes/tiempos/prove-Xor-Noirky2-bits.png}
+	\caption{Prove - XOR u8/u16/u32 - Noirky2 con operaciones de bits}
+	\label{fig:prove-Xor-Noirky2-bits}
+\end{figure}%
+
 
 
 \section{Análisis de tamaños de artefactos}
