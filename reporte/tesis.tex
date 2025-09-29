@@ -266,9 +266,9 @@ En este caso alcanza con realizar una única iteración por experimento, ya que 
 %Explicar como se conforma el repo brevemente. ¿Qué hay en el repo?
 
 
-A continuación vamos a ver un reporte y análisis de los resultados obtenidos en las mediciones de tiempos de los comandos \textbf{prove}, \textbf{write\_vk} y \textbf{verify} y tamaños de los 2 artefactos generados en los comandos \textbf{prove} y \textbf{write\_vk}. Los resultados se corresponden con la experimentación planteada en la sección \ref{sec:materiales_y_metodos}. La idea es mostrar 
+A continuación vamos a ver un reporte y análisis de los resultados obtenidos en las mediciones de tiempos de los comandos \textbf{prove}, \textbf{write\_vk} y \textbf{verify} y tamaños de los 2 artefactos generados en los comandos \textbf{prove} y \textbf{write\_vk}. Los resultados se corresponden con la experimentación planteada en la sección \ref{sec:materiales_y_metodos}. 
 
-Las distintas cantidades de operaciones usadas para cada familia de programas pueden verse en la tabla \ref{tab:tamanio_por_programa}. Notamos que no en todos los casos la cantidad de operaciones elegida es la misma, y esto se debe a que hay operaciones que llevan más tiempo que otras. Hubo un proceso de estimación manual orientado a que la experimentación completa pueda correrse en menos de 24hs. Además, se pudo observar que hacer mediciones con una cantidad tan grande de operaciones no aportaba información tan relevante, por lo que vamos a ver a continuación.
+Las distintas cantidades de operaciones usadas para cada familia de programas pueden verse en la tabla \ref{tab:tamanio_por_programa}. Notamos que no en todos los casos la cantidad de operaciones elegida es la misma, y esto se debe a que hay operaciones que llevan más tiempo que otras. Hubo un proceso de estimación manual orientado a que la experimentación completa pueda correrse en menos de 24hs. Además, se pudo observar que hacer mediciones con una cantidad tan grande de operaciones no siempre aportaba información tan relevante.
 
 \begin{table}[h!]
 \centering
@@ -292,7 +292,9 @@ Xor u32      & 1000 & 2000 & 5000 & 10000 & 20000 \\
 
 \section{Análisis de tiempos}
 
-Vamos a hacer algunas observaciones a grandes rasgos de cada uno de los comandos (prove, write\_vk y verify) para luego pasar a un estudio más enfocado en cada operación individual, en los casos donde esto tenga sentido. En este análisis tenemos que tener en cuenta, como se dijo en la sección \ref{sec:noir}, que el comando \texttt{write\_vk} realiza un subconjunto de las acciones del comando \texttt{prove}. Por esto mismo esperamos ver que los tiempos de ejecución del segundo sean estrictamente superiores que los del primero. Por esto mismo también nos vamos a enfocar más en los tiempos de generación de la prueba, ya que representa el flujo más completo de operaciones. Los gráficos completos pueden encontrarse en el apéndice \ref{sec:apendice_graficos}. En esta sección solo vamos a mostrar aquellos que sean de interés para conclusiones determinadas. 
+Vamos a hacer algunas observaciones a grandes rasgos de cada uno de los comandos (prove, write\_vk y verify) para luego pasar a un estudio más enfocado en cada operación individual, en los casos donde esto tenga sentido. En este análisis tenemos que tener en cuenta, como se dijo en la sección \ref{sec:noir}, que el comando \texttt{write\_vk} realiza un subconjunto de las acciones del comando \texttt{prove}. Por esto mismo esperamos ver que los tiempos de ejecución del segundo sean estrictamente superiores que los del primero. Por esta razón también nos vamos a enfocar más en los tiempos de generación de la prueba, ya que representa el flujo más completo del sistema. Los gráficos completos pueden encontrarse en el apéndice \ref{sec:apendice_graficos}. En esta sección solo vamos a mostrar aquellos que sean de interés para conclusiones determinadas. 
+
+\subsubsection{Comando \textbf{prove}}
 
 Comencemos viendo los resultados del comando \textbf{prove} en la figura \ref{fig:prove_tiempos}. Hay una generalidad que podemos observar en todos los casos. A grandes rasgos tenemos 2 variantes de Noirky2 para implementar las operaciones de Range y de XOR. Estas son bit a bit o usando lookup tables. Para cada una de estas también tenemos la opción de aplicar un blinding sobre la traza o no hacerlo. Podemos ver que en todos los casos, aplicar ese blinding incurre en un costo adicional, es decir, la versión que aplica este blinding siempre tiene un tiempo de ejecución mayor a la que no. Esto tiene sentido, ya que la fase de procesamiento de la traza en la generación de la prueba va a tener un costo mayor porque tienen que interpolarse polinomios de grado mayor. Podemos ver un representante de este fenómeno en la figura \ref{fig:prove_tiempo_representante}, con el caso del comando \textbf{XOR u8}.
 
@@ -303,13 +305,34 @@ Comencemos viendo los resultados del comando \textbf{prove} en la figura \ref{fi
 	\label{fig:prove_tiempo_representante}
 \end{figure}
 
+\subsubsection{Comando \textbf{write\_vk}}
 
-A continuación, veamos el caso de la operación \textbf{write\_vk}. Este puede verse en la figura \ref{fig:write_vk_tiempos}. Retomamos en este caso la observación realizada en el comando prove y vemos que esta se mantiene, de forma marcada en el caso de la operación \textbf{range} y más sutilmente en la operación de \textbf{xor}.
+A continuación, veamos el caso de la operación \textbf{write\_vk}. Los resultados pueden verse en la figura \ref{fig:write_vk_tiempos}. Retomamos en este caso la observación realizada en el comando prove y vemos que esta se mantiene, aunque de forma menos notable. Un representante de este fenómeno puede encontrarse en la figura \ref{fig:write_vk_tiempo_representante}.
 
+\begin{figure}
+	\centering
+	\includegraphics[width=0.6\linewidth]{imagenes/tiempos/write_vk-Xor-u8.png}
+	\caption{Representante de los tiempos de ejecución del comando \textbf{write\_vk}}
+	\label{fig:write_vk_tiempo_representante}
+\end{figure}
+
+\subsubsection{\textbf{prove} vs. \textbf{write\_vk}}
+
+En este punto vamos a hacer una comparación entre los tiempos de ejecución del comando \textbf{prove} y el comando \textbf{write\_vk} para el caso de Noirky2 con blinding para el opcode \texttt{AssertZero}. Como podemos ver en la figura \ref{fig:prove_vs_write_vk}, los tiempos de ejecución del comando \textbf{prove} son mayores, y esto es esperable dado que \textbf{write\_vk} realiza un subconjunto de las acciones que realiza \textbf{prove}, como ya habíamos adelantado. Esto se va a repetir en todos los opcodes, en todas las variantes de Noirky2.
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.6\linewidth]{imagenes/tiempos/prove-vs-vk-AssertZero-Noirky2.png}
+	\caption{Representante de los tiempos de ejecución del comando \textbf{prove} vs. el comando \textbf{write\_vk}}
+	\label{fig:prove_vs_write_vk}
+\end{figure}
+
+\subsubsection{Comando \textbf{verify}}
 
 Finalmente, vamos a ver los tiempos de la operación \textbf{verify}. Los resultados pueden verse en la figura \ref{fig:verify_tiempos}. Si bien en esta operación estamos viendo órdenes de magnitud mucho menores (del orden de $5ms$ a $25ms$ contra $1s$ a $50s$ en las operaciones de \texttt{prove} y \texttt{write\_vk}), podemos notar  en todos los casos que:
 \begin{itemize}
-    \item Los tiempos de ejecución parecen estabilizarse en un tiempo constante, o por lo menos de crecimiento muy leve frente al aumento de cantidad de operaciones. Esto se ve especialmente en el caso del AssertZero, donde incluso ejecutando $1.000.000$ de operaciones se observa un crecimiento muy leve.´
+    \item Los tiempos de ejecución parecen estabilizarse en un tiempo constante, o por lo menos de crecimiento muy leve frente al aumento de cantidad de operaciones. Esto se ve especialmente en el caso del AssertZero, donde incluso ejecutando $1.000.000$ de operaciones se observa un crecimiento muy leve en los tiempos de ejecución.
     \item Barretenberg (con KZG) tarda siempre un tiempo cercano a los $25ms$ mientras que todas las versiones de Noirky2 (con FRI) tardan alrededor de $5ms$. Esta comparación está más relacionada con la implementación de los provers en sí que con la implementación realizada en este trabajo. 
 \end{itemize}
 
@@ -324,25 +347,39 @@ Para dejar constancia de este comportamiento vamos a tomar como representante el
 
 
 
-Estos provers (Barretenberg y Plonky2) están diseñados para depositar el costo de la ejecución en la generación de la prueba, permitiendo que la verificación sea rápida o \texttt{succint} (recordemos que ese es uno de los principios básicos de los SNARKs descritos en la sección \ref{sec:snarks}). Este es un resultado muy esperable, y no vamos a prestar más atención a los tiempos de ejecución del comando \textbf{verify} en el análisis que viene. 
+Estos provers (Barretenberg y Plonky2) están diseñados para depositar el costo de la ejecución en la generación de la prueba, permitiendo que la verificación sea rápida o \texttt{succint} (recordemos que ese es uno de los principios básicos de los SNARKs descritos en la sección \ref{sec:snarks}). Este es un resultado esperable, y no vamos a prestar más atención a los tiempos de ejecución del comando \textbf{verify} en el análisis que viene. 
 
 
 
 \subsection{Análisis particular de opcodes}
-A continuación vamos a hacer un un foco en las operaciones, en lugar de mirar operación por operación. En este caso también vamos a querer comparar las distintas implementaciones. Vamos a centrarnos en particular en el comando \texttt{prove} porque consideramos que es el más representativo, ya que ejecuta el flujo completo que incluye la traducción de Noir a Plonky2, la generación de la verifying key y la generación de la prueba. Vamos a dejar a la verificación de lado ya que como vimos, su análisis no presenta tanto interés. 
+A continuación vamos a hacer un un foco en los opcodes. En este caso también vamos a querer comparar las implementaciones entre si. Vamos a centrarnos en particular en el comando \texttt{prove} porque consideramos que es el más representativo, ya que ejecuta el flujo completo que incluye la traducción de Noir a Plonky2, la generación de la verifying key y la generación de la prueba. Vamos a dejar a la verificación de lado ya que como vimos, su análisis no presenta tanto interés. 
 
 \subsubsection{AssertZero}
-Comencemos por el AssertZero. En este caso vamos a ver el comportamiento con muchas operaciones pero también con pocas operaciones, ya que puede llegar a ser de interés ver cómo se comporta esta herramienta para programas de Noir relativamente pequeños. Para ver el comportamiento con muchas operaciones (específicamente, $1000000$) nos remitimos a la figura \ref{fig:tiempo-prove-assert-zero} presentada previamente. Podemos ver, cuando la cantidad de operaciones crece, que el tiempo de ejecución aparenta tener un crecimiento lineal, teniendo el backend de Barretenberg una pendiente más pronunciada que aquellos de Noirky2. En particular, para $1000000$ de operaciones, la ejecución de este comando tarda $20$ segundos más con Barretenberg que con Noirky2, representando aproximadamente un $50\%$ más de tiempo de ejecución. 
+Comencemos por el AssertZero. En este caso vamos a ver los tiempos de ejecución con muchas y con pocas operaciones, ya que puede llegar a ser de interés ver cómo se comporta esta herramienta para programas de Noir relativamente pequeños. Para ver el comportamiento con muchas operaciones (específicamente, $1000000$) nos remitimos a la figura \ref{fig:muchas_operaciones}. Podemos ver que a medida que la cantidad de operaciones crece, el tiempo de ejecución aparenta tener un crecimiento lineal, teniendo el backend de Barretenberg una pendiente más pronunciada que aquellas variantes de Noirky2. En particular, para $1000000$ de operaciones, la ejecución de este comando tarda $20$ segundos más con Barretenberg que con Noirky2, representando aproximadamente un $50\%$ más de tiempo de ejecución. 
 
-Para ver el comportamiento en casos más pequeños, veamos el gráfico de la figura  \ref{fig:prove_log}. En este caso, la escala del eje horizontal es logarítmica para facilitar la vista. Lo que es interesante de este gráfico es que existe una cantidad de operaciones $k$ tal que si queremos generar una prueba de menos de $k \approx 20000$ opcodes de tipo AssertZero, opera más rápido el backend de Barretenberg. Sin embargo para valores mayores a $k$ ya es conveniente usar Noirky2, en lo que respecta a tiempo de ejecución de la prueba. Por completitud aclaramos que si no fuera de interés aplicar un blinding sobre los datos, siempre es conveniente usar Noirky2 sin blinding, pero compararlos de forma directa no sería del todo justo ya que esta variante no posee el mismo grado de seguridad que las otras dos. 
+Para ver el comportamiento en casos más pequeños, veamos el gráfico de la figura  \ref{fig:pocas_operaciones}. En este caso, la escala del eje horizontal es logarítmica para facilitar la vista. Lo que es interesante de este gráfico es que existe una cantidad de operaciones $k$ tal que si queremos generar una prueba de menos de $k \approx 20000$ opcodes de tipo AssertZero, opera más rápido el backend de Barretenberg. Sin embargo para valores mayores a $k$ ya es conveniente usar Noirky2, en lo que respecta a tiempo de ejecución de la prueba. Por completitud aclaramos que si no fuera de interés aplicar un blinding sobre los datos, siempre es conveniente usar Noirky2 sin blinding, pero compararlos de forma directa no sería del todo justo ya que esta variante no posee el mismo grado de seguridad que las otras dos. 
 
 
 \begin{figure}
-    \centering
-    \includegraphics[width=0.8\linewidth]{imagenes/tiempos/prove-Assert Zero-log.png}
-    \caption{Comando \textbf{prove} del opcode AssertZero, tiempos de ejecución}
-    \label{fig:prove_log}
+	\centering
+	\begin{subfigure}[t]{0.49\textwidth} 
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Assert Zero.png}
+		\caption{Hasta $100.000$ operaciones, vista logarítmica}
+		\label{fig:pocas_operaciones}
+	\end{subfigure}%
+	\hfill 
+	\begin{subfigure}[t]{0.49\textwidth}  
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Assert Zero-log.png}
+		\caption{Hasta $1.000.000$ de operaciones}
+		\label{fig:muchas_operaciones}
+	\end{subfigure}
+	\caption{Comando \textbf{prove} del opcode AssertZero, tiempos de ejecución para pocas y muchas operaciones}
+	\label{fig:assert_zero_pocas_y_muchas}
 \end{figure}
+
+
 
 \subsubsection{Operaciones de memoria}
 Avancemos entonces a las operaciones de memoria. Recordemos que tenemos 2 variantes en los programas: uno que aumenta la cantidad de lecturas y escrituras en una lista de tamaño 100; y otra que aumenta el tamaño de la lista pero siempre realiza 100 lecturas y escrituras. 
@@ -368,7 +405,14 @@ Antes de comenzar vamos a validar una pequeña hipótesis que planteamos en la s
     \label{fig:mem_vs_assert_zero}
 \end{figure}
 
-Notamos que en el caso de Noirky2 esta diferencia es notable , el crecimiento de los tiempos de ejecución es marcadamente diferente (como se ve en la figura \ref{fig:mem_vs_assert_zero_noirky}). Sin embargo, cuando usamos Barretenberg esta diferencia no es tan marcada (como se ve en la figura \ref{fig:mem_vs_assert_zero_barretenberg}). A su vez, si prestamos atención a la escala de ambos gráficos, vemos que los tiempos de ejecución con Noirky2 para las operaciones de memoria son mucho mayores que los de Barretenberg. Para ver mejor este fenómeno podemos remitirnos a las figuras \ref{alg:fig:tiempo-prove-mem} y \ref{alg:fig:tiempo-prove-mem-wide}. 
+Notamos que en el caso de Noirky2 esta diferencia es notable: el crecimiento de los tiempos de ejecución es marcadamente diferente (como se ve en la figura \ref{fig:mem_vs_assert_zero_noirky}). Sin embargo, cuando usamos Barretenberg esta diferencia no es tan marcada (como se ve en la figura \ref{fig:mem_vs_assert_zero_barretenberg}). A su vez, si prestamos atención a la escala de ambos gráficos, vemos que los tiempos de ejecución con Noirky2 para las operaciones de memoria son mucho mayores que los de Barretenberg. Para ver mejor este fenómeno podemos tomar como ejemplo el gráfico de \ref{fig:tiempo-prove-mem-rep}, donde se muestra que cuando aumenta la cantidad de operaciones de memoria el backend de Barretenberg actúa de forma mucho más veloz.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\linewidth]{imagenes/tiempos/prove-Memoria (varía operaciones).png}
+	\caption{Memoria (operaciones)}
+	\label{fig:tiempo-prove-mem-rep}
+\end{figure}%
 
 La diferencia en los tiempos de ejecución de ambos backends (Noirky2 y Barretenberg) es tan marcada que nos hace pensar que las implementaciones de lectura y escritura hechas por Barretenberg se basan en restricciones polinomiales distintas a las de Noirky2. Esto puede dar lugar a una investigación más profunda sobre Barretenberg para ver cómo esta herramienta simula con restricciones polinomiales la lectura y escritura en un bloque de memoria. 
 
