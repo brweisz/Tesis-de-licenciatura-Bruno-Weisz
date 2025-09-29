@@ -73,7 +73,7 @@
 \chapter{Evaluación de la herramienta}
 
 
-\section{Validación con tests funcionales}
+\section{Validación con tests funcionales}\label{sec:tests}
 Una parte crucial del proceso de desarrollo es validar a través de tests que la herramienta generada está cumpliendo con los requerimientos, sin embargo, en el contexto de los SNARKs y en particular con Plonky2 esto puede llegar a ser un desafío. Supongamos el siguiente escenario: Noirky2 recibe un código ACIR y un conjunto de witnesses como input y a partir de ellos crea un circuito en Plonky2, crea una prueba de este circuito con los valores de witnesses provistos y la verifica. Todo parece correcto, sin embargo, ¿Qué pasaría si la traducción de Noirky2 consistiera en hacer un circuito vacío que siempre verifica? Automáticamente cualquier programa generado debería verificar correctamente, sin embargo sabemos que la implementación no existe. 
 
 Tratamos de solucionar este problema haciendo tests por la negativa, es decir, proveyendo datos de entrada a la generación de la prueba que no satisfacen el sistema de ecuaciones y viendo que la verificación falla. Sin embargo no fue la verificación la que falló, sino la generación de la prueba misma. La explicación de esto es que Plonky2 resuelve todos los valores de sus Targets (o variables del sistema de ecuaciones). Si un valor provisto como input para la prueba es distinto a un valor que el motor de Plonky2 resuelve, este va a fallar en tiempo de resolución de circuito, ya que se trató de asignar a una misma variable del sistema de ecuaciones 2 valores distintos en momentos diferentes. El hecho de que falle la generación de la prueba también es útil para validar que la herramienta está haciendo lo previsto, sin embargo esto deja de lado un problema de seguridad.
@@ -468,157 +468,40 @@ Por otro lado, notamos que en las variantes con Noirky2, pasar de XOR u8 a XOR u
 En esta sección vamos a hacer un reporte de los tamaños de los artefactos generados en el flujo de trabajo. Estos artefactos son la \textbf{Verification Key} en el caso del comando \textbf{write\_vk} y la \textbf{prueba} en el caso del comando \textbf{prove}.
 
 \subsection{Tamaño de la Verification Key}
-Comencemos por ver los tamaños que tiene cada verification key, segun la cantidad de opcodes de cada tipo. Los resultados completos pueden verse en la figura \ref{fig:tamanios-vk}. Algo que notamos en todos los gráficos es que tanto Barretenberg como Noirky2 con operaciones de bits tienen el mismo tamaño de Verification Key para todas las familias de programas (por una cuestión de escala, esto no se percibe en el gráfico de las operaciones de XOR, pero fue constatado con los datos). Además, aplicar blindings no afecta en ningún caso el tamaño de la Verification Key. 
+Comencemos por ver los tamaños que tiene cada verification key, segun la cantidad de opcodes de cada tipo. Los resultados completos pueden verse en la figura \ref{fig:tamanios-vk}. Algo que notamos en todos los gráficos es que tanto Barretenberg como Noirky2 con operaciones de bits tienen el mismo tamaño de Verification Key para todas las familias de programas (por una cuestión de escala, esto no se percibe en el gráfico de las operaciones de XOR, pero fue constatado con los datos). Además, aplicar blindings no afecta en ningún caso el tamaño de la Verification Key. Un representante de este fenómeno lo encontramos en el caso del AssertZero como se ve en la figura \ref{}, sin embargo esto es así en todos los casos.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\textwidth]{imagenes/tamanios/tamanio-write_vk-Assert Zero.png}
+	\caption{Tamaño de la VK en Noirky2 con operaciones de bits y Barretenberg}
+	\label{fig:tamanio-vk-assert-zero}
+\end{figure}%
 
 Las diferencias pueden empezar a verse cuando usamos Lookup Tables. Recordemos que estas permiten tener tablas pre-computadas en la Verification Key, permitiendo tiempos de ejecución mucho más rápidos como vimos en las secciones \ref{sec:tiempo_range} y \ref{sec:tiempo_xor}. Sin embargo, acá podemos ver cómo esto trae desventajas en los tamaños de la verification key. 
 
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\textwidth]{imagenes/tamanios/tamanio-write_vk-Xor-u8.png}
+	\caption{Tamaño de la VK para operaciones de tipo Xor}
+	\label{fig:tamanio-vk-xor-u8}
+\end{figure}%
 
-\begin{figure}[htbp!]
-    \centering
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Assert Zero.png}
-        \caption{AssertZero}
-        \label{fig:tamanio-vk-assert-zero}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Memoria (varía operaciones).png}
-        \caption{Memoria (op)}
-        \label{fig:tamanio-vk-mem}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Memoria (varía tamaño de lista).png}
-        \caption{Memoria (tamaño)}
-        \label{fig:tamanio-vk-mem-wide}
-    \end{minipage}
-    
-    \vspace{0.5cm} 
-    
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Range-u8.png}
-        \caption{Range u8}
-        \label{fig:tamanio-vk-range-u8}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Range-u16.png}
-        \caption{Range u16}
-        \label{fig:tamanio-vk-range-u16}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Range-u32.png}
-        \caption{Range u32}
-        \label{fig:tamanio-vk-range-u32}
-    \end{minipage}
-    
-    \vspace{0.5cm}  
-    
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Xor-u8.png}
-        \caption{XOR u8}
-        \label{fig:tamanio-vk-xor-u8}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Xor-u16.png}
-        \caption{XOR u16}
-        \label{fig:tamanio-vk-xor-u16}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Xor-u32.png}
-        \caption{XOR u32}
-        \label{fig:tamanio-vk-xor-u32}
-    \end{minipage}
-    
-    \caption{Tamaño de la Verification Key para todas las familias de programas de Noir}
-    \label{fig:tamanios-vk}
-\end{figure}
-
-En el caso de las operaciones de Range con Lookup Tables, estas usan una tabla simple de $2^8$ elementos de cuerpo, y eso se ve reflejado en el aumento visible en las figuras \ref{fig:tamanio-vk-range-u8}, \ref{fig:tamanio-vk-range-u16} y \ref{fig:tamanio-vk-range-u32}, que es igual en todos los casos. Por otro lado, cuando nos movemos al caso del XOR, estamos usando tablas de $2^{16}$ elementos, por lo cual el grueso de la Verification Key se ve ocupado por esta tabla. Esto hace que se opaque casi en su totalidad a las otras implementaciones en las figuras \ref{fig:tamanio-vk-xor-u8}, \ref{fig:tamanio-vk-xor-u16} y \ref{fig:tamanio-vk-xor-u32}, superando el tamaño de 250kb. 
+En el caso de las operaciones de Range con Lookup Tables, estas usan una tabla simple de $2^8$ elementos de cuerpo, y eso se ve reflejado en el aumento visible en las figuras \ref{fig:tamanio-vk-range-u8}, \ref{fig:tamanio-vk-range-u16} y \ref{fig:tamanio-vk-range-u32}, que es igual en todos los casos. Por otro lado, cuando nos movemos al caso del XOR, estamos usando tablas de $2^{16}$ elementos, por lo cual el grueso de la Verification Key se ve ocupado por esta tabla. Esto hace que se opaque casi en su totalidad a las otras implementaciones, como podemos ver en la figura \ref{fig:tamanio-vk-xor-u8}, superando el tamaño de 250kb. 
 
 \subsection{Tamaño de la prueba}
-Nos movemos ahora al tamaño de las pruebas generadas. Los resultados pueden verse en la figura \ref{fig:tamanios-prueba}. En este caso, podemos ver que Barretenberg presenta una clara ventaja frente a Plonky2: los tamaños de sus pruebas son constantes. En todos los casos, la prueba pesa $2176$ bytes o $2.125$ kb. Esto se debe a que el Polynomial Commitment Scheme usado es KZG, explorado en la sección \ref{sec:kzg}.
-Esto no es así en el caso de Plonky2, que usa FRI. 
+Nos movemos ahora al tamaño de las pruebas generadas. Los resultados completos pueden verse en la figura \ref{fig:tamanios-prueba}. En este caso, podemos ver que Barretenberg presenta una clara ventaja frente a Plonky2: los tamaños de sus pruebas son constantes. En todos los casos, la prueba pesa $2176$ bytes o $2.125$ kb. Esto se debe a que el Polynomial Commitment Scheme usado es KZG, explorado en la sección \ref{sec:kzg}. Esto no es así en el caso de Plonky2, que usa FRI. 
 
-Notamos que en todas las variantes de Noirky2 la prueba es igual o más grande cuando se aplica un blinding, comparado con su respectiva variante. También notamos que esta diferencia tiende a igualarse a medida que aumenta la cantidad de operaciones. 
+Notamos que en todas las variantes de Noirky2 la prueba es igual o más grande cuando se aplica un blinding, comparado con su respectiva variante. También notamos que esta diferencia tiende a igualarse a medida que aumenta la cantidad de operaciones. Estos fenómenos así como lo mencionado en el párrafo anterior puede verse representado en la figura \ref{fig:tamanio-prueba-range-u8-ejemplo}, donde tomamos como ejemplo el caso del opcode \textbf{Range-u8}.
 
-Por otro lado, vemos que las variantes de Noirky2 operaciones de bits tienden a aumentara de tamaño cuando crece la cantidad de operaciones, mientras que la variante que usa Lookup Tables con blinding tiende a mantenerse constante. Lo que resulta extraño es que la variante de Lookup Tables sin blinding tiende a aumentar su tamaño a medida que aumenta la cantidad de operaciones producidas, mientras que la variante con blinding no lo hace. 
-
-\begin{figure}[htbp!]
-    \centering
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Assert Zero.png}
-        \caption{AssertZero}
-        \label{fig:tamanio-prueba-assert-zero}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Memoria (varía operaciones).png}
-        \caption{Memoria (op)}
-        \label{fig:tamanio-prueba-mem}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Memoria (varía tamaño de lista).png}
-        \caption{Memoria (tamaño)}
-        \label{fig:tamanio-prueba-mem-wide}
-    \end{minipage}
-    
-    \vspace{0.5cm} 
-    
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Range-u8.png}
-        \caption{Range u8}
-        \label{fig:tamanio-prueba-range-u8}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Range-u16.png}
-        \caption{Range u16}
-        \label{fig:tamanio-prueba-range-u16}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Range-u32.png}
-        \caption{Range u32}
-        \label{fig:tamanio-prueba-range-u32}
-    \end{minipage}
-    
-    \vspace{0.5cm}  
-    
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Xor-u8.png}
-        \caption{XOR u8}
-        \label{fig:tamanio-prueba-xor-u8}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Xor-u16.png}
-        \caption{XOR u16}
-        \label{fig:tamanio-prueba-xor-u16}
-    \end{minipage}%
-    \begin{minipage}[b]{0.33\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Xor-u32.png}
-        \caption{XOR u32}
-        \label{fig:tamanio-prueba-xor-u32}
-    \end{minipage}
-    
-    \caption{Tamaño de la prueba para todas las familias de programas de Noir}
-    \label{fig:tamanios-prueba}
-\end{figure}
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.6\textwidth]{imagenes/tamanios/tamanio-prove-Range-u8.png}
+\caption{Tamaño de prueba - Range-u8 - Todos los backends}
+\label{fig:tamanio-prueba-range-u8-ejemplo}
+\end{figure}%
 
 \subsection{Comparación entre artefactos y el CRS}
-Como última observación quiero hacer una comparación entre los tamaños de las pruebas generadas y el tamaño del CRS de KZG visto en la sección \ref{sec:costo_crs}. La idea central de este trabajo fue librarnos de tener que usar una herramienta que requiriera un CRS potencialmente muy pesado para generar pruebas. Es interesante ver en este contexto si esto efectivamente aporta algún valor. Por ejemplo, si el tamaño de las pruebas fuera mucho mayor a las del CRS necesario para un programa con un tamaño dado, usar FRI en lugar de KZG no presentaría una ventaja tan grande ya que el cuello de botella no estaría en el CRS requerido por KZG. 
+Para finalizar el análisis quiero hacer una comparación entre los tamaños de las pruebas generadas y el tamaño del CRS de KZG visto en la sección \ref{sec:costo_crs}. La idea central de este trabajo fue librarnos de tener que usar una herramienta que requiriera un CRS potencialmente muy pesado para generar pruebas. Es interesante ver en este contexto si esto efectivamente aporta algún valor. Por ejemplo, si el tamaño de las pruebas fuera mucho mayor a las del CRS necesario para un programa con un tamaño dado, usar FRI en lugar de KZG no presentaría una ventaja tan grande ya que el cuello de botella no estaría en el CRS requerido por KZG. 
 
 Para hacer este análisis vamos a comparar el tamaño del CRS necesario para procesar una traza de largo $N$ con el tamaño de los artefactos generados para esa misma traza (Prueba y Verification Key). Vamos a usar únicamente la familia de programas orientados a AssertZero para acotar este análisis. Recordemos de la sección \ref{sec:plonky2} que el ancho de la traza es de 135 y que Plonky2 empaqueta restricciones polinomiales del mismo tipo en una misma fila de la traza. Esto sumado a que una operación de AssertZero como las que usamos en el ejemplo ocupa 9 casillas de la traza (ya que son 3 términos matemáticos donde cada uno ocupa 3 casillas en la traza) nos permite saber un largo aproximado de la traza para una cantidad de operaciones dada. El resultado es 
 $$\frac{9\cdot N}{135} = \frac{N}{15} $$
@@ -642,22 +525,40 @@ Entonces por ejemplo, si realizamos 10000 operaciones de tipo AssertZero, Noirky
 
 \part{Conclusiones y trabajo futuro}
 
-Trabajo futuro
+\subsubsection{Conclusiones}
 
-*Hacer tests por la negativa para verificar que las restricciones están presentes. 
+Este trabajo trajo consigo muchos desafíos, tanto teóricos como de implementación, y es momento de hacer un pequeño resumen de las cosas aprendidas. 
 
-*Explicar mirando el código de barretenberg por qué es tanto más liviando barretenberg
+Respecto a la implementación en sí, se trató de construir una herramienta (Noirky2) que depende de otras dos (Plonky2 y Noir), lo cual fue especialmente complicado teniendo en cuenta que el repositorio de Noir estaba en una versión inestable y recibía muchos cambios todos los días (todavía lo hace). En cierto punto se decidió fijar una versión, pero para usar Noirky2 de forma productiva habría que actualizar la herramienta para que se adapte a la versión más nueva de Noir.
 
-*Explicar en detalle mirando la implementación por qué se dan los saltos en las operaciones de range de bits
+Respecto al uso de la herramienta en sí, pudimos ver que no hay una receta perfecta para la generación de pruebas de programas en Noir. El backend que tengamos que usar y su respectiva variante va a depender del tamaño del programa y del tipo de operaciones que predominen en él. Por ejemplo, para algunos programas muy chicos vimos que conviene usar Barretenberg, tanto temporal como espacialmente. Sin embargo, para programas más grandes, a menos que sea un programa con muchas operaciones de memoria, conviene usar Noirky2. El uso de Lookup Tables frente a operaciones de bits debe estar pautado por la cantidad de operaciones de tipo XOR o Range que haya en el programa, ya que el costo de inicializar esa tabla es muy alto. Por otro lado, si no es crítica la propiedad de \textbf{ZK} en la prueba, siempre conviene NO aplicar un blinding en Noirky2 en términos del tiempo de generación de la prueba.
 
-*Explorar por que en la variante con lookup tables sin blindings crece el tamaño de la prueba. 
+Por último, también vimos que el costo del CRS crece de manera mucho más acelerada que las pruebas de Plonky2. Esto hace que para programas relativamente chicos tenga sentido usar Barretenberg, ya que el CRS tendrá un tamaño pequeño. Sin embargo para programas que pasen cierto tamaño, el CRS se transforma en un cuello de botella para la memoria del dispositivo que genera las pruebas, y por ende puede ser limitante para ellos. 
 
-*Explorar en más de talle la forma en la que cada opcode va a ocupar la traza de plonky2 / hacer un análisis de la traza en sí misma
+\subsubsection{Trabajo futuro}
 
-Conclusiones 
-* trade-off tiempos de ejecusion-tamaño lookup tables
-* el crs sigue siendo mucho más grande que el resto de los artefactos, por lo tanto este sigue siendo un gran cuello de botella
-* Hablar de que el crs no tiene que viajar por red cada vez que se quiere demostrar algo
+Me gustaría finalizar dejando en claro las cosas que no se llegaron a estudiar y posibles continuaciones de este trabajo. 
+
+\begin{itemize}
+	\item Hacer tests por la negativa para verificar que las restricciones están presentes. Esto fue desarrollado en la sección \ref{sec:tests}.
+	\item Analizar en detalle el código de Barretenberg para explicar por qué son tanto más rápidas las operaciones de memoria. 
+	\item Analizar las implementaciones de las Custom Gates de Plonky2 y Barretenber para explicar los saltos discretos que se dan en las mediciones de tiempos del opcode \textbf{Range}.
+	\item Hacer un análisis más profundo de cómo crecen los tamaños de las pruebas en los casos donde esto tenga sentido.
+	\item Explorar en más de talle la forma en la que cada opcode ocupa la traza de Plonky2 para hacer un modelo teórico de la traza en sí misma que permita explicar mejor los tiempos de ejecución. 
+	\item Se podrían crear Custom Gates de Plonky2 para operaciones como las de memoria, o AssertZero, pensando en llenar la traza de la forma más eficiente posible. 
+	\item Hoy en día existen más backends de Noir hechos con otros provers. Estos backends no existían al momento de comenzar este trabajo. Se podría hacer un estudio de performance sobre los mismos, analizando ventajas y desventajas. 
+	
+	
+\end{itemize}
+
+
+
+
+
+
+
+
+
 
 \appendix
 \chapter{Gráficos de resultados de la experimentación}\label{sec:apendice_graficos}
@@ -863,6 +764,143 @@ Conclusiones
 	\caption{Mediciones de tiempos para el comando \textbf{verify} para todas las familias de programas de Noir}
 	\label{fig:verify_tiempos}
 \end{figure}
+
+
+\begin{figure}[htbp!]
+	\centering
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Assert Zero.png}
+		\caption{AssertZero}
+		\label{fig:tamanio-vk-assert-zero}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Memoria (varía operaciones).png}
+		\caption{Memoria (op)}
+		\label{fig:tamanio-vk-mem}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Memoria (varía tamaño de lista).png}
+		\caption{Memoria (tamaño)}
+		\label{fig:tamanio-vk-mem-wide}
+	\end{minipage}
+	
+	\vspace{0.5cm} 
+	
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Range-u8.png}
+		\caption{Range u8}
+		\label{fig:tamanio-vk-range-u8}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Range-u16.png}
+		\caption{Range u16}
+		\label{fig:tamanio-vk-range-u16}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Range-u32.png}
+		\caption{Range u32}
+		\label{fig:tamanio-vk-range-u32}
+	\end{minipage}
+	
+	\vspace{0.5cm}  
+	
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Xor-u8.png}
+		\caption{XOR u8}
+		\label{fig:tamanio-vk-xor-u8}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Xor-u16.png}
+		\caption{XOR u16}
+		\label{fig:tamanio-vk-xor-u16}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-write_vk-Xor-u32.png}
+		\caption{XOR u32}
+		\label{fig:tamanio-vk-xor-u32}
+	\end{minipage}
+	
+	\caption{Tamaño de la Verification Key para todas las familias de programas de Noir}
+	\label{fig:tamanios-vk}
+\end{figure}
+
+
+\begin{figure}[htbp!]
+	\centering
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Assert Zero.png}
+		\caption{AssertZero}
+		\label{fig:tamanio-prueba-assert-zero}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Memoria (varía operaciones).png}
+		\caption{Memoria (op)}
+		\label{fig:tamanio-prueba-mem}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Memoria (varía tamaño de lista).png}
+		\caption{Memoria (tamaño)}
+		\label{fig:tamanio-prueba-mem-wide}
+	\end{minipage}
+	
+	\vspace{0.5cm} 
+	
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Range-u8.png}
+		\caption{Range u8}
+		\label{fig:tamanio-prueba-range-u8}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Range-u16.png}
+		\caption{Range u16}
+		\label{fig:tamanio-prueba-range-u16}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Range-u32.png}
+		\caption{Range u32}
+		\label{fig:tamanio-prueba-range-u32}
+	\end{minipage}
+	
+	\vspace{0.5cm}  
+	
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Xor-u8.png}
+		\caption{XOR u8}
+		\label{fig:tamanio-prueba-xor-u8}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Xor-u16.png}
+		\caption{XOR u16}
+		\label{fig:tamanio-prueba-xor-u16}
+	\end{minipage}%
+	\begin{minipage}[b]{0.33\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{imagenes/tamanios/tamanio-prove-Xor-u32.png}
+		\caption{XOR u32}
+		\label{fig:tamanio-prueba-xor-u32}
+	\end{minipage}
+	
+	\caption{Tamaño de la prueba para todas las familias de programas de Noir}
+	\label{fig:tamanios-prueba}
+\end{figure}
+
 
 %%%% BIBLIOGRAFIA
 \newpage
