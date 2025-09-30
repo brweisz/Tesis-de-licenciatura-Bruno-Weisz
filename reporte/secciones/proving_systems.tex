@@ -644,7 +644,7 @@ Primero, notemos que si en lugar de tomar la evaluación de oráculos y polinomi
 
 El prover no podría haber falseado $a$, $b$, $c$ y $t$ para que la igualdad se mantenga solo en un punto, ya que no puede saber de antemano cuál es el punto $z$ en el que se van a evaluar. De esto se deduce que $a$, $b$ y $c$ tienen que ser validos y por ende el prover conoce una traza válida del programa.
 
-\subsection{\textcolor{red}{Protocolo para la matriz V}}
+\subsection{Protocolo para la matriz V}
 Para completar el protocolo tenemos que hablar sobre cómo demostramos la segunda propiedad de validez de la matriz $T$ respecto a un programa dado por $Q$ y $V$, es decir
 $$\forall i,j,k,l,~~~ V_{i,j} = V_{k,l} \implies T_{i,j} = T_{k,l}$$
 Para esto vamos a usar la idea de \textbf{permutación}. Una permutación es un ordenamiento de un conjunto, denotado con $\sigma$. Dado un conjunto $A = \{a_i\}_{0\leq i < n}$, definimos a un ordenamiento como una función biyectiva $\sigma: A \rightarrow A$. 
