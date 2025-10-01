@@ -1,12 +1,12 @@
 \chapter{Polynomial Commitment Schemes}
-En la sección \ref{sec:oraculos} definimos a los oráculos como un objeto matemático casi mágico. En la práctica, por supuesto, esto no es así, sino que son implementados a través de un protocolo interactivo entre el prover y el verifier. Muchas de las propiedades de los SNARKs se derivan directamente de las propiedades que proveen estos protocolos. La familia de protocolos para resolver el problema de los oráculos se conoce como \textbf{\textit{Polynomial Commitment Scheme}}. La idea general es la descrita anteriormente, pero ahora vamos a dar una idea un poco más bajo nivel.
+En la sección \ref{sec:oraculos} definimos a los oráculos como un objeto matemático casi mágico. En la práctica, por supuesto, esto no es así, sino que son implementados a través de un protocolo interactivo entre el prover y el verifier. Muchas de las propiedades de los SNARKs se derivan directamente de las propiedades que proveen estos protocolos, como los tamaños de las pruebas. La familia de protocolos para resolver el problema de los oráculos se conoce como \textbf{\textit{Polynomial Commitment Scheme}}. La idea general es la descrita anteriormente, pero ahora vamos a dar una idea un poco más bajo nivel.
 
 Un prover posee un polinomio privado y un verifier quiere conocer la evaluación de este polinomio en un punto. Los Polynomial Commitment Schemes son una herramienta que permite a un prover \textbf{comprometerse} a un polinomio, de manera tal que el verifier pueda hacer consultas sucesivas sobre sus valores en cualquier punto $z$ del dominio de la función asociada y obtener un resultado que puede estar convencido de que se corresponde con la evaluación de la función asociada a ese polinomio en $z$.
 
 La interfaz de estos protocolos está compuesta por 3 funciones:
 \begin{enumerate}
     \item $Commit(p) \rightarrow [p]$ : Acción que realiza el prover cuando se compromete a un polinomio $p$ frente a un verifier. En general esta acción consiste en pasar algún elemento matemático $[p]$ al verifier, al cual llamaremos \textbf{commit} de $p$.
-    \item $Open(p, x) \rightarrow y,\pi$: Acción que realiza el prover cuando el verifier le envía un valor $x$ en el dominio. El prover calcula $y = p(x)$ y se lo entrega al verifier, junto con una prueba $\pi$ de correctitud.
+    \item $Open(p, x) \rightarrow y,\pi$: Acción que realiza el prover cuando el verifier le envía un valor $x$ en el dominio. El prover calcula $y = p(x)$ y se lo entrega al verifier, junto con una prueba $\pi$ de que la evaluación es correcta en $p$.
     \item $Verify([p], x, y, \pi) \rightarrow \{true, false\}$: Acción que realiza el verifier para verificar que efectivamente $p(x) = y$. Para llevarla a cabo, debe hacer uso del commit $[p]$ obtenido previamente y la prueba para la pareja $x, y$ en particular.
 \end{enumerate}
 
@@ -23,7 +23,7 @@ Es muy importante que nadie conozca el valor de $\tau$ ya que de lo contrario ha
     \item Se puede genera una ceremonia entre varios agentes con protocolos de Multi Party Computation (MPC) para crear dicha lista sin que ninguno de ellos posea el valor de $\tau$. Esta es la opción que más suele usarse, aunque requiere la participación varios agentes, de los cuales por lo menos uno tiene que ser honesto. 
 \end{itemize}
 
-Es importante notar que el valor de $\tau$ no puede deducirse a partir del CRS: aunque contemos con el valor de $\tau G$, es computacionalmente dificil extraer $\tau$ por el problema del logaritmo discreto introducido en la sección \ref{sec:ecdlp}.
+Es importante notar que el valor de $\tau$ no puede deducirse a partir del CRS: aunque contemos con el valor de $\tau G$, es computacionalmente dificil extraer $\tau$ por el problema del logaritmo discreto para curvas elípticas introducido en la sección \ref{sec:ecdlp}.
 
 Veamos una intuición de lo que viene a continuación. Supongamos que tenemos un polinomio $p \in \Fp[X]$ de grado a lo sumo $n-1$ y un valor $\tau \in \Fp$ desconocido, como mencionamos anteriormente. Primero, observamos que 
 $$p(x) = c_0 + c_1\cdot x + c_2 \cdot x^2 + \cdots + c_{n-1} \cdot x^{n-1}$$
@@ -50,13 +50,13 @@ Veamos ahora cómo se implementa cada una de las funciones de la interfaz del pr
     $$e((p(\tau)-y)\cdot G, G) = e(q(\tau)\cdot G, (\tau - k)\cdot G)$$ para convencerse de que la evaluación es correcta.
 \end{enumerate}
 
-Descompongamos algunos de los pasos anteriores. El paso 2.b) crea un nuevo polinomio $q$ de una forma muy particular. Sea $y = p(k)$, pensemos en el polinomio $p(x) - y$. Este polinomio tiene una raíz en $k$, ya que si $p(k) = y$ entonces $p(k) - y = 0$, entonces $(x-k) | p(x) - y$. Esto solo ocurre si $y = p(k)$; si esto no fuera así, el prover no podría crear el polinomio $q$. El grado de $q$ es uno menos que el grado de $p$, por lo tanto, podemos usar el truco mencionado con el CRS para calcular $q(\tau)$ en el paso 2.c).
+Descompongamos algunos de los pasos anteriores. El paso 2.b) crea un nuevo polinomio $q$ de una forma muy particular. Sea $y = p(k)$, pensemos en el polinomio $p(x) - y$. Este polinomio tiene una raíz en $k$, ya que si $p(k) = y$ entonces $p(k) - y = 0$, entonces $(x-k) | (p(x) - y)$. Esto solo ocurre si $y = p(k)$; si esto no fuera así, el prover no podría crear el polinomio $q$. El grado de $q$ es uno menos que el grado de $p$, por lo tanto, podemos usar el truco mencionado con el CRS para calcular $q(\tau)$ en el paso 2.c).
 
 Por último, veamos por qué la igualdad del paso $3.$ nos garantiza que la evaluación es correcta. Notemos que todos los valores involucrados en la verificación son accesibles para el verifier:
 \begin{itemize}
     \item $(p(\tau)-y)\cdot G = p(\tau)\cdot G-y\cdot G$, que son dos puntos que fueron dados por el prover en el paso 1. y que puede ser calculado respectivamente.
     \item $q(\tau)\cdot G$ fue dado al verifier en el paso 2.c)
-    \item $(\tau - k)\cdot G = \tau \cdot G - k\cdot G$, que son dos puntos que están en el CRS y que puede ser calculado respectivamente. 
+    \item $(\tau - k)\cdot G = \tau \cdot G - k\cdot G$ son dos puntos que están en el CRS y que puede ser calculados respectivamente. 
 \end{itemize}
 
 Para entender esta verificación es importante recordar la propiedad de bilinealidad que posee el pairing $e$. Esto quiere decir que $e(a\cdot P, b \cdot Q) = e(P,Q)^{ab}$. Con esto en mente, desarrollemos un poco la igualdad:

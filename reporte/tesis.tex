@@ -902,6 +902,50 @@ Me gustaría finalizar dejando en claro las cosas que no se llegaron a estudiar 
 	\label{fig:tamanios-prueba}
 \end{figure}
 
+\chapter{Protocolo para la matriz V}\label{sec:apendice_matriz_v}
+
+Para completar el protocolo tenemos que hablar sobre cómo demostramos la segunda propiedad de validez de la matriz $T$ respecto a un programa dado por $Q$ y $V$, es decir
+$$\forall i,j,k,l,~~~ V_{i,j} = V_{k,l} \implies T_{i,j} = T_{k,l}$$
+Para esto vamos a usar la idea de \textbf{permutación}. Una permutación es un ordenamiento de un conjunto, denotado con $\sigma$. Dado un conjunto $A = \{a_i\}_{0\leq i < n}$, definimos a un ordenamiento como una función biyectiva $\sigma: A \rightarrow A$. 
+
+En nuestro caso particular, queremos una permutación sobre el conjunto de posiciones de la traza $T$, es decir, los pares 
+$$I = \{(i,j) ~|~ 0 \leq i < N ~ \land ~ 0 \leq j < 3\}$$
+Llamamos $T_{i,j}$ al valor de la matriz $T$ en la posición $(i,j)$, y lo mismo para la matriz $V$. De la matriz $V$ podemos obtener una permutación $\sigma$ donde $\sigma((i,j))$ es igual al par de índices de la \textbf{siguiente} ocurrencia del valor $V_{i,j}$. Si en la posición $(i,j)$ está la última ocurrencia de $V_{i,j}$ en $V$, $\sigma((i,j))$ es igual al par de índices de la primera aparición de $V_{i,j}$.
+
+Veamos un ejemplo. La tabla $V$ de la figura \ref{tab:matriz_v} induce una permutación tal que 
+\begin{itemize}
+	\item $\textcolor{black}{\sigma((0,0)) = (0,0)}$ 
+	\item$\textcolor{black}{\sigma((0,1)) = (1,1), ~\sigma((1,1)) = (0,1)}$
+	\item$\sigma((0,2)) = (1,0), ~\sigma((1,0)) = (0,2)$
+	\item$\textcolor{black}{\sigma((1,2)) = (2,0), ~\sigma((2,0)) = (1,2)}$
+	\item$\textcolor{black}{\sigma((2,2)) = (2,2)}$    
+\end{itemize}
+En otras palabras, vemos que una permutación forma \textbf{ciclos} dentro de un conjunto. 
+
+La restricción que establecida por la matriz $V$ es equivalente a decir que 
+$$T_{i,j} = T_{\sigma((i,j))} ~~~ \forall (i,j)\in I$$
+y esto a su vez equivale a decir que los conjuntos 
+$$A = \{((i,j), T_{i,j}) ~ | ~ (i,j)\in I\}$$
+$$B = \{(\sigma((i,j)), T_{i,j}) ~ | ~ (i,j)\in I\}$$
+son iguales. En otras palabras, $T_{i,j} = T_{\sigma((i,j))} \Leftrightarrow A = B$. La demostración de esto es por absurdo en ambas direcciones. La pregunta entonces es ¿cómo podemos reducir la verificación $A=B$ a ecuaciones polinomiales?
+
+\subsubsection{\textbf{Igualdad de conjuntos}}
+Si quisiéramos demostrar que dos conjuntos arbitrarios $A = \{a_i\}_{0\leq i<k}$ y $B = \{b_i\}_{0\leq i<k}$ son iguales, podemos multiplicar todos sus elementos y ver si el producto de cada conjunto es el mismo. Sin embargo, vemos como esto se rompe para los conjuntos $\{3,4\}$ y $\{2,6\}$, donde el producto de los elementos de ambos es $12$ y sin embargo no son iguales. Pero esto no ocurriría si se tratara de conjuntos de polinomios irreducibles, debido a su factorización única.
+
+Entonces tomemos ahora los conjuntos $A' = \{x+a_i\}_{0\leq i<k} \subset \Fp[x]$ y $B' = \{x+b_i\}_{0\leq i<k} \subset \Fp[x]$ construidos a partir de $A$ y $B$ respectivamente. En el ejemplo anterior, pasaríamos a tener los conjuntos de polinomios $\{x+3,x+4\}$ y $\{x+2,x+6\}$ y los productos ya serían distintos. Con esta construcción, $A=B \Leftrightarrow A'= B'$.
+
+El truco consiste en usar el lema de Schwartz-Zippel trabajado en la sección \ref{sec:zippel}. Tomamos un $\gamma$ aleatorio (en el contexto de un protocolo, sería un challenge por parte del verifier que el prover no puede conocer de antemano) y computamos el producto de los polinomios de $A'$ y $B'$ evaluados en $\gamma$. Formalmente
+$$\prod_{0 \leq i < k}(\gamma + a_i) = \prod_{0 \leq i < k}(\gamma + b_i) \Leftrightarrow A = B$$
+con probabilidad altísima. Ahora, ¿cómo pasamos de esto a ecuaciones polinomiales? 
+
+Sea $H = \{1, \omega, \omega^2, \cdots, \omega^{k-1}\}$ donde $\omega$ es una raíz de orden $k$, y sean $f$ y $g$ los polinomios que interpolan en el dominio $H$ a los valores $(a_0+\gamma, \cdots, a_{k-1} + \gamma)$ y $(b_0+\gamma, \cdots, b_{k-1} + \gamma)$ respectivamente. Decimos que $\prod_{0 \leq i < k}(\gamma + a_i) = \prod_{0 \leq i < k}(\gamma + b_i)$ si solo si existe un polinomio $Z$ tal que 
+$$Z(\omega^0) = 1 ~~~ \land ~~~ Z(h)f(h) = g(h)Z(\omega h) ~~ \forall h \in H$$
+
+Si tomamos a $Z$ como el polinomio que interpola en el dominio $H$ a los valores
+$$(1, \frac{a_0 + \gamma}{b_0 + \gamma}, \frac{(a_0 + \gamma)(a_1 + \gamma)}{(b_0 + \gamma)(b_1 + \gamma)}, \cdots, \prod_{0\leq i < k-1}\frac{a_i+\gamma}{b_i+\gamma})$$
+la propiedad se cumple en ambas direcciones.  
+
+
 
 %%%% BIBLIOGRAFIA
 \newpage
