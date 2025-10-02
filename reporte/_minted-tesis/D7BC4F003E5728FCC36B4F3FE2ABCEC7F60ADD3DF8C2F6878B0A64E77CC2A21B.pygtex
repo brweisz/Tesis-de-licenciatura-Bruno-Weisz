@@ -1,0 +1,35 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{fn} \PYG{n+nf}{main}\PYG{p}{()}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{c+c1}{// Configuración que va a tener el circuito}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n}{config}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{CircuitConfig}::\PYG{n}{standard\PYGZus{}recursion\PYGZus{}config}\PYG{p}{();}
+
+\PYG{+w}{    }\PYG{c+c1}{// Circuit Builder, la herramienta para construir circuitos}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{k}{mut}\PYG{+w}{ }\PYG{n}{builder}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{CircuitBuilder}::\PYG{n}{new}\PYG{p}{(}\PYG{n}{config}\PYG{p}{);}
+
+\PYG{+w}{    }\PYG{c+c1}{// Crear una variable y registrarla como input público.}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n}{x}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{builder}\PYG{p}{.}\PYG{n}{add\PYGZus{}virtual\PYGZus{}target}\PYG{p}{();}
+\PYG{+w}{    }\PYG{n}{builder}\PYG{p}{.}\PYG{n}{register\PYGZus{}public\PYGZus{}input}\PYG{p}{(}\PYG{n}{x}\PYG{p}{);}
+
+\PYG{+w}{    }\PYG{c+c1}{// Operaciones del circuito}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n}{a}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{builder}\PYG{p}{.}\PYG{n}{mul}\PYG{p}{(}\PYG{n}{x}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{);}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n}{b}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{builder}\PYG{p}{.}\PYG{n}{mul\PYGZus{}const}\PYG{p}{(}\PYG{n}{F}::\PYG{n}{from\PYGZus{}canonical\PYGZus{}u32}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{x}\PYG{p}{);}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n}{c}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{builder}\PYG{p}{.}\PYG{n}{add}\PYG{p}{(}\PYG{n}{a}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{);}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n}{d}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{builder}\PYG{p}{.}\PYG{n}{add\PYGZus{}const}\PYG{p}{(}\PYG{n}{c}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{F}::\PYG{n}{from\PYGZus{}canonical\PYGZus{}u32}\PYG{p}{(}\PYG{l+m+mi}{7}\PYG{p}{));}
+
+\PYG{+w}{    }\PYG{c+c1}{// Registrar al output como un public input, igual que en PLONK}
+\PYG{+w}{    }\PYG{n}{builder}\PYG{p}{.}\PYG{n}{register\PYGZus{}public\PYGZus{}input}\PYG{p}{(}\PYG{n}{d}\PYG{p}{);}
+
+\PYG{+w}{    }\PYG{c+c1}{// Construir el circuito a partir de las operaciones propuestas}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n}{circuit\PYGZus{}data}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{builder}\PYG{p}{.}\PYG{n}{build}\PYG{p}{();}
+
+\PYG{+w}{    }\PYG{c+c1}{// Crear un PartialWitness con los valores que no tienen dependencias}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{k}{mut}\PYG{+w}{ }\PYG{n}{patial\PYGZus{}witness}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{PartialWitness}::\PYG{n}{new}\PYG{p}{();}
+\PYG{+w}{    }\PYG{n}{patial\PYGZus{}witness}\PYG{p}{.}\PYG{n}{set\PYGZus{}target}\PYG{p}{(}\PYG{n}{x}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{F}::\PYG{n}{from\PYGZus{}canonical\PYGZus{}u32}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{));}
+
+\PYG{+w}{    }\PYG{c+c1}{// Crear la prueba}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{n}{proof}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{circuit\PYGZus{}data}\PYG{p}{.}\PYG{n}{prove}\PYG{p}{(}\PYG{n}{patial\PYGZus{}witness}\PYG{p}{)}\PYG{o}{?}\PYG{p}{;}
+
+\PYG{+w}{    }\PYG{c+c1}{// Verificar la prueba}
+\PYG{+w}{    }\PYG{n}{circuit\PYGZus{}data}\PYG{p}{.}\PYG{n}{verify}\PYG{p}{(}\PYG{n}{proof}\PYG{p}{)}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

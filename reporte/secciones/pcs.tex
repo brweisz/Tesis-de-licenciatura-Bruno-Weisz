@@ -117,13 +117,13 @@ $2^{30}$ & 95 GB \\
 \end{center}
 \end{table}
 
-\section{Merkle Trees}
-Los \textbf{Merkle Trees}~\cite{merkle1989certified} son estructuras de datos ampliamente utilizadas en protocolos criptográficos. Funcionan como huellas digitales de ciertas estructuras de datos ordenadas. Además, así como KZG nos da un protocolo para comprometernos a un polinomio y abrirlo en cualquier punto del dominio, los Merkle Trees son una primitiva que resultará útil para para comprometernos a listas.
+\section{Merkle Trees}\label{sec:merkle_tree}
+Los \textbf{Merkle Trees}~\cite{merkle1989certified} son estructuras de datos ampliamente utilizadas en protocolos criptográficos. Funcionan como huellas digitales de ciertas estructuras de datos ordenadas. Además, así como KZG nos da un protocolo para comprometernos a un polinomio y abrirlo en cualquier punto del dominio, los Merkle Trees son una primitiva que resultará útil para para comprometernos a \textbf{listas}.
 
 Esta estructura de datos tiene la forma de un árbol binario perfectamente balanceado y se construye a partir de una lista. Por simplicidad, vamos a asumir que esta lista tiene un tamaño $N=2^n$. Sea entonces $A = [a_1, \cdots a_N]$ una lista de elementos de algún tipo $a_i \in S$, $h: S \rightarrow S$ una función de hash y $||: S \times S \rightarrow S$ alguna función de concatenación, vamos a definir la estructura de datos de la siguiente manera:
 
 \begin{itemize}
-    \item Las \textbf{hojas} del árbol serán los hashes de los elementos ordenados de $A$, es decir, $$[h(a_1), \cdots, h(a_n)]$$
+    \item Las \textbf{hojas} del árbol serán los hashes de los elementos ordenados de $A$, es decir, $$[h(a_1), \cdots, h(a_N)]$$
     \item Los \textbf{niveles intermedios} (nivel $n-1$ al nivel $2$), donde 
     cada nodo será el hash de la concatenación de sus hijos. Por ejemplo, para el nivel $n-1$, los nodos serán $$[h(h(a_1)|| h(a_2)), \cdots, h(h(a_{N-1})||h(a_{N}))]$$
     \item Siguiendo la definición recursiva, la \textbf{raíz} del merkle tree será una huella digital de la lista. 
@@ -174,7 +174,7 @@ Supongamos que un prover tiene una lista secreta $A$ de tamaño $N=n^2$ y necesi
         \item Teniendo $h(h(a_1)||h(a_2))$ que fue provisto por el prover, puede calcular \\ $h(h(h(a_1),h(a_2))||h(h(a_3),h(a_4)))$, habiendo llegado de esta manera hasta la raíz. Llamemos al valor obtenido de la raíz $[A]'$.
         \item Finalmente, verifica que $[A] = [A]'$ para convencerse de que efectivamente $a_3$ es el elemento en el índice $3$ de $A$.
     \end{enumerate}
-    Notemos que la cantidad de pasos a realizar de forma recursiva es del orden de $n$, es decir, logarítmica respecto al tamaño de la lista o lineal respecto a la altura del árbol. Los valores provistos por el prover pueden verse en la figura \ref{fig:merkle_path}. En rojo están los valores provistos por el prover y en verde los valores calculados por el verifier (la raíz de el árbol entra en ambas categorías).
+    Notemos que la cantidad de pasos a realizar de forma recursiva es del orden de $n$, es decir, logarítmica respecto al tamaño de la lista o lineal respecto a la altura del árbol. Una representación del proceso de verificación puede verse en la figura \ref{fig:merkle_path}. En rojo están los valores provistos por el prover y en verde los valores calculados por el verifier (la raíz de el árbol entra en ambas categorías).
 \end{enumerate}
 
 \begin{figure}
@@ -203,8 +203,8 @@ Supongamos que un prover tiene una lista secreta $A$ de tamaño $N=n^2$ y necesi
 \label{fig:merkle_path}
 \end{figure}
 
-\section{\textcolor{red}{FRI}}
-Otro protocolo que implementa oráculos de polinomios es FRI. Este protocolo no necesita un CRS para funcionar, sin embargo las pruebas que genera ocupan más espacio de almacenamiento que las de KZG para alcanzar el mismo nivel de seguridad. FRI también es un protocolo interactivo, con muchas más interacciones que KZG y que se apoya en los commitments de listas de los Merkle Trees. 
+\section{FRI}
+Otro protocolo que implementa oráculos de polinomios es FRI. Este protocolo no necesita un CRS para funcionar, sin embargo las pruebas que genera ocupan más espacio de almacenamiento que las de KZG para alcanzar el mismo nivel de seguridad. FRI también es un protocolo interactivo, con muchas más interacciones que KZG y que se apoya en los commitments de listas de los Merkle Trees vistos en la sección \ref{sec:merkle_tree}. 
 
 Concretamente, FRI es una Low Degree Proof: un protocolo que sirve para demostrar que el prover conoce un polinomio de grado \textbf{menor estricto a} un cierto $N = 2^n$. El polinomial commitment scheme se apoya en este protocolo para dar garantías de Soundness. 
 
@@ -216,8 +216,8 @@ donde $\omega$ es una raíz $N$-ésima de $p$ (es decir que $\omega ^N = 1$). El
     \item $Commit(p) \rightarrow [p]$: Lo primero que va a hacer el prover es inicializar un Merkle Tree con hojas $$[p(1), p(\omega),p(\omega^2),\cdots, p(\omega^{N-1})]$$
     De esta manera va a obtener un Merkle Hash de su raíz $[p]$, es decir, un Merkle Hash de las evaluaciones de $p$ en el dominio $D$. A continuación va a darle $[p]$ al verifier. 
 
-    Lo que el prover está afirmando implícitamente es que ''$[p]$ es el Merkle Root de la lista de $N$ evaluaciones del polinomio $p$ en el dominio $D$'', sin embargo, desde el punto de vista del verifier esto podría no ser cierto. Vamos a ver cómo lidiamos con esto más adelante.
+    Lo que el prover está afirmando implícitamente es que “$[p]$ es el Merkle Root de la lista de $N$ evaluaciones del polinomio $p$ en el dominio $D$'', sin embargo, desde el punto de vista del verifier esto podría no ser cierto. Vamos a ver cómo lidiamos con esto más adelante.
 
-    \item $Open(p, z) \rightarrow p(z)$: El verifier quiere la evaluación de $p$ en un valor $z \in \Fp$, por lo tanto va a darle al prover ese valor. El prover va a retornar $p(z)$ al verifier. 
+    \item $Open(p, z) \rightarrow p(z)$: El verifier quiere la evaluación de $p$ en un valor $z \in \Fp$, por lo tanto va a darle al prover ese valor. El prover va a retornar $p(z)$ al verifier . 
 \end{enumerate}
 

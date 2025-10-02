@@ -1,0 +1,97 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\citation{Aztec}
+\@writefile{toc}{\contentsline {chapter}{\numberline {7.}Noirky2}{56}{chapter.7}\protected@file@percent }
+\@writefile{lof}{\addvspace {10pt}}
+\@writefile{lot}{\addvspace {10pt}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.1}{\ignorespaces Flujo de compilación de Noir hacia distintos backends\relax }}{56}{figure.caption.48}\protected@file@percent }
+\newlabel{fig:esquema_noirky2}{{7.1}{56}{Flujo de compilación de Noir hacia distintos backends\relax }{figure.caption.48}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.1}Cuerpo finito utilizado}{56}{section.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7.2}Tiempos de ejecución}{57}{section.7.2}\protected@file@percent }
+\newlabel{sec:tiempos_de_ejecución}{{7.2}{57}{Tiempos de ejecución}{section.7.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.3}Traducción de ACIR a Plonky2}{58}{section.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3.1}Traducción de AssertZero}{59}{subsection.7.3.1}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Traducción del opcode AssertZero\relax }}{60}{algorithm.2}\protected@file@percent }
+\newlabel{alg:traduccion_assert_zero}{{2}{60}{Traducción del opcode AssertZero\relax }{algorithm.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7.2}{\ignorespaces ACIR para el programa de ejemplo\relax }}{61}{figure.caption.49}\protected@file@percent }
+\newlabel{fig:ACIR_ejemplo_traduccion_assert_zero}{{7.2}{61}{ACIR para el programa de ejemplo\relax }{figure.caption.49}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3.2}Traducción de operaciones de memoria}{61}{subsection.7.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7.3}{\ignorespaces Vistas del Assert Zero\relax }}{62}{figure.caption.50}\protected@file@percent }
+\newlabel{fig:assert_zero_plonky2}{{7.3}{62}{Vistas del Assert Zero\relax }{figure.caption.50}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\textbf  {Asignación condicional en Plonky2}}{63}{section*.51}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\textbf  {Lectura de memoria}}{65}{section*.54}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces Traducción del opcode \texttt  {MemRead}\relax }}{65}{algorithm.3}\protected@file@percent }
+\newlabel{alg:traduccion_mem_read}{{3}{65}{Traducción del opcode \texttt {MemRead}\relax }{algorithm.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\textbf  {Escritura de memoria}}{66}{section*.55}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7.4}{\ignorespaces Actualización de un bloque de memoria\relax }}{66}{figure.caption.56}\protected@file@percent }
+\newlabel{fig:memory_write}{{7.4}{66}{Actualización de un bloque de memoria\relax }{figure.caption.56}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces Traducción del opcode \texttt  {MemWrite}\relax }}{67}{algorithm.4}\protected@file@percent }
+\newlabel{alg:traduccion_mem_write}{{4}{67}{Traducción del opcode \texttt {MemWrite}\relax }{algorithm.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3.3}Traducción de Range-Check}{67}{subsection.7.3.3}\protected@file@percent }
+\newlabel{sec:traduccion_range}{{7.3.3}{67}{Traducción de Range-Check}{subsection.7.3.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\textbf  {Range-Check con descomposición en bits}}{67}{section*.57}\protected@file@percent }
+\newlabel{sec:range_check}{{7.3.3}{67}{\textbf {Range-Check con descomposición en bits}}{section*.57}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7.1}{\ignorespaces Lookup table para un range-check de 8 bits\relax }}{68}{table.caption.59}\protected@file@percent }
+\newlabel{tab:tabla_lookup_u8}{{7.1}{68}{Lookup table para un range-check de 8 bits\relax }{table.caption.59}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\textbf  {Range-Check con lookup tables}}{68}{section*.58}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\textbf  {Range-Check con descomposición en limbs y lookup tables}}{69}{section*.60}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {5}{\ignorespaces Descomposición en N limbs de 8 bits\relax }}{70}{algorithm.5}\protected@file@percent }
+\newlabel{alg:descomposicion_limbs}{{5}{70}{Descomposición en N limbs de 8 bits\relax }{algorithm.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3.4}Traducción de XOR y AND}{70}{subsection.7.3.4}\protected@file@percent }
+\newlabel{sec:traduccion_xor}{{7.3.4}{70}{Traducción de XOR y AND}{subsection.7.3.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7.2}{\ignorespaces Tabla de verdad para $a \oplus b =c$ respecto a la fórmula $(a-b)^2-c$\relax }}{71}{table.caption.62}\protected@file@percent }
+\newlabel{tab:verdad_xor}{{7.2}{71}{Tabla de verdad para $a \oplus b =c$ respecto a la fórmula $(a-b)^2-c$\relax }{table.caption.62}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\textbf  {XOR con descomposición en bits}}{71}{section*.61}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7.3}{\ignorespaces Tabla de XOR para inputs de 8 bits\relax }}{72}{table.caption.64}\protected@file@percent }
+\newlabel{tab:calculo_xor}{{7.3}{72}{Tabla de XOR para inputs de 8 bits\relax }{table.caption.64}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\textbf  {XOR con descomposición en limbs y lookup tables}}{72}{section*.63}\protected@file@percent }
+\@setckpt{secciones/noirky2}{
+\setcounter{page}{74}
+\setcounter{equation}{0}
+\setcounter{enumi}{2}
+\setcounter{enumii}{4}
+\setcounter{enumiii}{0}
+\setcounter{enumiv}{0}
+\setcounter{footnote}{1}
+\setcounter{mpfootnote}{0}
+\setcounter{part}{2}
+\setcounter{chapter}{7}
+\setcounter{section}{3}
+\setcounter{subsection}{4}
+\setcounter{subsubsection}{0}
+\setcounter{paragraph}{0}
+\setcounter{subparagraph}{0}
+\setcounter{figure}{4}
+\setcounter{table}{3}
+\setcounter{FancyVerbLine}{33}
+\setcounter{linenumber}{1}
+\setcounter{LN@truepage}{77}
+\setcounter{FV@TrueTabGroupLevel}{0}
+\setcounter{FV@TrueTabCounter}{0}
+\setcounter{FV@HighlightLinesStart}{0}
+\setcounter{FV@HighlightLinesStop}{0}
+\setcounter{FancyVerbLineBreakLast}{0}
+\setcounter{float@type}{16}
+\setcounter{minted@FancyVerbLineTemp}{0}
+\setcounter{minted@pygmentizecounter}{1}
+\setcounter{listing}{1}
+\setcounter{parentequation}{0}
+\setcounter{@todonotes@numberoftodonotes}{0}
+\setcounter{Item}{88}
+\setcounter{Hfootnote}{1}
+\setcounter{bookmark@seq@number}{49}
+\setcounter{algorithm}{5}
+\setcounter{ALG@line}{9}
+\setcounter{ALG@rem}{0}
+\setcounter{ALG@nested}{0}
+\setcounter{ALG@Lnr}{2}
+\setcounter{ALG@blocknr}{10}
+\setcounter{ALG@storecount}{0}
+\setcounter{ALG@tmpcounter}{0}
+\setcounter{caption@flags}{0}
+\setcounter{continuedfloat}{0}
+\setcounter{subfigure}{0}
+\setcounter{subtable}{0}
+\setcounter{prop}{2}
+\setcounter{section@level}{3}
+}

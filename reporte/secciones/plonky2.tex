@@ -5,9 +5,9 @@ Esto quiere decir que todas las operaciones que ocurran sobre elementos nativos 
 
 \vspace{1em}
 
-Plonky2 está implementado como una biblioteca de Rust~\cite{Rust}. A diferencia de Barretenberg, Plonky2 no fue creado con el propósito ni la funcionalidad de interpretar código ACIR. A pesar de esto, Plonky2 posee una API para creación de programas genéricos demostrables, que de ahora en adelante llamaremos \textbf{circuitos}. El nombre ''circuito'' se debe a la estructura con la que nos invita a pensar la API este tipo de programas. 
+Plonky2 está implementado como una biblioteca de Rust~\cite{Rust}. A diferencia de Barretenberg, Plonky2 no fue creado con el propósito ni la funcionalidad de interpretar código ACIR. A pesar de esto, Plonky2 posee una API para creación de programas genéricos, que de ahora en adelante llamaremos \textbf{circuitos}. El nombre “circuito'' se debe a la estructura con la que nos invita a pensar la API este tipo de programas. 
 
-La API nos provee herramientas para construir programas: crear variables, declararlas como inputs, combinarlas en operaciones binarias para tener operaciones de suma, resta, multiplicación, generar condicionales, etc. La comprensión y el uso de esta API es central en el trabajo realizado así que voy a hacer un resumen que resulte suficiente para describir las acciones tomadas a través de un ejemplo de cómo se ve un circuito de Plonky2. El ejemplo puede verse en el programa \ref{lst:ejemplo_plonky2}:
+La API nos provee herramientas para construir programas: crear variables, declararlas como inputs, combinarlas en operaciones binarias para tener operaciones de suma, resta, multiplicación, generar condicionales, etc. La comprensión y el uso de esta API es central en el trabajo realizado, por lo tanto voy a hacer un resumen que resulte suficiente para describir las acciones tomadas a través de un ejemplo de cómo se ve un circuito de Plonky2. El ejemplo puede verse en el programa \ref{lst:ejemplo_plonky2}:
 
 \begin{listing}
 \caption{Ejemplo de armado de un circuito simple en Plonky2}
@@ -49,22 +49,30 @@ fn main() {
 \end{minted}
 \end{listing}
 
-Veamos el código poco a poco, hay mucha información para desarmar. Se comienza definiendo una \textbf{configuración} para el circuito. En este caso estamos tomando una configuración default \texttt{standard\_recursion\_config}. La configuración define varios atributos del circuito a construir, algunos ejemplos son: 
+Veamos el código poco a poco. Se comienza definiendo una \textbf{configuración} para el circuito. En este caso estamos tomando una configuración default \texttt{standard\_recursion\_config}. La configuración define varios atributos del circuito a construir, algunos ejemplos son: 
 \begin{itemize}
     \item Ancho de la traza: 135 columnas
     \item Cuántas columnas forman parte del argumento de permutación: 80 
     \item Constantes habilitadas por cada gate: 2
     \item Configuración de FRI 
 \end{itemize}
-Con esta configuración vamos a crear un \texttt{CircuitBuilder}, un objeto que encapsula toda la creación del circuito. Las ''variables'' del circuito van a ser los \textbf{targets}. Podemos crear un target con el método \texttt{builder.add\_virtual\_target()} y registrarlo como input con el método \texttt{builder.register\_public\_input(x)}. En nuestro ejemplo, el programa tiene 2 public inputs: el que sería el \textbf{input} en un programa tradicional y el que sería su \textbf{output}. Desde el punto de vista del protocolo, esto se debe a que el prover va a querer demostrar la ejecución de ese programa para un input público pero también va a querer que el verifier corrobore que el resultado es el esperado. 
+Con esta configuración vamos a crear un \texttt{CircuitBuilder}, un objeto que encapsula toda la creación del circuito. Las “variables'' del circuito van a ser los \textbf{targets}. Podemos crear un target con el método \texttt{builder.add\_virtual\_target()} y registrarlo como input con el método \texttt{builder.register\_public\_input(x)}. En nuestro ejemplo, el programa tiene 2 public inputs: el que sería el \textbf{input} en un programa tradicional y el que sería su \textbf{output}. Desde el punto de vista del protocolo, esto se debe a que el prover va a querer demostrar la ejecución de ese programa para un input público pero también va a querer que el verifier corrobore que el resultado es el esperado, por lo tanto el output del programa es considerado un “input público'' por Plonky2. 
 
-Como vemos, cada operación crea un nuevo target, y esto se debe a que los targets son inmutables. Podemos pensarlos como los cables en un circuito como el de la figura \ref{fig:circuito_plonk}. Al mismo tiempo, esta metáfora no es del todo correct ya que los targets pueden aparecer más de una vez en el circuito, entonces quizás simplemente es más sencillo pensarlo como variables en un sistema de ecuaciones. De esta manera, cuando vemos una operación como \texttt{let c = builder.add(a, b)}, podemos pensar que se agrega una restricción al sistema de ecuaciones de la forma $a+b-c=0$. La API dispone de muchas operaciones que iremos encontrando a medida que las usemos para nuestros propósitos. 
+Como vemos, cada operación crea un nuevo target, y esto se debe a que los targets son inmutables. Podemos pensarlos como los cables en un circuito como el de la figura \ref{fig:circuito_plonk}. Al mismo tiempo, esta metáfora no es del todo correcta ya que los targets pueden aparecer más de una vez en el circuito, entonces quizás simplemente es más sencillo pensarlo como variables en un sistema de ecuaciones. De esta manera, cuando vemos una operación como \texttt{let c = builder.add(a, b)}, podemos pensar que se agrega una restricción al sistema de ecuaciones de la forma $a+b-c=0$. La API dispone de muchas operaciones que iremos encontrando a medida que las usemos para nuestros propósitos. 
 
 Una vez que la forma del circuito es la que deseamos, tenemos que construir el circuito propiamente dicho con \texttt{let circuit\_data = builder.build()}. El objeto de tipo \texttt{CircuitData} que obtendremos estará compuesto por la \textbf{proving key} y la \textbf{verifying key}, que contienen toda la información necesaria para generar y verificar la prueba respectivamente. 
 
 El siguiente elemento importante en este flujo es el \texttt{PartialWitness}, un objeto que servirá para proveer valores concretos a ciertos targets para generar la prueba $\pi_{plonky2}$. En esencia, es un diccionario potencialmente incompleto que mapea targets a elementos de $\Fp$. Podríamos proveer al \texttt{PartialWitness} con el valor para todos los targets, resolviendo el valor de cada uno de ellos por nuestra cuenta. Sin embargo, Plonky2 sabe resolver los valores de los targets. Esto es posible porque todos los targets tienen dependencias para ser resueltos: por ejemplo, para resolver el valor del target $c$ en la expresión \texttt{let c = builder.add(a, b)} se necesita conocer los valores asignados a $a$ y $b$. Más generalmente, Plonky2 solo necesita conocer los valores asignados a los targets que \textbf{no tienen dependencias} y con eso puede resolver el resto. Si hay targets que no puede resolver, significa que 1. el circuito está mal formado o 2. los valores provistos no fueron suficientes para resolver todas las dependencias. 
 
-En este caso particular alcanza con proveer al \texttt{PartialWitness} con el valor del target nombrado $x$, que es lo que hace la expresión \\\texttt{patial\_witness.set\_target(x, F::from\_canonical\_u32(1))}. Notamos que como Plonky2 solo trabaja nativamente con elementos de $\Fp$, los valores que demos para los targets tienen que estar en $\Fp$, que es lo que consigue la expresión \texttt{F::from\_canonical\_u32(1)}. Finalmente el \texttt{circuit\_data} nos abstrae la acción de generar y verificar la prueba. 
+En este caso particular alcanza con proveer al \texttt{PartialWitness} con el valor del target nombrado $x$, que es lo que hace la expresión
+
+\vspace{0.5em}
+
+ \texttt{patial\_witness.set\_target(x, F::from\_canonical\_u32(1))} 
+ 
+ \vspace{0.5em}
+ 
+ Notamos que como Plonky2 solo trabaja nativamente con elementos de $\Fp$, los valores que demos para los targets tienen que estar en $\Fp$, que es lo que consigue la expresión \texttt{F::from\_canonical\_u32(1)}. Finalmente el \texttt{circuit\_data} nos abstrae la acción de generar y verificar la prueba. 
 
 \subsubsection{\textbf{Lookup tables en Plonky2}}\label{sec:lookup_plonky2}
 La API de Plonky2 también nos provee mecanismos para definir y realizar consultas en lookup tables, tales como están definidas en la sección \ref{sec:plonk_lookup_tables}. En realidad, las lookup tables en Plonky2 presentan leves diferencias y restricciones respecto a la definición general. Se definen como \texttt{vec<(u16,u16)>}, es decir, dos columnas con un máximo de $2^{16}$ elementos de tamaño máximo $2^{16}-1$. 
@@ -72,10 +80,24 @@ La API de Plonky2 también nos provee mecanismos para definir y realizar consult
 Una vez que tenemos definido un listado de valores
 \[\texttt{let table: vec<(u16,u16)> ~= [...]}\]
 podemos usar el método \[\texttt{let table\_index = builder.add\_lookup\_table\_from\_pairs(table)}\]
-para indicar al \texttt{CircuitBuilder} que queremos una tabla definida con dichos valores. Estos valores tienen que ser conocidos en tiempo de generación de circuito: ser valores explícitos que están hardcodeados en el circuito y no dependen de la ejecución.
+para indicar al \texttt{CircuitBuilder} que queremos una tabla definida con dichos valores. Estos valores tienen que ser conocidos en tiempo de generación de circuito, es decir, deben ser valores explícitos que están hardcodeados en el circuito y no dependen de la ejecución concreta.
 
 Para usar estas lookup tables necesitamos un target $t$. Podemos ver en tiempo de resolución de circuito si el valor de este target se encuentra en la primera componente de alguna de las tuplas definidas en la tabla, usando el método
-\[\texttt{let lookup\_result = builder.add\_lookup\_from\_index(t, table\_index)}\]
-donde \texttt{table\_index} es el índice de la tabla creada con el método \texttt{builder.add\_lookup\_table\_from\_pairs}. En este caso el resultado de llamar al método será otro target \texttt{lookup\_result} que estará restringido por el circuito a tomar el valor de la segunda componente de la tupla. 
+
+\vspace{0.5em}
+
+\texttt{let lookup\_result = builder.add\_lookup\_from\_index(t, table\_index)}
+
+\vspace{0.5em}
+
+\noindent donde \texttt{table\_index} es el índice de la tabla creada con el método
+
+\vspace{0.5em}
+
+\texttt{table\_index = builder.add\_lookup\_table\_from\_pairs()}. 
+
+\vspace{0.5em}
+
+En este caso el resultado de llamar al método será otro target \texttt{lookup\_result} que estará restringido por el circuito a tomar el valor de la segunda componente de la tupla. 
 
 En pocas palabras: una lookup table en Plonky2 nos permite definir un diccionario $u16 \rightarrow u16$ que opera de forma eficiente, pero que tiene que estar definido en tiempo de generación de circuito para realizar consultas sobre valores dinámicos en tiempo de resolución de circuito. Si en tiempo de resolución de circuito (mientras se genera la prueba) se realiza un lookup para un valor que no está en la primera componente de ninguna tupla, la generación de la prueba fallará.

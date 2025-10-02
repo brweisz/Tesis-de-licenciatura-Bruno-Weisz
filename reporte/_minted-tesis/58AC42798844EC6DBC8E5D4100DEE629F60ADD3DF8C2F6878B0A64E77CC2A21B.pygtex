@@ -1,0 +1,10 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{fn} \PYG{n+nf}{main}\PYG{p}{(}\PYG{n}{idx}: \PYG{n+nc}{Field}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{val}: \PYG{n+nc}{Field}\PYG{p}{)}\PYG{+w}{ }\PYGZhy{}\PYGZgt{} \PYG{n+nc}{pub}\PYG{+w}{ }\PYG{n}{Field}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kd}{let}\PYG{+w}{ }\PYG{k}{mut}\PYG{+w}{ }\PYG{n}{arr}: \PYG{p}{[}\PYG{n}{Field}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{N}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{N}\PYG{p}{];}
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{n}{\PYGZus{}}\PYG{+w}{ }\PYG{k}{in}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{o}{..}\PYG{l+m+mi}{100}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{arr}\PYG{p}{[}\PYG{n}{idx}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{val}\PYG{p}{;}
+\PYG{+w}{        }\PYG{n}{assert}\PYG{p}{(}\PYG{n}{arr}\PYG{p}{[}\PYG{n}{idx}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{n}{val}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{n}{arr}\PYG{p}{[}\PYG{n}{idx}\PYG{p}{]}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

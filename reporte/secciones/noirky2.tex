@@ -1,6 +1,6 @@
 
 \chapter{Noirky2}
-Haber recorrido Noir y Plonky2 nos permite re-definir el problema que estamos intentando resolver en términos más concretos. Dijimos en la sección \ref{sec:problema} que la intención es adaptar Noir para que pueda usar Plonky2 para generar pruebas de ejecución. Concretamente, el trabajo consiste en hacer un programa (el cual llamaremos ''Noirky2'' de ahora en adelante) que tiene como dependencias a Nargo (el compilador de Noir) y a Plonky2. Tanto Nargo como Plonky2 están escritos en Rust, por lo tanto Noirky2 también estará programado en Rust. La figura \ref{fig:esquema_noirky2} muestra un esquema en alto nivel de la interacción de los programas involucrados.
+Haber recorrido Noir y Plonky2 nos permite re-definir el problema que estamos intentando resolver en términos más concretos. Dijimos en la sección \ref{sec:problema} que la intención es adaptar Noir para que pueda usar Plonky2 para generar pruebas de ejecución. Concretamente, el trabajo consiste en hacer un programa (el cual llamaremos \textbf{Noirky2} de ahora en adelante) que tiene como dependencias a Nargo (el compilador de Noir) y a Plonky2. Tanto Nargo como Plonky2 están escritos en Rust, por lo tanto Noirky2 también estará programado en Rust. La figura \ref{fig:esquema_noirky2} muestra un esquema en alto nivel de la interacción de los programas involucrados.
 
 \begin{figure}[h]
 \centering
@@ -11,18 +11,18 @@ Haber recorrido Noir y Plonky2 nos permite re-definir el problema que estamos in
 ]
 
 % Nodes
-\node[box] (noir_) {Noir};
-\node[box, right=of noir_] (acir_) {ACIR};
-\node[redbox, right=1.5cm of acir_, yshift=1cm] (intermediate_) {Noirky2};
-\node[box, right=1.5cm of intermediate_] (plonky2_) {Plonky2};
-\node[box, below=1.5cm of plonky2_] (barretenberg_) {Barretenberg};
+\node[box] (noir) {Noir};
+\node[box, right=of noir] (acir) {ACIR};
+\node[redbox, right=1.5cm of acir, yshift=1cm] (intermediate) {Noirky2};
+\node[box, right=1.5cm of intermediate] (plonky2) {Plonky2};
+\node[box, below=1.5cm of plonky2] (barretenberg) {Barretenberg};
 
 % Arrows
-%\draw[->] (noir_) -- (acir_);
-%\draw[->] (acir_) -- (intermediate_);
-%\draw[->] (intermediate_) -- (plonky2_);
-%\draw[->] (plonky2_) -- (intermediate_);
-%\draw[->] (acir_.south) |- (barretenberg_.west);
+\draw[-] (noir) -- (acir);
+\draw[-] (acir) -- (intermediate);
+\draw[-] (intermediate) -- (plonky2);
+\draw[-] (plonky2) -- (intermediate);
+\draw[-] (acir.south) |- (barretenberg.west);
 
 \end{tikzpicture}
 \caption{Flujo de compilación de Noir hacia distintos backends}
@@ -35,7 +35,7 @@ Noirky2 tiene que poder:
 \begin{itemize}
     \item Leer los artefactos generados por Noir, es decir, el ACIR y el diccionario de witnesses a elementos de cuerpo. Para parsear estos elementos correctamente vamos a usar de forma directa el código de Nargo, ya que nos vamos a manejar con el mismo sistema de objetos que Nargo usa internamente. 
     \item Generar un circuito de Plonky2 que sea semánticamente equivalente al código ACIR.
-    \item Responder a los mismos comandos que Barretenberg provee: \textbf{prove}, \textbf{create\_vk} y \textbf{verify}. La semántica de estos debe ser la misma que en el otro prover.
+    \item Responder a los mismos comandos que Barretenberg provee: \textbf{prove}, \textbf{create\_vk} y \textbf{verify}. La semántica de estos debe ser la misma que en Barretenberg.
 \end{itemize}
 
 \section{Cuerpo finito utilizado}
@@ -45,9 +45,9 @@ La primera traba del trabajo fue la siguiente: hacer que la resolución de witne
 
 Pensemos por qué esto es un problema con un ejemplo más simple. Supongamos que $p_{nargo} = 7$ y $p_{plonky2} = 5$. Hacer un programa en Noir que verifique $a+b=c$ implicaría que todas las operaciones ocurren módulo $7$, por lo tanto si proveemos inputs como $a=5, b = 5, c = 3$, el programa verificaría correctamente ya que $5+5\equiv 3 ~ (7)$. Sin embargo, si trasladamos estos mismos inputs a Plonky2 e hiciéramos un programa que hace lo mismo, la ecuación no verificaría porque $5+5 \not\equiv 3 ~ (5)$. Esto hace que los witnesses resueltos por Noir no sean utilizables por Plonky2 a menos que estén usando el mismo cuerpo finito. Vamos a necesitar el valor de esos witnesses para generar la prueba de Plonky2. 
 
-La descripción de la solución es puramente implementativa y no es de interés para este trabajo, así que simplemente nos va a alcanzar con decir que esta modificación fue realizada con éxito pero al mismo tiempo, el cambio en el compilador generó la necesidad de usar una versión forkeada de Nargo durante el resto del desarrollo. 
+La descripción de la solución es puramente implementativa y no es de interés para este trabajo, así que simplemente nos va a alcanzar con decir que esta modificación fue realizada con éxito, pero al mismo tiempo el cambio en el compilador generó la necesidad de usar una versión forkeada de Nargo durante el resto del desarrollo. 
 
-Otro problema relacionado con el uso de $p_{goldilocks} = 2^{64}-2^{32}+1$ en Plonky2 es que no permite representar fácilmente valores de 64 bits, una funcionalidad que Noir provee. Esto se debe a que $p_{goldilocks} < 2^{64}-1$ por lo tanto un \texttt{u64} no ''entra'' en un elemento de $\Fp$. Esta dificultad se podría saltear usando dos elementos de $\Fp$ para representar un \texttt{u64}, donde cada elemento de cuerpo representa los 32 bits menos significativos o los 32 bits más significativos del \texttt{u64}. Sin embargo, esto sigue resultando insuficiente ya que habría que modificar la resolución de Witnesses por parte de Nargo y su forma de armar el código ACIR. En particular, al usar \texttt{u64} en un programa de Noir e intentar compilarlo con nuestro Nargo modificado para usar $p_{goldilocks}$, el compilador genera un error ''\texttt{Range constraint of 64 bits is too large for the Field size}''. Por estas cosas vamos a impedir el uso de \texttt{u64} y \texttt{u128} en Noirky2. 
+Otro problema relacionado con el uso de $p_{goldilocks} = 2^{64}-2^{32}+1$ en Plonky2 es que no permite representar fácilmente valores de 64 bits, una funcionalidad que Noir provee. Esto se debe a que $p_{goldilocks} < 2^{64}-1$ por lo tanto un \texttt{u64} no “entra'' en un elemento de $\Fp$. Esta dificultad se podría saltear usando dos elementos de $\Fp$ para representar un \texttt{u64}, donde cada elemento de cuerpo representa los 32 bits menos significativos o los 32 bits más significativos del \texttt{u64}. Sin embargo, esto sigue resultando insuficiente ya que habría que modificar la resolución de Witnesses por parte de Nargo y su forma de armar el código ACIR. En particular, al usar \texttt{u64} en un programa de Noir e intentar compilarlo con nuestro Nargo modificado para usar $p_{goldilocks}$, el compilador genera un error ''\texttt{Range constraint of 64 bits is too large for the Field size}''. Por estas cosas vamos a impedir el uso de \texttt{u64} y \texttt{u128} en Noirky2. 
 
 
 

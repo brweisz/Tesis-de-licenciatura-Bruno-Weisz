@@ -1,0 +1,82 @@
+\begin{thebibliography}{10}
+
+\bibitem{goldwasser1985knowledge}
+S~Goldwasser, S~Micali, and C~Rackoff.
+\newblock The knowledge complexity of interactive proof-systems. 17 stoc, 1985.
+
+\bibitem{huang2024data}
+Chengpeng Huang, Rui Song, Shang Gao, Yu~Guo, and Bin Xiao.
+\newblock Data availability and decentralization: New techniques for zk-rollups
+  in layer 2 blockchain networks.
+\newblock {\em arXiv preprint arXiv:2403.10828}, 2024.
+
+\bibitem{benarroch2019diving}
+Daniel Benarroch.
+\newblock Diving into the zk-snarks setup phase, 2019.
+\newblock Available at \url{http://www.urlverdadera.com}, recuperado el día
+  xx/xx/xxxx.
+
+\bibitem{PLONK}
+Ariel Gabizon, Zachary~J. Williamson, and Oana Ciobotaru.
+\newblock {PLONK}: Permutations over lagrange-bases for oecumenical
+  noninteractive arguments of knowledge.
+\newblock Cryptology {ePrint} Archive, Paper 2019/953, 2019.
+
+\bibitem{noirIntroduction}
+Aztec team.
+\newblock Introducing noir: The universal language of zero-knowledge, 2022.
+
+\bibitem{ACIR}
+Aztec team.
+\newblock Abstract circuit intermediate representation specification, 2022.
+
+\bibitem{gabizon2020proposal}
+Ariel Gabizon and Zachary~J Williamson.
+\newblock Proposal: The turbo-plonk program syntax for specifying snark
+  programs, 2020.
+
+\bibitem{PLONKY2}
+Polygon~Zero Team.
+\newblock Plonky2: Fast recursive arguments with plonk and fri, 2022.
+
+\bibitem{Short_Signatures_from_the_Weil_Pairing}
+Dan Boneh, Ben Lynn, and Hovav Shacham.
+\newblock Short signatures from the weil pairing.
+\newblock In Colin Boyd, editor, {\em Advances in Cryptology --- ASIACRYPT
+  2001}. Springer Berlin Heidelberg, 2001.
+
+\bibitem{bernhard2012not}
+David Bernhard, Olivier Pereira, and Bogdan Warinschi.
+\newblock How not to prove yourself: Pitfalls of the fiat-shamir heuristic and
+  applications to helios.
+\newblock In {\em Advances in Cryptology--ASIACRYPT 2012: 18th International
+  Conference on the Theory and Application of Cryptology and Information
+  Security, Beijing, China, December 2-6, 2012. Proceedings 18}, pages
+  626--643. Springer, 2012.
+
+\bibitem{gabizon2020plookup}
+Ariel Gabizon and Zachary~J Williamson.
+\newblock plookup: A simplified polynomial protocol for lookup tables.
+\newblock {\em Cryptology ePrint Archive}, 2020.
+
+\bibitem{ConstantSizeCommitmentstoPolynomialsandTheirApplications}
+Aniket Kate, Gregory~M. Zaverucha, and Ian Goldberg.
+\newblock Constant-size commitments to polynomials and their applications.
+\newblock In Masayuki Abe, editor, {\em Advances in Cryptology - ASIACRYPT
+  2010}. Springer Berlin Heidelberg, 2010.
+
+\bibitem{merkle1989certified}
+Ralph~C Merkle.
+\newblock A certified digital signature.
+\newblock In {\em Conference on the Theory and Application of Cryptology},
+  pages 218--238. Springer, 1989.
+
+\bibitem{Rust}
+https://www.rust lang.org/es.
+\newblock Rust.
+
+\bibitem{Aztec}
+https://aztec.network/noir.
+\newblock Aztec.
+
+\end{thebibliography}

@@ -1,0 +1,54 @@
+This is BibTeX, Version 0.99d (TeX Live 2022/dev/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: tesis.aux
+A level-1 auxiliary file: secciones/introduccion.aux
+A level-1 auxiliary file: secciones/primitivas_criptograficas.aux
+A level-1 auxiliary file: secciones/proving_systems.aux
+A level-1 auxiliary file: secciones/pcs.aux
+A level-1 auxiliary file: secciones/problema_a_resolver.aux
+A level-1 auxiliary file: secciones/noir.aux
+A level-1 auxiliary file: secciones/plonky2.aux
+A level-1 auxiliary file: secciones/noirky2.aux
+The style file: unsrt.bst
+Database file #1: bibliografia.bib
+You've used 15 entries,
+            1791 wiz_defined-function locations,
+            527 strings with 6045 characters,
+and the built_in function-call counts, 2708 in all, are:
+= -- 217
+> -- 124
+< -- 2
++ -- 48
+- -- 33
+* -- 101
+:= -- 417
+add.period$ -- 42
+call.type$ -- 15
+change.case$ -- 15
+chr.to.int$ -- 0
+cite$ -- 15
+duplicate$ -- 127
+empty$ -- 319
+format.name$ -- 33
+if$ -- 636
+int.to.chr$ -- 0
+int.to.str$ -- 15
+missing$ -- 6
+newline$ -- 71
+num.names$ -- 19
+pop$ -- 88
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 79
+stack$ -- 0
+substring$ -- 64
+swap$ -- 37
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 0
+while$ -- 23
+width$ -- 17
+write$ -- 142
