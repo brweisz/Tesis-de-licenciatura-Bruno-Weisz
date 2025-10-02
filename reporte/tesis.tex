@@ -946,7 +946,40 @@ Si tomamos a $Z$ como el polinomio que interpola en el dominio $H$ a los valores
 $$(1, \frac{a_0 + \gamma}{b_0 + \gamma}, \frac{(a_0 + \gamma)(a_1 + \gamma)}{(b_0 + \gamma)(b_1 + \gamma)}, \cdots, \prod_{0\leq i < k-1}\frac{a_i+\gamma}{b_i+\gamma})$$
 la propiedad se cumple en ambas direcciones.  
 
+\chapter{FRI: Low Degree Proof}\label{sec:fri_ldp}
 
+La idea es contar resumidamente cómo se realiza una \textit{Low Degree Proof} sobre un polinomio. La idea es demostrar que un polinomio $p \in \Fp[X]$ tiene un grado $deg(p) < N$. En particular, lo que va a demostrar este protocolo es que tiene un grado $deg(p) \in [\frac{N}{2}, N)$, para algún $N = 2^n$. La idea del protocolo va a ser reducir a la mitad (redondeando para abajo) el grado del polinomio sucesivas veces, mientras prover y verifier interactúan, para que el verifier se convenza de que una serie de puntos pertenecen a un polinomio de grado acotado. 
+
+Vamos a comenzar definiendo un \textit{blowup factor} $b$, una medida del grado de seguridad del protocolo. A partir de este valor, vamos a calcular 
+$$m = n + b$$ y finalmente $$M = 2^m = 2 ^{n+b}$$
+El prover a tomar un generador $\omega$ de $\Fp$ de grado $M$ para armar un dominio
+
+$$D=[\omega^i : 0 \leq i < M] = [1, \omega, \omega^2, ..., \omega^{M-1}]$$
+
+y va a evaluar $p$ en todos los puntos del dominio, obteniendo así 
+$$[p(1), p(\omega), p(\omega^2), ..., p(\omega^{M-1})]$$
+
+A continuación, va a armar un Merkle Tree con esos puntos y obtener el Merkle Root. Este va a ser pasado al verifier como Commit de la lista obtenida. Hasta ahora tenemos un commit de $M$ puntos que son evaluaciones de $p$ y el prover sabe que el grado de $p$ es $N<M$ (pero el verifier no).
+
+Lo siguiente que va a ocurrir es una reducción sucesiva del grado del polinomio: en cada iteración este va a reducirse a la mitad. La estrategia para hacer esto va a ser armar 2 polinomios de grado $\lfloor \frac{d}{2} \rfloor$ siendo $d$ el grado actual del polinomio y realizar una combinación lineal entre ellos. Uno de estos polinomios va a ser armado con todos los términos impares del polinomio original, y el otro con todos los términos pares. Sea:
+ 
+$$p(x)= a_0 + a_1 \cdot x + a_2 \cdot x^2 + \cdots +  a_d \cdot x^d$$
+vamos a armar 2 polinomios
+
+$$p_{par}(x) = a_0 + a_2 \cdot x + \cdots + a_d \cdot x^{\frac{d}{2}}$$ y
+
+$$p_{impar}(x) = a_1 + a_3 \cdot x +\cdots + a_{d-1} \cdot x^{\lfloor\frac{d-1}{2}\rfloor}$$
+
+de manera tal que se cumple la igualdad 
+$$p(x) = p_{par}(x^2) + x \cdot p_{impar}(x^2)$$
+
+Para obtener el siguiente polinomio de la siguiente iteración (de grado $\lfloor \frac{d}{2} \rfloor$) vamos a tomar 
+$$p_{i+1} = p_{par} + \gamma \cdot p_{impar}$$
+donde $\gamma$ es un \textit{challenge} por parte del verifier que el prover no podía saber de antemano. Es interesante notar que el dominio $D_{i+1}$ con el cual vamos a crear el nuevo Merkle Tree ahora está dado por $D^2$, es decir 
+$$[1, \omega^2, \omega^4, ..., \omega^{M-1}]$$
+y esto se debe a que al elevar todos los elementos de $D$ al cuadrado, obtendremos un dominio de la mitad de tamaño porque la mitad de los valores se repiten, dado que $\omega$ es una raíz de la unidad. 
+
+En cada iteración, el verifier puede convencerse de que 
 
 %%%% BIBLIOGRAFIA
 \newpage
