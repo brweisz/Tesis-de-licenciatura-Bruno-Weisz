@@ -79,7 +79,7 @@ Una parte crucial del proceso de desarrollo es validar a través de tests que la
 
 Tratamos de solucionar este problema haciendo tests por la negativa, es decir, proveyendo datos de entrada a la generación de la prueba que no satisfacen el sistema de ecuaciones y viendo que la verificación falla. Sin embargo no fue la verificación la que falló, sino la generación de la prueba misma. La explicación de esto es que Plonky2 resuelve todos los valores de sus Targets (o variables del sistema de ecuaciones). Si un valor provisto como input para la prueba es distinto a un valor que el motor de Plonky2 resuelve, este va a fallar en tiempo de resolución de circuito, ya que se trató de asignar a una misma variable del sistema de ecuaciones 2 valores distintos en momentos diferentes. El hecho de que falle la generación de la prueba también es útil para validar que la herramienta está haciendo lo previsto, sin embargo esto deja de lado un problema de seguridad.
 
-Plonky2 hace 2 cosas. Resuelve el valor de todos los Targets cuando genera la prueba y verifica que las restricciones polinomiales se cumplen cuando la verifica. Resolver el valor de los targets podemos pensarlo como ``llenar la traza'' (la matriz $T$) vista en la sección \ref{sec:plonk}. Sin embargo, estamos asumiendo que luego de que Plonky2 ``llena la traza'' nadie la modifica, lo cual es potencialmente incorrecto. Lo bueno es que si modificamos la traza, luego la verificación debería fallar, asumiendo que establecimos todas las restricciones correctamente. Ese es el centro de la cuestión, ¿cómo validamos que las restricciones están establecidas correctamente? Para hacer eso tendríamos que hacer tests por la negativa, pero no como los anteriores, sino modificando la traza luego de que esta sea generada por Plonky2 y viendo que es la verificación (y no la generación de la prueba) la que falla.
+Plonky2 hace 2 cosas. Resuelve el valor de todos los Targets cuando genera la prueba y verifica que las restricciones polinomiales se cumplen cuando la verifica. Resolver el valor de los targets podemos pensarlo como ``llenar la traza'' (la matriz $T$) vista en la sección \ref{sec:plonk}. Sin embargo, estamos asumiendo que luego de que Plonky2 ``llena la traza'' ningún atacante la modifica, lo cual es potencialmente incorrecto. Lo bueno es que si modificamos la traza, luego la verificación debería fallar, asumiendo que establecimos todas las restricciones correctamente. Ese es el centro de la cuestión, ¿cómo validamos que las restricciones están establecidas correctamente? Para hacer eso tendríamos que hacer tests por la negativa, pero no como los anteriores, sino modificando la traza luego de que esta sea generada por Plonky2 y viendo que es la verificación (y no la generación de la prueba) la que falla.
 
 El problema con esto es que Plonky2 no va a generar una traza incorrecta. La resolución de operaciones de Plonky2 está pensada para corresponderse con las ecuaciones que se intentan verificar. Por ejemplo, si se establece una restricción de la forma $t_3 = t_1 + t_2$ la resolución de targets de Plonky2 le va a asignar a $t_3$ el valor de $t_1 + t_2$. Si proveyéramos con valores inconsistentes a $t_1, t_2 \text{ y } t_3$ fallaría la generación de la prueba, pero nunca vamos a poder verificar que las restricciones están haciendo lo que nosotros queremos (o dicho con otras palabras, hacer que falle la verificación). 
 
@@ -124,11 +124,9 @@ fn main(a: [Field; N]) -> pub Field {
 \end{minipage}
 \end{center}
 
-Este programa recibe como input una lista de $N$ elementos de cuerpo y luego toma una variable \texttt{acc} para acumular valores. La intención con este programa es generar muchas operaciones de tipo AssertZero, como veremos a continuación. Más en general, la idea es crear programas a partir del template con valores de $N$
-$$N = \{1000, 10000, 100000, 1000000\}$$
-Al compilar esos programas de Noir, el código ACIR generado tendrá $N$ opcodes AssertZero que usen términos lineales y cuadtráticos, de la forma 
+Este programa recibe como input una lista de $N$ elementos de cuerpo y luego toma una variable \texttt{acc} para acumular valores. La intención con este programa es generar muchas operaciones de tipo AssertZero, como veremos a continuación. Más en general, la idea es crear programas a partir del template con distintos valores de $N$. Al compilar esos programas de Noir, el código ACIR generado tendrá $N$ opcodes AssertZero que usen términos lineales y cuadtráticos, de la forma 
 
-$$(1 \cdot w_0 \cdot w_1) + (1 \cdot w_2) + (-1 \cdot w_3) == 0 $$
+$$(1 \cdot w_0 \cdot w_1) + (1 \cdot w_2) + (-1 \cdot w_3) = 0 $$
 
 La forma del programa es relativamente arbitraria, su único objetivo es generar la cantidad adecuada de opcodes AssertZero con la forma deseada. A su vez, los inputs para cada programa serán $N$ valores aleatorios en el rango $[0,p)$, donde usamos $p_{plonky2}$ para aquellos que serán procesados por Noirky2 y $p_{barretenberg}$ para los que serán procesados por Barretenberg. 
 
@@ -150,7 +148,7 @@ fn main(idx: Field, val: Field) -> pub Field {
 \end{minted}
 \end{listing}
 
-El codigo ACIR generado se compone de $N$ bloques consecutivos como los que se pueden ver en la figura \ref{fig:ACIR_familia_memoria}.
+El codigo ACIR generado se compone de $N$ bloques consecutivos como los que se pueden ver en la figura \ref{fig:ACIR_familia_memoria} (pero inicializando el bloque de memoria una única vez).
 
 \begin{figure}[H]
     \centering
@@ -365,14 +363,14 @@ Para ver el comportamiento en casos más pequeños, veamos el gráfico de la fig
 	\centering
 	\begin{subfigure}[t]{0.49\textwidth} 
 		\centering
-		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Assert Zero.png}
+		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Assert Zero-log.png}
 		\caption{Hasta $100.000$ operaciones, vista logarítmica}
 		\label{fig:pocas_operaciones}
 	\end{subfigure}%
 	\hfill 
 	\begin{subfigure}[t]{0.49\textwidth}  
 		\centering
-		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Assert Zero-log.png}
+		\includegraphics[width=\textwidth]{imagenes/tiempos/prove-Assert Zero.png}
 		\caption{Hasta $1.000.000$ de operaciones}
 		\label{fig:muchas_operaciones}
 	\end{subfigure}
@@ -469,13 +467,13 @@ Por otro lado, notamos que en las variantes con Noirky2, pasar de XOR u8 a XOR u
 En esta sección vamos a hacer un reporte de los tamaños de los artefactos generados en el flujo de trabajo. Estos artefactos son la \textbf{Verification Key} en el caso del comando \textbf{write\_vk} y la \textbf{prueba} en el caso del comando \textbf{prove}.
 
 \subsection{Tamaño de la Verification Key}
-Comencemos por ver los tamaños que tiene cada verification key, segun la cantidad de opcodes de cada tipo. Los resultados completos pueden verse en la figura \ref{fig:tamanios-vk}. Algo que notamos en todos los gráficos es que tanto Barretenberg como Noirky2 con operaciones de bits tienen el mismo tamaño de Verification Key para todas las familias de programas (por una cuestión de escala, esto no se percibe en el gráfico de las operaciones de XOR, pero fue constatado con los datos). Además, aplicar blindings no afecta en ningún caso el tamaño de la Verification Key. Un representante de este fenómeno lo encontramos en el caso del AssertZero como se ve en la figura \ref{}, sin embargo esto es así en todos los casos.
+Comencemos por ver los tamaños que tiene cada verification key, segun la cantidad de opcodes de cada tipo. Los resultados completos pueden verse en la figura \ref{fig:tamanios-vk}. Algo que notamos en todos los gráficos es que tanto Barretenberg como Noirky2 con operaciones de bits tienen el mismo tamaño de Verification Key para todas las familias de programas (por una cuestión de escala, esto no se percibe en el gráfico de las operaciones de XOR, pero fue constatado con los datos). Además, aplicar blindings no afecta en ningún caso el tamaño de la Verification Key. Un representante de este fenómeno lo encontramos en el caso del AssertZero como se ve en la figura \ref{fig:tamanio-vk-assert-zero-ej}, sin embargo esto es así en todos los casos.
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.6\textwidth]{imagenes/tamanios/tamanio-write_vk-Assert Zero.png}
 	\caption{Tamaño de la VK en Noirky2 con operaciones de bits y Barretenberg}
-	\label{fig:tamanio-vk-assert-zero}
+	\label{fig:tamanio-vk-assert-zero-ej}
 \end{figure}%
 
 Las diferencias pueden empezar a verse cuando usamos Lookup Tables. Recordemos que estas permiten tener tablas pre-computadas en la Verification Key, permitiendo tiempos de ejecución mucho más rápidos como vimos en las secciones \ref{sec:tiempo_range} y \ref{sec:tiempo_xor}. Sin embargo, acá podemos ver cómo esto trae desventajas en los tamaños de la verification key. 
@@ -484,10 +482,10 @@ Las diferencias pueden empezar a verse cuando usamos Lookup Tables. Recordemos q
 	\centering
 	\includegraphics[width=0.6\textwidth]{imagenes/tamanios/tamanio-write_vk-Xor-u8.png}
 	\caption{Tamaño de la VK para operaciones de tipo Xor}
-	\label{fig:tamanio-vk-xor-u8}
+	\label{fig:tamanio-vk-xor-u8-ej}
 \end{figure}%
 
-En el caso de las operaciones de Range con Lookup Tables, estas usan una tabla simple de $2^8$ elementos de cuerpo, y eso se ve reflejado en el aumento visible en las figuras \ref{fig:tamanio-vk-range-u8}, \ref{fig:tamanio-vk-range-u16} y \ref{fig:tamanio-vk-range-u32}, que es igual en todos los casos. Por otro lado, cuando nos movemos al caso del XOR, estamos usando tablas de $2^{16}$ elementos, por lo cual el grueso de la Verification Key se ve ocupado por esta tabla. Esto hace que se opaque casi en su totalidad a las otras implementaciones, como podemos ver en la figura \ref{fig:tamanio-vk-xor-u8}, superando el tamaño de 250kb. 
+En el caso de las operaciones de Range con Lookup Tables, estas usan una tabla simple de $2^8$ elementos de cuerpo, y eso se ve reflejado en el aumento visible en las figuras \ref{fig:tamanio-vk-range-u8}, \ref{fig:tamanio-vk-range-u16} y \ref{fig:tamanio-vk-range-u32}, que es igual en todos los casos. Por otro lado, cuando nos movemos al caso del XOR, estamos usando tablas de $2^{16}$ elementos, por lo cual el grueso de la Verification Key se ve ocupado por esta tabla. Esto hace que se opaque casi en su totalidad a las otras implementaciones, como podemos ver en la figura \ref{fig:tamanio-vk-xor-u8-ej}, superando el tamaño de 250kb. 
 
 \subsection{Tamaño de la prueba}
 Nos movemos ahora al tamaño de las pruebas generadas. Los resultados completos pueden verse en la figura \ref{fig:tamanios-prueba}. En este caso, podemos ver que Barretenberg presenta una clara ventaja frente a Plonky2: los tamaños de sus pruebas son constantes. En todos los casos, la prueba pesa $2176$ bytes o $2.125$ kb. Esto se debe a que el Polynomial Commitment Scheme usado es KZG, explorado en la sección \ref{sec:kzg}. Esto no es así en el caso de Plonky2, que usa FRI. 
@@ -502,12 +500,12 @@ Notamos que en todas las variantes de Noirky2 la prueba es igual o más grande c
 \end{figure}%
 
 \subsection{Comparación entre artefactos y el CRS}
-Para finalizar el análisis quiero hacer una comparación entre los tamaños de las pruebas generadas y el tamaño del CRS de KZG visto en la sección \ref{sec:costo_crs}. La idea central de este trabajo fue librarnos de tener que usar una herramienta que requiriera un CRS potencialmente muy pesado para generar pruebas. Es interesante ver en este contexto si esto efectivamente aporta algún valor. Por ejemplo, si el tamaño de las pruebas fuera mucho mayor a las del CRS necesario para un programa con un tamaño dado, usar FRI en lugar de KZG no presentaría una ventaja tan grande ya que el cuello de botella no estaría en el CRS requerido por KZG. 
+Para finalizar el análisis quiero hacer una comparación entre los tamaños de las pruebas generadas y el tamaño del CRS de KZG visto en la sección \ref{sec:costo_crs}. La idea de este trabajo fue librarnos de tener que usar una herramienta que requiriera un CRS potencialmente muy pesado para generar pruebas. Es interesante ver en este contexto si esto efectivamente aporta algún valor. Por ejemplo, si el tamaño de las pruebas fuera mucho mayor a las del CRS necesario para un programa con un tamaño dado, usar FRI en lugar de KZG no presentaría una ventaja tan grande ya que el cuello de botella no estaría en el CRS requerido por KZG. 
 
-Para hacer este análisis vamos a comparar el tamaño del CRS necesario para procesar una traza de largo $N$ con el tamaño de los artefactos generados para esa misma traza (Prueba y Verification Key). Vamos a usar únicamente la familia de programas orientados a AssertZero para acotar este análisis. Recordemos de la sección \ref{sec:plonky2} que el ancho de la traza es de 135 y que Plonky2 empaqueta restricciones polinomiales del mismo tipo en una misma fila de la traza. Esto sumado a que una operación de AssertZero como las que usamos en el ejemplo ocupa 9 casillas de la traza (ya que son 3 términos matemáticos donde cada uno ocupa 3 casillas en la traza) nos permite saber un largo aproximado de la traza para una cantidad de operaciones dada. El resultado es 
+Para hacer este análisis vamos a comparar el tamaño del CRS necesario para procesar una traza de largo $N$ con el tamaño de los artefactos generados para esa misma traza (Prueba y Verification Key). Vamos a usar únicamente la familia de programas orientados a AssertZero para acotar este análisis. Recordemos de la sección \ref{sec:plonky2} que el ancho de la traza es de 135 columnas y que Plonky2 empaqueta restricciones polinomiales del mismo tipo en una misma fila de la traza. Esto sumado a que una operación de AssertZero como las que usamos en el ejemplo ocupa 9 casillas de la traza (ya que son 3 términos matemáticos donde cada uno ocupa 3 casillas en la traza) nos permite saber un largo aproximado de la traza para una cantidad de operaciones dada. El resultado es 
 $$\frac{9\cdot N}{135} = \frac{N}{15} $$
 
-Entonces por ejemplo, si realizamos 10000 operaciones de tipo AssertZero, Noirky2 va a generar una traza de Plonky2 con un estimado de $10000/15 \approx 666$ filas. Volviéndonos a la tabla \ref{tab:costo_crs} el CRS tendría que tener un tamaño mínimo de $62kb$. Para esta cantidad de operaciones, la figura \ref{fig:tamanio-prueba-assert-zero} nos muestra que una prueba de Plonky2 para este programa pesa aproximadamente $125kb$, que es un tamaño mayor al del CRS. Sin embargo, si tomamos un programa con $1.000.000$ de AssertZeros, la traza de Plonky2 tendría un largo de aproximadamente $66.666$ y por ende el CRS tendría un tamaño mínimo de $6.200kb$, superando ampliamente a los aproximadamente $150kb$ de la prueba para este mismo tamaño.
+Entonces por ejemplo, si realizamos 10000 operaciones de tipo AssertZero, Noirky2 va a generar una traza de Plonky2 con un estimado de $10000/15 \approx 666$ filas. Volviéndonos a la tabla \ref{tab:costo_crs} el CRS tendría que tener un tamaño mínimo de $62kb$. Para esta cantidad de operaciones, la figura \ref{fig:tamanio-prueba-assert-zero} nos muestra que una prueba de Plonky2 para este programa pesa aproximadamente $125kb$, que es un tamaño mayor al del CRS. Sin embargo, si tomamos un programa con $1000000$ de AssertZeros, la traza de Plonky2 tendría un largo de aproximadamente $66666$ y por ende el CRS tendría un tamaño mínimo de $6200kb$, superando ampliamente a los aproximadamente $150kb$ de la prueba para este mismo tamaño.
 
 ¿Qué nos dice esto? Para programas chicos, en términos espaciales, usar Noirky2 en lugar de Barretenberg no presenta ventajas. Sin embargo, cuando los programas crecen, el crecimiento del CRS en función de la cantidad de operaciones es mucho más pronunciado que el del tamaño de las pruebas. Resultados más detallados pueden verse en la tabla \ref{tab:CRS_vs_prueba}.
 
@@ -948,7 +946,7 @@ la propiedad se cumple en ambas direcciones.
 
 \chapter{FRI: Low Degree Proof}\label{sec:fri_ldp}
 
-La idea es contar resumidamente cómo se realiza una \textit{Low Degree Proof} sobre un polinomio. La idea es demostrar que un polinomio $p \in \Fp[X]$ tiene un grado $deg(p) < N$. En particular, lo que va a demostrar este protocolo es que tiene un grado $deg(p) \in [\frac{N}{2}, N)$, para algún $N = 2^n$. La idea del protocolo va a ser reducir a la mitad (redondeando para abajo) el grado del polinomio sucesivas veces, mientras prover y verifier interactúan, para que el verifier se convenza de que una serie de puntos pertenecen a un polinomio de grado acotado. 
+Vamos a contar resumidamente cómo se realiza una \textit{Low Degree Proof} sobre un polinomio. La idea es demostrar que un polinomio $p \in \Fp[X]$ tiene un grado $deg(p) < N$. En particular, lo que va a demostrar este protocolo es que tiene un grado $deg(p) \in [\frac{N}{2}, N)$, para algún $N = 2^n$. La idea del protocolo va a ser reducir a la mitad (redondeando para abajo) el grado del polinomio sucesivas veces, mientras prover y verifier interactúan, para que el verifier se convenza de que una serie de puntos pertenecen a un polinomio de grado acotado. 
 
 Vamos a comenzar definiendo un \textit{blowup factor} $b$, una medida del grado de seguridad del protocolo. A partir de este valor, vamos a calcular 
 $$m = n + b$$ y finalmente $$M = 2^m = 2 ^{n+b}$$
@@ -956,30 +954,35 @@ El prover a tomar un generador $\omega$ de $\Fp$ de grado $M$ para armar un domi
 
 $$D=[\omega^i : 0 \leq i < M] = [1, \omega, \omega^2, ..., \omega^{M-1}]$$
 
-y va a evaluar $p$ en todos los puntos del dominio, obteniendo así 
-$$[p(1), p(\omega), p(\omega^2), ..., p(\omega^{M-1})]$$
+\noindent y va a evaluar $p$ en todos los puntos del dominio, obteniendo así 
+$$P = [p(1), p(\omega), p(\omega^2), ..., p(\omega^{M-1})]$$
 
-A continuación, va a armar un Merkle Tree con esos puntos y obtener el Merkle Root. Este va a ser pasado al verifier como Commit de la lista obtenida. Hasta ahora tenemos un commit de $M$ puntos que son evaluaciones de $p$ y el prover sabe que el grado de $p$ es $N<M$ (pero el verifier no).
+A continuación, va a armar un Merkle Tree con esos puntos y obtener el Merkle Root. Este va a ser pasado al verifier como Commit de la lista obtenida. Esto mismo va a repetirse en varias iteraciones, cada vez con un dominio de la mitad de tamaño y un polinomio de la mitad de tamaño. Para facilitar la explicación podemos pensar que el prover va a ir dándole oráculos de ciertos polinomios al verifier, aunque ahora sabemos que estos oráculos están implementados como merkle trees. 
 
 Lo siguiente que va a ocurrir es una reducción sucesiva del grado del polinomio: en cada iteración este va a reducirse a la mitad. La estrategia para hacer esto va a ser armar 2 polinomios de grado $\lfloor \frac{d}{2} \rfloor$ siendo $d$ el grado actual del polinomio y realizar una combinación lineal entre ellos. Uno de estos polinomios va a ser armado con todos los términos impares del polinomio original, y el otro con todos los términos pares. Sea:
  
-$$p(x)= a_0 + a_1 \cdot x + a_2 \cdot x^2 + \cdots +  a_d \cdot x^d$$
+$$p_i(x)= a_0 + a_1 \cdot x + a_2 \cdot x^2 + \cdots +  a_d \cdot x^d$$
 vamos a armar 2 polinomios
 
-$$p_{par}(x) = a_0 + a_2 \cdot x + \cdots + a_d \cdot x^{\frac{d}{2}}$$ y
+$$p_{i, par}(x) = a_0 + a_2 \cdot x + \cdots + a_d \cdot x^{\frac{d}{2}}$$ y
 
-$$p_{impar}(x) = a_1 + a_3 \cdot x +\cdots + a_{d-1} \cdot x^{\lfloor\frac{d-1}{2}\rfloor}$$
+$$p_{i,impar}(x) = a_1 + a_3 \cdot x +\cdots + a_{d-1} \cdot x^{\lfloor\frac{d-1}{2}\rfloor}$$
 
 de manera tal que se cumple la igualdad 
-$$p(x) = p_{par}(x^2) + x \cdot p_{impar}(x^2)$$
+$$p_i(x) = p_{i,par}(x^2) + x \cdot p_{i,impar}(x^2)$$
 
 Para obtener el siguiente polinomio de la siguiente iteración (de grado $\lfloor \frac{d}{2} \rfloor$) vamos a tomar 
-$$p_{i+1} = p_{par} + \gamma \cdot p_{impar}$$
-donde $\gamma$ es un \textit{challenge} por parte del verifier que el prover no podía saber de antemano. Es interesante notar que el dominio $D_{i+1}$ con el cual vamos a crear el nuevo Merkle Tree ahora está dado por $D^2$, es decir 
-$$[1, \omega^2, \omega^4, ..., \omega^{M-1}]$$
-y esto se debe a que al elevar todos los elementos de $D$ al cuadrado, obtendremos un dominio de la mitad de tamaño porque la mitad de los valores se repiten, dado que $\omega$ es una raíz de la unidad. 
+$$p_{i+1} = p_{i,par} + \gamma \cdot p_{i,impar}$$
+donde $\gamma$ es un \textit{challenge} por parte del verifier que el prover no puede saber de antemano. El dominio $D_{i+1}$ con el cual vamos a crear el nuevo Merkle Tree ahora está dado por $D^2$, es decir 
+$$[1, \omega^2, \omega^4, ..., \omega^{2(M-1)}]$$
+Al elevar todos los elementos de $D$ al cuadrado, obtendremos un dominio de la mitad de tamaño porque la mitad de los valores se repiten, dado que $\omega$ es una raíz de la unidad. 
 
-En cada iteración, el verifier puede convencerse de que 
+Notemos también la siguiente igualdad:
+$$p_i(-x) = p_{i,par}(x^2) - x \cdot p_{i,impar}(x^2)$$
+Esto hace que el verifier pueda obtener $p_{i, par}$ y $p_{i, impar}$ a partir de $p$ con las ecuaciones
+$$p_{par}(x^2) = \frac{p(x) + p(-x)}{2}$$ y 
+$$p_{impar}(x^2) = \frac{p(x) - p(-x)}{2x}$$
+y con ellas verificar a través de los oráculos que el oráculo de la siguiente iteracción se corresponde con una reducción correcta. Si aplicamos $n$ iteraciones, finalmente vamos a alcanzar una lista de $2^b$ elementos iguales, ya que se corresponden con evaluaciones de un polinomio constante. El verifier puede abrir esta lista en varios puntos aleatorios para convencerse probabilísticamente de que todos los elementos son iguales. Llegado este punto, el la conclusión a la que llega el verifier es que el polinomio original tuvo que haber sido de grado a lo sumo $n$. 
 
 %%%% BIBLIOGRAFIA
 \newpage
