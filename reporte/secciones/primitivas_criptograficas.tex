@@ -1,5 +1,5 @@
 \chapter{Primitivas Criptográficas}
-En esta sección se van a presentar algunos de los tópicos básicos necesarios para entender la problemática que se intenta resolver. Voy a buscar la mayor completitud posible en los temas no abarcados por la carrera de ciencias de la computación. Entre ellos se encuentran tópicos de la matemática, de la criptografía y más específicamente de la criptografía \zk.
+En esta sección se van a presentar algunos de los tópicos básicos necesarios para entender la problemática que se intenta resolver. Se va a buscar la mayor completitud posible en los temas no abarcados por la carrera de ciencias de la computación. Entre ellos se encuentran tópicos de la matemática, de la criptografía y más específicamente de la criptografía \zk.
 
 
 \section{Aritmética modular y cuerpos finitos}\label{sec:cuerpos}
@@ -78,7 +78,7 @@ Revisando las propiedades, también tenemos que
 
 \vspace{1em}
 
-Si bien todos los elementos de $R$ tienen un inverso aditivo, un anillo no requiere que todos sus elementos tengan un inverso respecto al producto. Tomemos por ejemplo el anillo $(\mathbb{Z}, +, \cdot)$, es decir, los números enteros con la suma y el producto. Todos números $n \in \mathbb{Z}$ tiene un inverso aditivo que podemos obtener tomando $-n$. Si buscamos un inverso multiplicativo, tomamos por ejemplo al $2$ y notamos que $2^{-1}=\frac{1}{2} \notin \mathbb{Z}$.
+Si bien todos los elementos de $R$ tienen un inverso aditivo, un anillo no requiere que todos sus elementos tengan un inverso respecto al producto. Tomemos por ejemplo el anillo $(\mathbb{Z}, +, \cdot)$, es decir, los números enteros con la suma y el producto. Todo elemento $n \in \mathbb{Z}$ tiene un inverso aditivo que podemos obtener tomando $-n$. Si buscamos un inverso multiplicativo, tomamos por ejemplo al $2$ y notamos que $2^{-1}=\frac{1}{2} \notin \mathbb{Z}$.
 
 \vspace{2em}
 
@@ -158,7 +158,7 @@ El intercambio de claves de Diffie-Hellman es un problema conocido de la criptog
     \item Alice y Bob eligen valores secretos $a \in \mathbb{N}$ y $b \in \mathbb{N}$ respectivamente y estos valores también deben ser suficientemente grandes.
     \item Cada uno va a calcular $$A \equiv g^a ~(p)~~~y~~~ B \equiv g^b ~(p)$$ respectivamente.  
     \item Cada uno comparte el valor que calculó con el otro, es decir, Alice le transmite $A$ a Bob a través del medio inseguro, y Bob hace lo mismo con $B$.
-    \item Por ultimo, cada uno va a calcular el valor de $K$ (la clave compartida) de la siguiente forma: Alice va a tomar el valor obtenido $B$ y va a calcular $$K \equiv B^a ~ (p)$$ y lo mismo va a Bcer bob con $A$ y $b$, es decir $$K' \equiv A^b ~ (p).$$ Es fácil ver que $K \equiv K' ~ (p)$ y que por ende ahora tienen una clave en común.
+    \item Por ultimo, cada uno va a calcular el valor de $K$ (la clave compartida) de la siguiente forma: Alice va a tomar el valor obtenido $B$ y va a calcular $$K \equiv B^a ~ (p)$$ y lo mismo va a hacer Bob con $A$ y $b$, es decir $$K' \equiv A^b ~ (p).$$ Es fácil ver que $K \equiv K' ~ (p)$ y que por ende ahora tienen una clave en común.
 \end{enumerate}
 
 La pregunta entonces es ¿que hace que Malcom no tenga la clave $K$ si pudo observar todas las comunicaciones? La respuesta es que la seguridad de este intercambio de claves depende de la dificultad de resolver DLP. Los valores que Malcom pudo observar son $p$, $g$, $A$ y $B$, sin embargo $$K \equiv g^{a\cdot b} \equiv A^b \equiv B^a ~ (p),$$ pero $K$ no puede calcularse sin conocer $a$ o $b$, que son valores privados. Uno podría pensar entonces que el valor de $a$ se puede deducir de saber que $A \equiv g^a~(p)$ pero ahí es donde DLP entra en juego y nos asegura que Malcom no puede realizar este despeje en un tiempo razonable. 
@@ -356,7 +356,7 @@ Notamos $n = log_P(Q)$. Puede ocurrir que el problema no esté definido para alg
 La dificultad ECDLP es similar a la del DLP para grupos genéricos, en el sentido de que dados $P,Q \in E(\Fp)$ conocidos, el mejor algoritmo conocido que computa $n = log_P(Q)$ es equivalente a sumar $P$ sucesivamente a sí mismo hasta alcanzar el valor de $Q$. Sin embargo, hay algunas curvas elípticas conocidas para las cuales existen algoritmos más eficientes para resolver ECDLP. 
 
 \subsection{BLS y Pairings}
-Paralelamente, también existen curvas elípticas más seguras y con propiedades deseables, como puede ser la curva BLS12385~\cite{Short_Signatures_from_the_Weil_Pairing}. Esta curva está definida como
+Paralelamente, también existen curvas elípticas más seguras y con propiedades deseables, como puede ser la curva BLS12-385~\cite{Short_Signatures_from_the_Weil_Pairing}. Esta curva está definida como
 
 $$E(\Fp): Y^2=X^3+4 ~~~~~ p = 2^{255}-13$$
 
