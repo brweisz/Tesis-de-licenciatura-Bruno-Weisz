@@ -209,15 +209,27 @@ Otro protocolo que implementa oráculos de polinomios es FRI. Este protocolo no 
 Concretamente, FRI es una Low Degree Proof: un protocolo que sirve para demostrar que el prover conoce un polinomio de grado \textbf{menor estricto a} un cierto $N = 2^n$. El polinomial commitment scheme se apoya en este protocolo para dar garantías de Soundness. 
 
 \subsection{Polinomial Commitment Scheme sobre FRI}
-Nuevamente partimos de que el prover conoce un polinomio $p$ de grado $N = 2^n$ y quiere comprometerse a ese polinomio para que el verifier pueda abrirlo en algún punto que desee, convenciéndose de que la evaluación obtenida se corresponde al polinomio comprometido inicialmente. Vamos a partir de un dominio $$D=\{1, \omega, \omega ^2, \cdots, \omega ^{N-1}\}$$
-donde $\omega$ es una raíz $N$-ésima de $p$ (es decir que $\omega ^N = 1$). El protocolo es como sigue:
+Nuevamente partimos de que el prover conoce un polinomio $p$ de grado $N = 2^n$ y quiere comprometerse a ese polinomio para que el verifier pueda abrirlo en algún punto que desee, convenciéndose de que la evaluación obtenida se corresponde al polinomio comprometido inicialmente. Vamos a comenzar tomando un valor $M = 2^{n+b}$, donde $b$ es un parámetro de seguridad (o \textit{blowup-factor}) y tomar una raíz M-ésima de la unidad $\omega$ para armar un dominio de evaluación
+
+$$D=\{1, \omega, \omega ^2, \cdots, \omega ^{M-1}\}$$
+
+El protocolo es como sigue:
 
 \begin{enumerate}
-    \item $Commit(p) \rightarrow [p]$: Lo primero que va a hacer el prover es inicializar un Merkle Tree con hojas $$[p(1), p(\omega),p(\omega^2),\cdots, p(\omega^{N-1})]$$
+    \item $Commit(p) \rightarrow [p]$: Lo primero que va a hacer el prover es inicializar un Merkle Tree con hojas $$[p(1), p(\omega),p(\omega^2),\cdots, p(\omega^{M-1})]$$
     De esta manera va a obtener un Merkle Hash de su raíz $[p]$, es decir, un Merkle Hash de las evaluaciones de $p$ en el dominio $D$. A continuación va a darle $[p]$ al verifier. 
 
-    Lo que el prover está afirmando implícitamente es que “$[p]$ es el Merkle Root de la lista de $N$ evaluaciones del polinomio $p$ en el dominio $D$'', sin embargo, desde el punto de vista del verifier esto podría no ser cierto. Vamos a ver cómo lidiamos con esto más adelante.
+    Podemos volver nuevamente a la abstracción de que el prover le está dando al verifier un oráculo de $p$, acotado a los valores del dominio $D$. 
 
-    \item $Open(p, z) \rightarrow p(z)$: El verifier quiere la evaluación de $p$ en un valor $z \in \Fp$, por lo tanto va a darle al prover ese valor. El prover va a retornar $p(z)$ al verifier . 
+    \item $Open(p, z) \rightarrow p(z)$: El verifier va a pedir la evaluación de $p$ en un valor $z \in D$, por lo tanto va a darle al prover ese valor. El prover va a retornar $p(z)$ al verifier. 
+    
+    \item $Verify([p], p(z))\rightarrow \{true, false\}$: El verifier va a pensar en el polinomio 
+    
+    $$q(x) = \frac{p(x) - p(z)}{x-z}$$
+    
+    No tiene acceso a este polinomio, sin embargo puede usar algo llamado \textit{oráculo virtual} (o $[q]$), obteniéndolo a través de $[p]$. Es decir, si el verifier puede obtener evaluaciones de $p$ usando el oráculo, también puede obtener evaluaciones de $q$ usando el mismo oráculo $[p]$. El truco para hacer la verificación es el siguiente: si efectivamente la evaluación que el prover dio de $p(z)$ es correcta, entonces $q$ debería tener un grado menos que $p$. Si la evaluación no es correcta, entonces $q$ va a tener un grado notablemente más alto. Al verifier le alcanza entonces con convencerse de que $q$ tiene grado \textit{a lo sumo} $N-1$ para ver que $p$ tiene grado $N$. Para garantizarse esto, va a recurrir al protocolo FRI explicado en el apéndice \ref{sec:fri_ldp}.
+    
 \end{enumerate}
+
+Un detalle importante es que al aplicar la heurística de Fiat-Shamir, todo el protocolo FRI estará comprimido en una única prueba, armada de forma offchain por el prover. La verificación ocurre en tiempo succint. 
 

@@ -528,7 +528,7 @@ Entonces por ejemplo, si realizamos 10000 operaciones de tipo AssertZero, Noirky
 
 Este trabajo trajo consigo muchos desafíos, tanto teóricos como de implementación, y es momento de hacer un pequeño resumen de las cosas aprendidas. 
 
-Respecto a la implementación en sí, se trató de construir una herramienta (Noirky2) que depende de otras dos (Plonky2 y Noir), lo cual fue especialmente complicado teniendo en cuenta que el repositorio de Noir estaba en una versión inestable y recibía muchos cambios todos los días (todavía lo hace). En cierto punto se decidió fijar una versión, pero para usar Noirky2 de forma productiva habría que actualizar la herramienta para que se adapte a la versión más nueva de Noir.
+Respecto a la implementación en sí, se construyó una herramienta (Noirky2) que depende de otras dos (Plonky2 y Noir), lo cual fue especialmente complicado teniendo en cuenta que el repositorio de Noir estaba en una versión inestable y recibía muchos cambios todos los días (todavía lo hace). En cierto punto se decidió fijar una versión, pero para usar Noirky2 de forma productiva habría que actualizar la herramienta para que se adapte a la versión más nueva de Noir.
 
 Respecto al uso de la herramienta en sí, pudimos ver que no hay una receta perfecta para la generación de pruebas de programas en Noir. El backend que tengamos que usar y su respectiva variante va a depender del tamaño del programa y del tipo de operaciones que predominen en él. Por ejemplo, para algunos programas muy chicos vimos que conviene usar Barretenberg, tanto temporal como espacialmente. Sin embargo, para programas más grandes, a menos que sea un programa con muchas operaciones de memoria, conviene usar Noirky2. El uso de Lookup Tables frente a operaciones de bits debe estar pautado por la cantidad de operaciones de tipo XOR o Range que haya en el programa, ya que el costo de inicializar esa tabla es muy alto. Por otro lado, si no es crítica la propiedad de \textbf{ZK} en la prueba, siempre conviene NO aplicar un blinding en Noirky2 en términos del tiempo de generación de la prueba.
 
@@ -541,9 +541,9 @@ Me gustaría finalizar dejando en claro las cosas que no se llegaron a estudiar 
 \begin{itemize}
 	\item Hacer tests por la negativa para verificar que las restricciones están presentes. Esto fue desarrollado en la sección \ref{sec:tests}.
 	\item Analizar en detalle el código de Barretenberg para explicar por qué son tanto más rápidas las operaciones de memoria. 
-	\item Analizar las implementaciones de las Custom Gates de Plonky2 y Barretenber para explicar los saltos discretos que se dan en las mediciones de tiempos del opcode \textbf{Range}.
+	\item Analizar las implementaciones de las Custom Gates de Plonky2 y Barretenberg para explicar los saltos discretos que se dan en las mediciones de tiempos del opcode \textbf{Range}.
 	\item Hacer un análisis más profundo de cómo crecen los tamaños de las pruebas en los casos donde esto tenga sentido.
-	\item Explorar en más de talle la forma en la que cada opcode ocupa la traza de Plonky2 para hacer un modelo teórico de la traza en sí misma que permita explicar mejor los tiempos de ejecución. 
+	\item Explorar en más detalle la forma en la que cada opcode ocupa la traza de Plonky2 para hacer un modelo teórico de la traza en sí misma que permita explicar mejor los tiempos de ejecución. 
 	\item Se podrían crear Custom Gates de Plonky2 para operaciones como las de memoria, o AssertZero, pensando en llenar la traza de la forma más eficiente posible. 
 	\item Hoy en día existen más backends de Noir hechos con otros provers. Estos backends no existían al momento de comenzar este trabajo. Se podría hacer un estudio de performance sobre los mismos, analizando ventajas y desventajas. 
 	\item Se podrían aplicar modificaciones sobre Noir para que Noirky2 soporte el uso de enteros mayores a u32. Esto requeriría modificar la generación de restricciones por parte de Noir porque los enteros u64 tendrían que resolverse divididos en 2 partes (32 bits más significativos y 32 bits menos significativos).
@@ -982,7 +982,7 @@ $$p_i(-x) = p_{i,par}(x^2) - x \cdot p_{i,impar}(x^2)$$
 Esto hace que el verifier pueda obtener $p_{i, par}$ y $p_{i, impar}$ a partir de $p$ con las ecuaciones
 $$p_{par}(x^2) = \frac{p(x) + p(-x)}{2}$$ y 
 $$p_{impar}(x^2) = \frac{p(x) - p(-x)}{2x}$$
-y con ellas verificar a través de los oráculos que el oráculo de la siguiente iteracción se corresponde con una reducción correcta. Si aplicamos $n$ iteraciones, finalmente vamos a alcanzar una lista de $2^b$ elementos iguales, ya que se corresponden con evaluaciones de un polinomio constante. El verifier puede abrir esta lista en varios puntos aleatorios para convencerse probabilísticamente de que todos los elementos son iguales. Llegado este punto, el la conclusión a la que llega el verifier es que el polinomio original tuvo que haber sido de grado a lo sumo $n$. 
+y con ellas verificar a través de los oráculos que el oráculo de la siguiente iteracción se corresponde con una reducción correcta. Si aplicamos $n$ iteraciones, finalmente vamos a alcanzar una lista de $2^b$ elementos iguales, ya que se corresponden con evaluaciones de un polinomio constante. El verifier puede abrir esta lista en varios puntos aleatorios para convencerse probabilísticamente de que todos los elementos son iguales. Llegado este punto, la conclusión a la que llega el verifier es que el polinomio original tuvo que haber sido de grado a lo sumo $N-1$. 
 
 %%%% BIBLIOGRAFIA
 \newpage

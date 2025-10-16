@@ -2,10 +2,14 @@
 %\large \bf \runtitulo
 %\end{center}
 %\vspace{1cm}
-\chapter*{\runtitulo}
+\chapter*{\tituloTesis}
 
-\noindent En este trabajo se aborda una rama de la criptografía incipiente: la de los SNARKs y las Pruebas de Conocimiento Zero. \textbf{Hacer al final}
+En este trabajo se estudia la posibilidad de demostrar la ejecución de programas de alto nivel utilizando Plonky2, un sistema de pruebas criptográficas de tipo ZK-SNARK que no requiere de un \textit{trusted setup}. El trabajo se enmarca en el área de las pruebas de conocimiento cero (Zero Knowledge Proofs), presentando una introducción a las primitivas matemáticas y criptográficas necesarias para comprender estos protocolos, así como un análisis superficial de los sistemas relevantes como PLONK.
+
+Se propone y desarrolla una herramienta que traduce programas de ACIR (la representación intermedia de Noir) a Plonky2. De esta manera, se logra la construcción de pruebas verificables de ejecución en entornos con recursos limitados de almacenamiento, superando una de las principales restricciones de Barretenberg.
+
+El documento incluye la descripción formal de la traducción de primitivas y operaciones, una evaluación experimental del desempeño obtenido y un análisis comparativo en términos de tiempos de ejecución y tamaños de artefactos generados. Finalmente, se discuten los resultados alcanzados y se plantean líneas de trabajo futuro. 
 
 \bigskip
 
-\noindent\textbf{Palabras clave:} Pruebas de conocimiento zero, zero knowledge proofs, ZK, SNARK, PLONK, Plonky2, Noir, ACIR, Barretenberg, Criptografía
+\noindent\textbf{Palabras clave:} Pruebas de conocimiento zero, zero knowledge proofs, ZK, SNARK, PLONK, Plonky2, Noir, ACIR, Barretenberg, Criptografía.
