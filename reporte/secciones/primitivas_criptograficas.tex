@@ -199,12 +199,12 @@ En numerosas ocasiones nos va a interesar obtener el \textbf{polinomio interpola
 
 No me voy a adentrar en profundidad en los mecanismos para obtener dicho polinomio, pero me interesa hablar de algunas de sus propiedades:
 \begin{itemize}
-    \item Existencia: existe al menos un polinomio interpolador para cualquier conjunto de puntos.
-    \item Unicidad: dados $n+1$ puntos, el polinomio de grado a lo sumo $n$ que lo interpola es único.
+    \item \textbf{Existencia}: existe al menos un polinomio interpolador para cualquier conjunto de puntos.
+    \item \textbf{Unicidad}: dados $n+1$ puntos, el polinomio de grado a lo sumo $n$ que lo interpola es único.
 \end{itemize}
 
 \subsection{Lema de Schwartz-Zippel} \label{sec:zippel}
-El Lema de Schwartz-Zippel es una herramienta matemática usada en las Pruebas de Identidad de Polinomios. Estas van a resultar centrales para los Proving Systems y será usado numerosas veces en diversos protocolos, dándoles a su vez la caracterización de pruebas probabilísticas.
+El Lema de Schwartz-Zippel es una herramienta matemática usada en las Pruebas de Identidad de Polinomios. Estas van a resultar centrales para los proving systems y será usado numerosas veces en diversos protocolos, dándoles a su vez la caracterización de pruebas probabilísticas.
 
 Sea $p$ un primo grande, dos polinomios $P, Q \in \Fp[X]$ de grado $n$, y $k \in \Fp$ un valor aleatorio tomado de una distribución uniforme de $\Fp$. Si las funciones asociadas a $P$ y $Q$ en $\Fp$ ($p(x)$ y $q(x)$ respectivamente) cumplen que $p(k) = q(k)$ entonces la probabilidad de que $P$ y $Q$ sean distintos es de $\frac{n}{p}$. En un entorno donde $p \gg n$ (por ejemplo $p>2^{200}$ y $n=2^{32}$) podemos decir que si $p(k) = q(k)$ entonces es altamente probable que $P$ y $Q$ sean iguales, ya que $1 - \frac{2^{32}}{2^{200}} \approx 1$. 
 
@@ -218,9 +218,7 @@ La intuición detrás de esto está dada por la propiedad de los polinomios de g
 \label{schwartz-zippel-intuicion}
 \end{figure}
 
-Pensemos por un segundo qué pasaría si el valor elegido no fuera aleatorio, o más bien si el valor fuera elegido maliciosamente por un agente que conoce $P$ y $Q$. Supongamos también que $P \neq Q$. Si este agente conociera un valor $k^*$ tal que $p(k^*) = q(k^*)$ (alguno de los puntos donde los polinomios intersecan) podría alegar que $P = Q$ a los ojos de un protocolo que usa el lema de Schwartz-Zippel, dando lugar a una vulnerabilidad. Más adelante veremos cómo se resuelve esta obtención de números aleatorios en el contexto de los protocolos ZK. 
-
-Dijimos que para que este protocolo sea seguro se pide que $p \gg n$. El valor de $p - n$ se conoce como \textbf{blowup factor} y se usa en muchos casos para medir la seguridad de un protocolo. 
+Pensemos por un segundo qué pasaría si el valor elegido no fuera aleatorio, o más bien si el valor fuera elegido maliciosamente por un agente que conoce $P$ y $Q$. Supongamos también que $P \neq Q$. Si este agente conociera un valor $k^*$ tal que $p(k^*) = q(k^*)$ (alguno de los puntos donde los polinomios intersecan) podría alegar que $P = Q$ a los ojos de un protocolo que usa el lema de Schwartz-Zippel, dando lugar a una vulnerabilidad. Más adelante veremos cómo se resuelve esta obtención de números aleatorios en el contexto de los protocolos ZK. Para que este protocolo sea seguro se pide que $p \gg n$. 
 
 \section{Curvas elípticas} \label{sec:curvas_elipticas}
 Una curva elíptica es el conjunto de soluciones $(x,y)$ a una ecuación de la forma 
@@ -292,7 +290,7 @@ En otras palabras, dada la definición de la sección \ref{sec:cuerpos}, podemos
 La \textbf{resta} de dos puntos de curva $P$ y $Q$ podemos pensarla como la suma del inverso aditivo, es decir, dados $P,Q\in E$, decimos que $P-Q = P + (-Q)$ siendo $-Q$ el punto espejado a $Q$ en el eje horizontal.
 
 \subsection{Curvas elípticas sobre cuerpos finitos}
-Para usar la teoría de curvas elípticas en el contexto de protocolos criptográficos tenemos que pensarlas como conjuntos de puntos con coordinadas en $\Fp$. Alteramos levemente la definición:
+Para usar la teoría de curvas elípticas en el contexto de protocolos criptográficos tenemos que pensarlas como conjuntos de puntos con coordenadas en $\Fp$. Alteramos levemente la definición:
 
 \vspace{1em}
 
@@ -360,7 +358,7 @@ Paralelamente, también existen curvas elípticas más seguras y con propiedades
 
 $$E(\Fp): Y^2=X^3+4 ~~~~~ p = 2^{255}-13$$
 
-Esta curva posee la propiedad de que calcular \textbf{\textit{pairings}} es una operación poco costosa respecto a otras curvas. Ahora bien, ¿qué son los pairings? No me interesa dar una definición formal, más bien enunciar algunas de las propiedades que nos interesan en el contexto de los SNARKs.
+Esta curva posee la propiedad de que calcular \textbf{\textit{pairings}} es una operación poco costosa respecto a otras curvas. Ahora bien, ¿qué son los pairings? No voy a presentar una definición formal, más bien enunciar algunas de las propiedades que nos interesan en el contexto de los SNARKs.
 
 \vspace{1em}
 
@@ -368,7 +366,7 @@ Sea $E(\Fp)$ una curva elíptica, un pairing es una función $e$ que cumple lo s
 \begin{itemize}
     \item $e: E(\Fp) \times E(\Fp) \rightarrow \Fp$.
     \item $e(P,Q)$ puede computarse de manera eficiente.
-    \item $e(a\cdot P, b\cdot Q) = e(P,Q)^{a\cdot b} ~~~ \forall~a,b\in  \Fp$, propiedad conocida como \textbf{bilinealidad}. 
+    \item $e(a\cdot P, b\cdot Q) = e(P,Q)^{a\cdot b} ~~~ \forall~a,b\in  \Fp$, propiedad conocida como \textbf{bilinearidad}. 
 \end{itemize}
 
 La definición de pairing es más general, pero esto es todo lo que nos va a interesar en el contexto de los SNARKs. 

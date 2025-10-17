@@ -1,12 +1,12 @@
 \chapter{Proving Systems}
 Llegó el momento de hablar de uno de los temas centrales de la tesis: los \textbf{sistemas de pruebas} o \textit{proving systems} en inglés. Vamos a mencionar en particular una familia de protocolos llamados \textbf{SNARKs} (\textbf{S}uccint \textbf{N}on-Interactive \textbf{AR}gument of \textbf{K}nowledge) que sirven para demostrar la ``ejecución'' de un programa con determinados inputs. 
 
-La idea general es modelar a un programa cualquiera con matrices. Algunas de estas matrices van a representar al programa en sí y otras van a representar la ejecución concreta del programa modelado. A estas últimas las llamamos la \textbf{traza} del programa. Luego tomaremos las columnas de estas matrices de forma independiente y las interpolaremos sobre un dominio específico para obtener un conjunto de polinomios que caractericen al programa y a la ejecución. Luego de eso, vamos a comprometernos a estos polinomios ante un observador externo usando algún \textbf{Polynomial Commitement Scheme} y con esta información, aprovechándonos de la heurística de Fiat-Shamir tendremos una prueba de tamaño reducido que contiene toda la información encriptada de la ejecución del programa. Esta está armada para ser verificada a través de operaciones rápidas sobre cuerpos finitos. Esta verificación será de carácter probabilístico, lo cual quiere decir que habrá una probabilidad despreciable de que se demuestre correctamente una ejecución incorrecta o que falle la demostración de una ejecución correcta.
+La idea general es modelar a un programa cualquiera con matrices. Algunas de estas matrices van a representar al programa en sí y otras van a representar la ejecución concreta del programa modelado. A estas últimas las llamamos la \textbf{traza} del programa. Luego tomaremos las columnas de estas matrices de forma independiente y las interpolaremos sobre un dominio específico para obtener un conjunto de polinomios que caractericen al programa y a la ejecución. Luego de eso, vamos a comprometernos a estos polinomios ante un observador externo usando algún \textbf{Polynomial Commitment Scheme} y con esta información, aprovechándonos de la heurística de Fiat-Shamir tendremos una prueba de tamaño reducido que contiene toda la información encriptada de la ejecución del programa. Esta está armada para ser verificada a través de operaciones rápidas sobre cuerpos finitos. Esta verificación será de carácter probabilístico, lo cual quiere decir que habrá una probabilidad despreciable de que se demuestre correctamente una ejecución incorrecta o que falle la demostración de una ejecución correcta.
 
-La mayoría de los conceptos mencionados (como los Polynomial Commitement Schemes o la heurística de Fiat-Shamir) serán tratados a continuación. Mi intención es descomponer poco a poco el funcionamiento de esta familia de protocolos, hablar de sus propiedades y dar un ejemplo: \textbf{PLONK}. 
+La mayoría de los conceptos mencionados (como los Polynomial Commitment Schemes o la heurística de Fiat-Shamir) serán tratados a continuación. Mi intención es descomponer poco a poco el funcionamiento de esta familia de protocolos, hablar de sus propiedades y dar un ejemplo: \textbf{PLONK}. 
 
 \section{Provers y verifiers}
-En general en estos protocolos vamos a tener 2 agentes representados por programas informáticos: un \textbf{prover} y un \textbf{verifier}. El prover es quien ejecuta un programa, genera una prueba de su ejecución y se la pasa al verifier para que la verifique y se convenza de que la prueba es correcta. El prover y el verifier deberían tener un setup para ponerse de acuerdo en un conjunto de elementos. Estos elementos dependen del protocolo y suelen estar comprimidas dentro de una \textbf{Verifiying Key}. Algunos de estos elementos son comunes entre protocolos:
+En general en estos protocolos vamos a tener 2 agentes representados por programas informáticos: un \textbf{prover} y un \textbf{verifier}. El prover es quien ejecuta un programa, genera una prueba de su ejecución y se la pasa al verifier para que la verifique y se convenza de que la prueba es correcta. El prover y el verifier deberían tener un setup para ponerse de acuerdo en un conjunto de elementos. Estos elementos dependen del protocolo y suelen estar comprimidos dentro de una \textbf{Verifiying Key}. Algunos de estos elementos son comunes entre protocolos:
 \begin{itemize}
     \item Un cuerpo finito sobre el cual operar, es decir, un primo $p$ suficientemente grande para dar seguridad al protocolo que será el grado de $\Fp$. En general el cuerpo finito usado depende del sistema de pruebas elegido.
     \item Un generador de $\Fp$ al cual vamos a llamar $g$.
@@ -25,7 +25,7 @@ Sean los valores conocidos tanto por el prover como por el verifier:
 
 El protocolo se dispone de la siguiente forma:
 
-\textbf{Round 1 (commitement):} el prover genera un valor privado $a \in \Fp$ y computa $A=g^a$. A continuación le envía $A$ al verifier. Notamos que gracias a la dificultad del problema del logaritmo discreto, el verifier no puede deducir $a$ ni aún conociendo $A$ y $g$. 
+\textbf{Round 1 (commitment):} el prover genera un valor privado $a \in \Fp$ y computa $A=g^a$. A continuación le envía $A$ al verifier. Notamos que gracias a la dificultad del problema del logaritmo discreto, el verifier no puede deducir $a$ ni aún conociendo $A$ y $g$. 
 
 \textbf{Round 2 (random sampling):} El prover elige un valor aleatorio $r \in \Fp$ y computa $R=g^r$. A continuación le envía $R$ al verifier. Este valor aleatorio $r$ tampoco puede ser despejado por el verifier en un tiempo razonable. 
 
@@ -37,7 +37,9 @@ El protocolo se dispone de la siguiente forma:
 
 Vamos a descomponer esta última operación:
 $$R \cdot A^c = g^s \Leftrightarrow$$
-$$g^r \cdot (g^a)^c = g^s \Leftrightarrow$$
+$$g^r \cdot (g^a)^c = g^s \Leftrightarrow $$
+
+\begin{center}(como $s = r+a\cdot c$)\end{center}
 $$g^r \cdot g^{a \cdot c} = g^{r+a\cdot c} \Leftrightarrow$$
 $$g^{r+a\cdot c} = g^{r+a\cdot c}$$
 
@@ -51,11 +53,11 @@ $$R := S \cdot \frac{1}{A^c}$$ y la ecuación se verifica, engañando de esa man
 Dicho esto, el protocolo impide que el prover conozca el challenge de antemano, en particular no conoce el challenge al momento de comprometerse a los valores de $A$ y $R$. Esta temporalidad impide hacer este truco, ya que por el orden de los rounds el verifier conoce el valor de $R$ antes de mandar el challenge $c$, y por ende el prover no puede hacer cuentas previas en función de $c$. 
 
 
-Se llama \textbf{Soundness} a la propiedad de un protocolo criptográfico que dicta que un verifier honesto no puede ser convencido por un prover deshonesto de que una afirmación falsa es verdadera. En este caso, el protocolo de Schnorr tiene soundness, ya que el prover no puede demostrar al verifier la afirmación ´´conozco $a$ tal que $A = g^a$''.
+Se llama \textbf{Soundness} a la propiedad de un protocolo criptográfico que dicta que un verifier honesto no puede ser convencido por un prover deshonesto de que una afirmación falsa es verdadera. En este caso, el protocolo de Schnorr tiene soundness, ya que el prover no puede demostrar al verifier la afirmación “conozco $a$ tal que $A = g^a$''.
 
 \textbf{¿Qué pasa entonces con el ocultamiento de $a$?}¿Es posible para el verifier deducir el valor de $a$ con los datos provistos por el prover? El verifier conoce $A$, pero no puede deducir $a$ a partir de ello por la dificultad del problema del logaritmo discreto. Por otro lado, conoce $R$, pero tampoco puede calcular $r$ a partir de ese dato por el mismo motivo. Conoce $b$ porque él mismo lo generó, pero eso no le aporta información de por sí. Por último, conoce $s = r + a\cdot b$, sin embargo no conoce $r$, entonces no puede deducir $a$ con esa información (para cada valor fijo de $r$ correspondería un valor de $a$ distinto). Acá es donde se ve la importancia de la aleatoriedad introducida en el round 2, sin la cual este protocolo estaría revelando información confidencial ($a$). 
 
-Se llama \textbf{Zero Knowledge} a la propiedad de un protocolo criptográfico que dicta que el verifier no aprende nada más que la afirmación que se está probando. Esta es una categorización coloquial que alcanza por el momento, para no adentrarnos en definiciones más complejas. En este caso podemos decir que el prover pudo demostrar al verifier el conocimiento de $a$ sin revelar ningún tipo de información nueva sobre $a$. La ecuación $s = r + a\cdot b$ no aporta ningún tipo de información, ya que $r$ es un valor ´´basura'', convirtiendo a $s$ en otro valor ´´basura''.
+Se llama \textbf{Zero Knowledge} a la propiedad de un protocolo criptográfico que dicta que el verifier no aprende nada más que la afirmación que se está probando. Esta es una categorización coloquial que alcanza por el momento, para no adentrarnos en definiciones más complejas. En este caso podemos decir que el prover pudo demostrar al verifier el conocimiento de $a$ sin revelar ningún tipo de información nueva sobre $a$. La ecuación $s = r + a\cdot b$ no aporta ningún tipo de información, ya que $r$ es un valor aleatorio, convirtiendo a $s$ en otro valor aleatorio.
 
 \section{Propiedades de los SNARKS} \label{sec:snarks}
 Cuando hablamos de SNARKs, no es enteramente correcto hablar de ´´demostrar la ejecución de un programa'' aunque sea una frase que coloquialmente usamos con frecuencia. En la realidad lo que ocurre es que el prover \textbf{demuestra que conoce la traza de una ejecución válida del programa}. Es decir, no es necesario que el prover ejecute el programa en cuestión, aunque en general esa es la forma de obtener dicha traza. Por ahora podemos pensar en la traza como los valores que toman todas sus variables a lo largo de su ejecución. Dado un programa fijo, la traza define inequívocamente su ejecución.  
@@ -122,14 +124,14 @@ Otra forma útil de ver los programas es la de un circuito binario. En este caso
 
 \begin{figure}[h!]
 	\centering
-	\begin{subfigure}[b]{0.44\textwidth}
+	\begin{subfigure}[b]{0.33\textwidth}
 		\centering
 		\includegraphics[width=\linewidth]{imagenes/Circuito Plonk.jpg}
 		\caption{Representación en forma de circuito del programa de ejemplo}
 		\label{fig:circuito_plonk}
 	\end{subfigure}%
-	\hfill
-	\begin{subfigure}[b]{0.40\textwidth}
+	\hspace{1em}
+	\begin{subfigure}[b]{0.30\textwidth}
 		\centering
 		\includegraphics[width=\linewidth]{imagenes/circuito plonk valores.jpg}
 		\caption{Representación en forma de circuito del programa de ejemplo, con valores concretos}
@@ -141,7 +143,7 @@ Otra forma útil de ver los programas es la de un circuito binario. En este caso
 En la práctica lo que vamos a tener son valores concretos para estas variables, en este caso el circuito estaría completo como se puede ver en la figura \ref{fig:circuito_plonk_valores}.
 
 
-Para modelar nuestro programa de ejemplo, PLONK usa \textbf{matrices}. La primera matriz que vamos a mencionar es la matriz $T$: la \textbf{Traza}. En nuestro caso esta sería la que vemos en la tabla \ref{tab:matriz_t}:
+Para modelar nuestro programa de ejemplo, PLONK usa \textbf{matrices}. La primera matriz que vamos a mencionar es la matriz $T$: la \textbf{Traza}. En nuestro caso esta sería la que vemos en la tabla \ref{tab:matriz_t}. En ella podemos ver cómo cada fila de esta matriz se corresponde con una de las compuertas mencionadas anteriormente. En todos los casos la columna $A$ es el operando izquierdo, $B$ el derecho y $C$ el output. Por el momento no nos vamos a preocupar por el hecho de que no existe un segundo operando para la tercera operación, el símbolo $-$ quiere decir que puede ir cualquier valor en ese lugar, y que este no será tomado en cuenta. La traza plasmada en la tabla \ref{tab:matriz_t} es válida para nuestro programa, sin embargo no todas las posibles trazas lo son. Entonces ¿qué significa que sea válida para el protocolo? La pregunta surge porque no tenemos modelado nuestro programa todavía.
 \begin{table}[h!]
 \begin{center}
 \begin{tabular}{ccc}
@@ -158,7 +160,7 @@ Para modelar nuestro programa de ejemplo, PLONK usa \textbf{matrices}. La primer
 \end{center}
 \end{table}
 
-Acá podemos ver cómo cada fila de esta matriz se corresponde con una de las compuertas mencionadas anteriormente. En todos los casos la columna $A$ es el operando izquierdo, $B$ el derecho y $C$ el output. Por el momento no nos vamos a preocupar por el hecho de que no existe un segundo operando para la tercera operación, el símbolo $-$ quiere decir que puede ir cualquier valor en ese lugar, y que este no será tomado en cuenta. La traza plasmada en la tabla \ref{tab:matriz_t} es válida para nuestro programa, sin embargo no todas las posibles trazas lo son. Entonces ¿qué significa que sea válida para el protocolo? La pregunta surge porque no tenemos modelado nuestro programa todavía.
+
 
 Para empezar a modelar nuestro programa de juguete vamos a necesitar 2 matrices: $Q$ y $V$. Estas matrices son públicas tanto para el prover como para el verifier, y nos definen el programa en su totalidad.
 
@@ -367,7 +369,7 @@ L & R & O \\
 
 
 \label{def:validez_traza}
-\textbf{Definición.} Sea $T$ una traza con columnas $A$, $B$ y $C$. Esta refleja una evaluación del circuito dado por las matrices $Q$ y $V$ si solo si:
+\textbf{Definición.} Sea $T$ una traza con columnas $A$, $B$ y $C$. Esta refleja una evaluación del circuito dado por las matrices $Q$ y $V$ si y solo si:
 \begin{enumerate}
     \item Se satisface la ecuación \PlonkFormula
     \item $\forall i,j,k,l$, $V_{i,j} = V_{k,l} \implies T_{i,j} = T_{k,l}$
@@ -381,44 +383,45 @@ Este segundo chequeo impide que el ejemplo de la traza en \ref{tab:matrices_comp
 
 \subsubsection{\textbf{Compuertas personalizadas}} \label{sec:plonk_custom_gates}
 
-Hasta ahora vimos algunas configuraciones que pueden tener filas de la matriz $Q$, en particular para operaciones básicas como sumar y multiplicar. Sin embargo, PLONK nos permite definir compuertas personalizadas, customizando como queramos la matriz $Q$ para conseguir la operación deseada. En particular, vemos que podemos comprimir todo nuestro programa de ejemplo en una sola fila de la matriz Q, quedándonos de esta manera un conjunto de matrices como se puede ver en \ref{tab:matrices_completas_comprimidas}.
+Hasta ahora vimos algunas configuraciones que pueden tener filas de la matriz $Q$, en particular para operaciones básicas como sumar y multiplicar. Sin embargo, PLONK nos permite definir compuertas personalizadas, customizando como queramos la matriz $Q$ para conseguir la operación deseada. En particular, vemos que podemos comprimir todo nuestro programa de ejemplo en una sola fila de la matriz Q, quedándonos de esta manera un conjunto de matrices como se puede ver en la tabla \ref{tab:matrices_completas_comprimidas}.
 
 
-\begin{table}
-\centering
-\begin{minipage}{0.32\textwidth}
-\centering
-\begin{tabular}{ccccc}
-\toprule
-\textbf{$Q_L$} & \textbf{$Q_R$} & \textbf{$Q_M$} & \textbf{$Q_O$} & \textbf{$Q_C$} \\
-\midrule
-0 & 1 & 1 & -1 & -1 \\
-\bottomrule
-\end{tabular}
-\end{minipage}
-\hfill
-\begin{minipage}{0.32\textwidth}
-\centering
-\begin{tabular}{ccc}
-\toprule
-L & R & O \\
-\midrule
-0 & 1 & 2 \\
-\bottomrule
-\end{tabular}
-\end{minipage}
-\hfill
-\begin{minipage}{0.32\textwidth}
-\begin{tabular}{ccc}
-\toprule
-A & B & C \\
-\midrule
-2 & 3 & 8 \\
-\bottomrule
-\end{tabular}
-\end{minipage}
-\caption{Matrices $Q$, $V$ y $T$ comprimidas del programa de ejemplo.}
-\label{tab:matrices_completas_comprimidas}
+\begin{table}[h!]
+	\centering
+	\begin{minipage}{0.3\textwidth}
+		\centering
+		\begin{tabular}{ccccc}
+			\toprule
+			\textbf{$Q_L$} & \textbf{$Q_R$} & \textbf{$Q_M$} & \textbf{$Q_O$} & \textbf{$Q_C$} \\
+			\midrule
+			0 & 1 & 1 & -1 & -1 \\
+			\bottomrule
+		\end{tabular}
+	\end{minipage}
+	\hspace{2.5em} % pequeño espacio entre tablas
+	\begin{minipage}{0.3\textwidth}
+		\centering
+		\begin{tabular}{ccc}
+			\toprule
+			L & R & O \\
+			\midrule
+			0 & 1 & 2 \\
+			\bottomrule
+		\end{tabular}
+	\end{minipage}
+	\hspace{0.01em}
+	\begin{minipage}{0.3\textwidth}
+		\centering
+		\begin{tabular}{ccc}
+			\toprule
+			A & B & C \\
+			\midrule
+			2 & 3 & 8 \\
+			\bottomrule
+		\end{tabular}
+	\end{minipage}
+	\caption{Matrices $Q$, $V$ y $T$ comprimidas del programa de ejemplo.}
+	\label{tab:matrices_completas_comprimidas}
 \end{table}
 
 
