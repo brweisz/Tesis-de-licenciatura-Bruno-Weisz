@@ -7,7 +7,7 @@
 \contentsline {section}{\numberline {1.2}Polinomios}{8}{section.1.2}%
 \contentsline {subsection}{\numberline {1.2.1}Interpolación}{9}{subsection.1.2.1}%
 \contentsline {subsection}{\numberline {1.2.2}Lema de Schwartz-Zippel}{9}{subsection.1.2.2}%
-\contentsline {section}{\numberline {1.3}Curvas elípticas}{9}{section.1.3}%
+\contentsline {section}{\numberline {1.3}Curvas elípticas}{10}{section.1.3}%
 \contentsline {subsubsection}{\textbf {Operaciones básicas}}{10}{section*.5}%
 \contentsline {subsubsection}{\textbf {Curvas Elípticas como grupos conmutativos}}{12}{section*.8}%
 \contentsline {subsection}{\numberline {1.3.1}Curvas elípticas sobre cuerpos finitos}{12}{subsection.1.3.1}%
