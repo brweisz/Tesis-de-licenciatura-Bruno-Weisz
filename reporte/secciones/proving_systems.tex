@@ -553,10 +553,10 @@ Vamos a darle uso a toda la teoría de cuerpos y polinomios que tratamos en las 
 
 \textbf{Vamos a interpolar cada una de las columnas} sobre el dominio $D$. Esto nos va a dejar como resultado los 9 polinomios interpoladores, los cuales vamos a nombrar respectivamente (al igual que sus funciones asociadas en $\Fp$) $q_L$, $q_R$, $q_M$, $q_O$, $q_C$, $a$, $b$, $c$ y $pi$. Conceptualmente, lo que acabamos de hacer es crear 9 polinomios que cumplen una propiedad muy interesante. Tomemos por ejemplo el polinomio $a$, obtenido a partir de interpolar los valores de la columna $A$. Sin perder generalidad, vamos a notar $A[i]$ al valor en la i-ésima fila de la columna $A$. Dado el dominio de interpolación elegido y los valores que estamos interpolando, podemos ver que por definición se cumple la igualdad
 
-$$a(w^i) = A[i]$$
+$$a(\omega^i) = A[i]$$
 
 ya que el polinomio $a$ está armado para que se cumpla. Esto mismo pasa en el resto de las columnas. A continuación, vamos a armar un nuevo polinomio 
-$$f = q_L \cdot a + q_R \cdot b + q_M \cdot a \cdot b + q_O \cdot c + q_C$$
+$$f = q_L \cdot a + q_R \cdot b + q_M \cdot a \cdot b + q_O \cdot c + q_C + pi$$
 
 Si resulta familiar, es porque es una formula que vimos anteriormente predicando sobre las columnas de las matrices, pero en este caso aplicada a los polinomios asociadas a ellas. Si tomamos $f(x)$ la función asociada a $f$ en $\Fp$ obtenemos que 
 $$f(x) = 0 ~~ \forall x \in D$$
@@ -564,8 +564,8 @@ si la traza $T$ está bien formada respecto al programa $Q$ y a los Public Input
 
 \begin{align*}
 f(\omega^i) &= \\
-q_L(\omega^i) \cdot a(\omega^i) + q_R(\omega^i) \cdot b(\omega^i) + q_M(\omega^i) \cdot a(\omega^i) \cdot b(\omega^i) + q_O(\omega^i) \cdot c(\omega^i) + q_C(\omega^i) &= \\
-Q_L[i] \cdot A[i] + Q_R[i] \cdot B[i] + Q_M[i] \cdot A[i] \cdot B[i] + Q_O[i] \cdot C[i] + Q_C[i] &= 0\\
+q_L(\omega^i) \cdot a(\omega^i) + q_R(\omega^i) \cdot b(\omega^i) + q_M(\omega^i) \cdot a(\omega^i) \cdot b(\omega^i) + q_O(\omega^i) \cdot c(\omega^i) + q_C(\omega^i) + pi(\omega^i)&= \\
+Q_L[i] \cdot A[i] + Q_R[i] \cdot B[i] + Q_M[i] \cdot A[i] \cdot B[i] + Q_O[i] \cdot C[i] + Q_C[i] + PI[i] &= 0\\
 \forall ~0 \leq i < N
 \end{align*}
 
@@ -600,7 +600,7 @@ Sea $p \in \Fp[X]$, definimos a $[p]$ como el \textbf{oráculo} de $p$. Este or�
 
 Dado un conjunto de $k$ polinomios $p_1,p_2,...,p_k \in \Fp[x]$, podemos pedirle al conjunto de oráculos $[p_1], [p_2],..., [p_k]$ una evaluación conjunta, que nos devuelve para un mismo $z$ su evaluación en todos los polinomios, es decir $[p_1]_z, [p_2]_z,..., [p_k]_z$ que equivale a $p_1(z), p_2(z),...,p_k(z)$.
 
-Esta abstracción nos va a resultar útil en el protocolo para simplificar de algunos temas que veremos más adelante. La motivación concretamente está relacionada a que el prover no quiere dar al verifier los polinomios $a$, $b$ y $c$, ya que haciendo esto estaría revelando los valores de la traza. El verifier simplemente podría completar la traza $T$ haciendo las operaciones que se pueden ver en la matriz \ref{tab:matriz_t_trampa}. En cambio, al pasar un oráculo polinomio se evita este problema, permitiendo hacer la verificación deseada con las limitadas capacidades del oráculo.
+Esta abstracción nos va a resultar útil en el protocolo para simplificar algunos temas que veremos más adelante. La motivación concretamente está relacionada a que el prover no quiere dar al verifier los polinomios $a$, $b$ y $c$, ya que haciendo esto estaría revelando los valores de la traza. El verifier simplemente podría completar la traza $T$ haciendo las operaciones que se pueden ver en la matriz \ref{tab:matriz_t_trampa}. En cambio, al pasar un oráculo polinomio se evita este problema, permitiendo hacer la verificación deseada con las limitadas capacidades del oráculo. Veremos más adelante cómo estos oráculos se implementan aprovechando el lema de Schwartz-Zippel. 
 
 \begin{table}
 \begin{center}
@@ -620,12 +620,12 @@ $a(\omega^2)$ & $b(\omega^2)$ & $c(\omega^2)$ \\
 \end{table}
 
 \subsection{Protocolo parcial}
-Veamos entonces cómo funciona el protocolo usando estos oráculos y todas las propiedades vistas anteriormente. Empecemos por ver qué elementos prover y verifier.
+Veamos entonces cómo funciona el protocolo usando estos oráculos y todas las propiedades vistas anteriormente. Empecemos por ver qué elementos tienen el prover y verifier.
 
 \begin{itemize}
     \item Ambos conocen $\Fp$ y  $\omega$ un generador de grado $N$.
-    \item Ambos conocen la matriz $Q$ y la matriz $PI$.
-    \item Solo el prover conoce la matriz $T$.
+    \item Ambos conocen la matriz $Q$ y la matriz $PI$ (el programa propiamente dicho).
+    \item Solo el prover conoce la matriz $T$ (la ejecución).
 \end{itemize}
 
 Podemos ver los pasos a continuación:
@@ -633,16 +633,16 @@ Podemos ver los pasos a continuación:
 \begin{enumerate}
     \item El prover computa los polinomios  $p_i$, $q_L$, $q_R$, $q_M$, $q_O$, $q_C$, $a$, $b$, $c$
     \item El verifier computa los polinomios $pi$, $q_L$, $q_R$, $q_M$, $q_O$, $q_C$
-    \item El prover computa el polinomio $f = q_L \cdot a + q_R \cdot b + q_M \cdot a \cdot b + q_O \cdot c + q_C$
+    \item El prover computa el polinomio $f = q_L \cdot a + q_R \cdot b + q_M \cdot a \cdot b + q_O \cdot c + q_C + pi$
     \item El prover computa el polinomio $t(x) = \frac{f(x)}{x^n-1}$
     \item El prover le pasa al verifier los oráculos $[a], [b], [c], [t]$
     \item El verifier toma un valor aleatorio $z$ y verifica la ecuación 
-    $$q_L(z) \cdot [a]_z + q_R(z) \cdot [b]_z + q_M(z) \cdot [a]_z \cdot [b]_z + q_O(z) \cdot [c]_z + q_C(z) = [t]_z \cdot (z^N-1)$$
+    $$q_L(z) \cdot [a]_z + q_R(z) \cdot [b]_z + q_M(z) \cdot [a]_z \cdot [b]_z + q_O(z) \cdot [c]_z + q_C(z) + pi(z) = [t]_z \cdot (z^N-1)$$
 \end{enumerate}
 
 Los pasos 1-4 deberían ser triviales y en el paso 5 estamos tomando el modelo de oráculo explicado en \ref{sec:oraculos}, lo importante ahora es entender la verificación del paso 6 como la culminación de todas las explicaciones anteriores.
 
-Primero, notemos que si en lugar de tomar la evaluación de oráculos y polinomios en la ecuación hubiéramos comparado directamente a los polinomios, la igualdad sería trivial y el verifier podría convencerse fácilmente de que el prover posee $a$, $b$ y $c$ válidos para el programa dado por $q_L$, $q_R$, $q_M$, $q_O$ y $q_C$. Sin embargo hacer esto sería revelar la totalidad de la traza, cosa que queremos evitar. El prover quiere que el verifier se convenza de esto mismo pero sin revelar $a$, $b$ y $c$. Utilizando el lema de Schwartz-Zippel de la sección \ref{sec:zippel} observamos que si 2 polinomios que desconocemos evalúan al mismo valor en un mismo elemento aleatorio del dominio, entonces con probabilidad arrasadora ambos polinomios son iguales. En esto nos estamos apoyando ahora mismo: el verifier no necesita conocer los polinomios completos para convencerse de la igualdad, necesita conocer una evaluación de todos ellos en un mismo punto generado aleatoriamente, que es lo que nos proveen los oráculos. 
+Primero, notemos que si en lugar de tomar la evaluación de oráculos y polinomios en la ecuación hubiéramos comparado directamente a los polinomios, la igualdad sería trivial y el verifier podría convencerse fácilmente de que el prover posee $a$, $b$ y $c$ válidos para el programa dado por $q_L$, $q_R$, $q_M$, $q_O$ y $q_C$. Sin embargo hacer esto sería revelar la totalidad de la traza, cosa que queremos evitar. El prover quiere que el verifier se convenza de esto mismo pero sin revelar $a$, $b$ y $c$. Utilizando el lema de Schwartz-Zippel de la sección \ref{sec:zippel} observamos que si 2 polinomios que desconocemos evalúan al mismo valor en un mismo elemento aleatorio del dominio, entonces con probabilidad abrumadora ambos polinomios son iguales. En esto nos estamos apoyando ahora mismo: el verifier no necesita conocer los polinomios completos para convencerse de la igualdad, necesita conocer una evaluación de todos ellos en un mismo punto generado aleatoriamente, que es lo que nos proveen los oráculos. 
 
 El prover no podría haber falseado $a$, $b$, $c$ y $t$ para que la igualdad se mantenga solo en un punto, ya que no puede saber de antemano cuál es el punto $z$ en el que se van a evaluar. De esto se deduce que $a$, $b$ y $c$ tienen que ser validos y por ende el prover conoce una traza válida del programa.
 
