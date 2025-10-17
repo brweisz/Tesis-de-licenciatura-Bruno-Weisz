@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2025.9.26)  17 OCT 2025 12:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2025.9.26)  17 OCT 2025 14:46
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1040,73 +1040,73 @@ Cap\'{\i }tulo 1.
 LaTeX Info: Redefining \. on input line 74.
 LaTeX Info: Redefining \% on input line 74.
  [4]
-LaTeX Info: Redefining \. on input line 118.
-LaTeX Info: Redefining \% on input line 118.
+LaTeX Info: Redefining \. on input line 121.
+LaTeX Info: Redefining \% on input line 121.
  [5]
-LaTeX Info: Redefining \. on input line 154.
-LaTeX Info: Redefining \% on input line 154.
+LaTeX Info: Redefining \. on input line 153.
+LaTeX Info: Redefining \% on input line 153.
  [6]
-LaTeX Info: Redefining \. on input line 171.
-LaTeX Info: Redefining \% on input line 171.
+LaTeX Info: Redefining \. on input line 169.
+LaTeX Info: Redefining \% on input line 169.
  [7]
-LaTeX Info: Redefining \. on input line 197.
-LaTeX Info: Redefining \% on input line 197.
+LaTeX Info: Redefining \. on input line 198.
+LaTeX Info: Redefining \% on input line 198.
  [8]
 <imagenes/intuicion_shwartz_zippel.png, id=464, 509.905pt x 500.87125pt>
 File: imagenes/intuicion_shwartz_zippel.png Graphic file (type png)
 <use imagenes/intuicion_shwartz_zippel.png>
 Package pdftex.def Info: imagenes/intuicion_shwartz_zippel.png  used on input l
-ine 221.
+ine 217.
 (pdftex.def)             Requested size: 213.39568pt x 209.6155pt.
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-LaTeX Info: Redefining \. on input line 231.
-LaTeX Info: Redefining \% on input line 231.
+LaTeX Info: Redefining \. on input line 229.
+LaTeX Info: Redefining \% on input line 229.
 [9]
 <imagenes/curvas elipticas de ejemplo.png, id=474, 1393.205pt x 620.3175pt>
 File: imagenes/curvas elipticas de ejemplo.png Graphic file (type png)
 <use imagenes/curvas elipticas de ejemplo.png>
 Package pdftex.def Info: imagenes/curvas elipticas de ejemplo.png  used on inpu
-t line 236.
+t line 232.
 (pdftex.def)             Requested size: 213.39568pt x 95.01237pt.
-LaTeX Info: Redefining \. on input line 244.
-LaTeX Info: Redefining \% on input line 244.
- [10 <./imagenes/intuicion_shwartz_zippel.png> <./imagenes/curvas elipticas de 
-ejemplo.png>]
-<imagenes/elliptic_curve_addition.png, id=485, 1134.2375pt x 917.4275pt>
+<imagenes/elliptic_curve_addition.png, id=476, 1134.2375pt x 917.4275pt>
 File: imagenes/elliptic_curve_addition.png Graphic file (type png)
 <use imagenes/elliptic_curve_addition.png>
 Package pdftex.def Info: imagenes/elliptic_curve_addition.png  used on input li
-ne 250.
+ne 246.
 (pdftex.def)             Requested size: 213.39568pt x 172.59119pt.
-<imagenes/suma tangente curva eliptica.png, id=487, 1134.2375pt x 917.4275pt>
+LaTeX Info: Redefining \. on input line 252.
+LaTeX Info: Redefining \% on input line 252.
+ [10 <./imagenes/intuicion_shwartz_zippel.png> <./imagenes/curvas elipticas de 
+ejemplo.png>]
+<imagenes/suma tangente curva eliptica.png, id=488, 1134.2375pt x 917.4275pt>
 File: imagenes/suma tangente curva eliptica.png Graphic file (type png)
 <use imagenes/suma tangente curva eliptica.png>
 Package pdftex.def Info: imagenes/suma tangente curva eliptica.png  used on inp
-ut line 259.
+ut line 255.
 (pdftex.def)             Requested size: 213.39568pt x 172.59119pt.
-LaTeX Info: Redefining \. on input line 267.
-LaTeX Info: Redefining \% on input line 267.
+LaTeX Info: Redefining \. on input line 269.
+LaTeX Info: Redefining \% on input line 269.
  [11 <./imagenes/elliptic_curve_addition.png> <./imagenes/suma tangente curva e
 liptica.png>]
-LaTeX Info: Redefining \. on input line 309.
-LaTeX Info: Redefining \% on input line 309.
- [12]
-<imagenes/curva eliptica Fp.png, id=503, 467.7475pt x 402.50375pt>
+<imagenes/curva eliptica Fp.png, id=498, 467.7475pt x 402.50375pt>
 File: imagenes/curva eliptica Fp.png Graphic file (type png)
 <use imagenes/curva eliptica Fp.png>
-Package pdftex.def Info: imagenes/curva eliptica Fp.png  used on input line 312
+Package pdftex.def Info: imagenes/curva eliptica Fp.png  used on input line 308
 .
 (pdftex.def)             Requested size: 213.39568pt x 183.63083pt.
+LaTeX Info: Redefining \. on input line 312.
+LaTeX Info: Redefining \% on input line 312.
+ [12]
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 321.
-LaTeX Info: Redefining \. on input line 357.
-LaTeX Info: Redefining \% on input line 357.
+put line 317.
+LaTeX Info: Redefining \. on input line 356.
+LaTeX Info: Redefining \% on input line 356.
  [13 <./imagenes/curva eliptica Fp.png>]
-LaTeX Info: Redefining \. on input line 370.
-LaTeX Info: Redefining \% on input line 370.
+LaTeX Info: Redefining \. on input line 372.
+LaTeX Info: Redefining \% on input line 372.
 
 [14])
 LaTeX Info: Redefining \. on input line 62.
@@ -1991,7 +1991,7 @@ runsystem(rm tesis.pyg)...executed.
 Here is how much of TeX's memory you used:
  30143 strings out of 480112
  584678 string characters out of 5892631
- 883438 words of memory out of 5000000
+ 883437 words of memory out of 5000000
  47049 multiletter control sequences out of 15000+600000
  483414 words of font info for 82 fonts, out of 8000000 for 9000
  85 hyphenation exceptions out of 8191
@@ -2024,7 +2024,7 @@ texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/share/texlive/texmf-d
 ist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/share/texlive/texmf-dist/fon
 ts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf/fonts/type1/publi
 c/cm-super/sfrm1095.pfb>
-Output written on tesis.pdf (113 pages, 3177164 bytes).
+Output written on tesis.pdf (113 pages, 3177738 bytes).
 PDF statistics:
  1591 PDF objects out of 1728 (max. 8388607)
  1285 compressed objects within 13 object streams

@@ -82,25 +82,21 @@ Si bien todos los elementos de $R$ tienen un inverso aditivo, un anillo no requi
 
 \vspace{2em}
 
-\textbf{Definición:} Dado un grupo $(G, \cdot)$ con un elemento neutro $e$, llamamos $G^*$ al conjunto formado por $G - \{e\}$.
-
-\vspace{2em}
-
 \textbf{Definición:} Un \textbf{cuerpo} es una tripla $(F, +, \cdot)$ donde $F$ es un conjunto y $(\cdot, +)$ son operaciones binarias que llamamos \textit{producto} y \textit{suma} respectivamente. Se tiene que cumplir que:
 
 \begin{enumerate}
     \item El par $(F,+)$ es un grupo conmutativo.
-    \item El par $(F^*,\cdot)$ es un grupo conmutativo.
+    \item El par $(F-\{0\}\, \cdot)$ es un grupo conmutativo.
     \item Se cumple la \textbf{propiedad distributiva}.
 \end{enumerate}
 
-En otras palabras, un cuerpo es un anillo donde el grupo $(F^*,\cdot)$ sí tiene inverso para todos sus elementos y se cumple la propiedad conmutativa.
+En otras palabras, un cuerpo es un anillo donde el grupo $(F,\cdot)$ tiene inverso para todos sus elementos excepto el $0$ y se cumple la propiedad conmutativa.
 
 \newcommand{\Fp}{\mathbb{F}_p}
 
 \vspace{1em}
 
-\textbf{Notación:} Sea $p \in \mathbb{N}$ primo, llamamos $\Fp = ((\mathbb{Z}/p\mathbb{Z}), +_{(p)}, \cdot_{(p)})$ al cuerpo finito conformado por los enteros módulo $p$, con la suma $+_{(p)}$ y el producto $\cdot_{(p)}$ definidos módulo $p$.
+\textbf{Notación:} Sea $p \in \mathbb{N}$ primo, llamamos $\Fp = \left((\mathbb{Z}/p\mathbb{Z}), +_{(p)}, \cdot_{(p)}\right)$ al cuerpo finito conformado por los enteros módulo $p$, con la suma $+_{(p)}$ y el producto $\cdot_{(p)}$ definidos módulo $p$.
 
 \vspace{1em}
 
@@ -148,9 +144,9 @@ El Problema del Logaritmo Discreto es un problema matemático que surge en cript
 
 \textbf{Definición.} Sea $g$ un generador de $\Fp$ y $h \neq 0 \in \Fp$. El Problema del Logaritmo Discreto (\textbf{DLP} por sus siglas en inglés) es el problema de encontrar un exponente $x \in \mathbb{N}$ tal que $$g^x \equiv h ~ (p)$$ El número $x$ se conoce como logaritmo discreto de $h$ en base $g$ y se denota $log_g(h)$. Hay una cantidad infinita de soluciones al problema, ya que si $g^x = h$ entonces $g^{x+k\cdot(p-1)} = h$. Por esto mismo, el problema está definido módulo $p-1$ y existe una única solución. 
 
-DLP es un problema difícil en teoría de la computación, ya que los únicos algoritmos que se conocen para resolverlo son de tiempo exponencial en función del tamaño de $p$. Esto quiere decir que si $p$ es suficientemente grande entonces no es posible hallar $x$ en un tiempo tratable.  
+DLP es un problema difícil en teoría de la computación, ya que los únicos algoritmos que se conocen para resolverlo para un cuerpo genérico son de tiempo exponencial en función del tamaño de $p$. Esto quiere decir que si $p$ es suficientemente grande entonces no es posible hallar $x$ en un tiempo tratable.
 
-El algoritmo trivial para solucionar el problema es computar todos los exponentes de $g$ hasta hallar un exponente $x$ tal que $g^x = h$. Sin embargo, si analizamos la complejidad computacional y supongamos que $p$ se representa con $k$ bits (es decir que $p \in [2^k, 2^{k+1}]$), entonces el algoritmo tiene un costo de $\mathcal{O}(3^k)$.
+El algoritmo trivial para solucionar el problema es computar todos los exponentes de $g$ hasta hallar un exponente $x$ tal que $g^x = h$. Sin embargo, si analizamos la complejidad computacional y suponemos que $p$ se representa con $k$ bits (es decir que $p \in [2^{k-1}, 2^k]$), entonces el algoritmo tiene un costo de $\mathcal{O}(3^k)$.
 
 A continuación vamos a ver un protocolo criptográfico básico cuya seguridad depende de la dificultad de DLP: el intercambio de claves de Diffie-Hellman.
 
@@ -158,7 +154,7 @@ A continuación vamos a ver un protocolo criptográfico básico cuya seguridad d
 El intercambio de claves de Diffie-Hellman es un problema conocido de la criptografía simétrica. El problema que resuelve es el siguiente: supongamos que tenemos 2 partes (Alice y Bob) que quieren tener una clave compartida para usar un cifrado simétrico, pero el único medio que tienen para comunicarse es inseguro. Una forma de interpretar un medio inseguro es pensar que hay un adversario (llamémoslo Malcom) que puede observar toda la informacion que Alice y Bob intercambian. La dificultad de DLP en $\Fp$ provee una solución a este problema. El protocolo es el siguiente:
 
 \begin{enumerate}
-    \item Alice y Bob se ponen de acuerdo en un primo $p$ suficientemente grande y un valor $g \neq 0 \in \Fp$. No importa si $p$ y $g$ son valores públicos, es decir, Malcom puede conocer estos valores.
+    \item Alice y Bob se ponen de acuerdo en un primo $p$ suficientemente grande y un valor $g \neq 0 \in \Fp$. No importa si $p$ y $g$ son valores públicos, es decir, Malcom puede conocer estos valores. Esta idea de que se debe asumir que el adversario conoce el protocolo se conoce como \textbf{principio de Kerckhoff}.
     \item Alice y Bob eligen valores secretos $a \in \mathbb{N}$ y $b \in \mathbb{N}$ respectivamente y estos valores también deben ser suficientemente grandes.
     \item Cada uno va a calcular $$A \equiv g^a ~(p)~~~y~~~ B \equiv g^b ~(p)$$ respectivamente.  
     \item Cada uno comparte el valor que calculó con el otro, es decir, Alice le transmite $A$ a Bob a través del medio inseguro, y Bob hace lo mismo con $B$.
@@ -193,7 +189,7 @@ Las raíces de un polinomio $p$ sobre el dominio $\Fp$ son aquellos valores $x^*
 \end{prop}
 
 \begin{prop} \label{prop:unicidad_raices}
-    Sean $p,q \in \Fp[X]$ tal que $deg(p) = deg(q) = n$. Si el multiconjunto de raíces de $p$ es el mismo que el de $q$ entonces $p=q$.
+    Sean $p,q \in \Fp[X]$ polinomios mónicos tal que $deg(p) = deg(q) = n$. Si el multiconjunto de raíces de $p$ es el mismo que el de $q$ entonces $p=q$.
 \end{prop}
 
 
