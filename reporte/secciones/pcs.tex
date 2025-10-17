@@ -162,10 +162,10 @@ Visualmente, un merkle tree de 3 niveles se puede ver en la figura \ref{fig:merk
 
 Hay otras operaciones que nos interesan realizar sobre un Merkle Tree además de construirlo para obtener su raíz. Una de usos más comunes es \textbf{comprometerse a una lista} para luego revelar elementos a pedido sin revelar la lista entera. ¿Qué quiere decir esto?
 
-Supongamos que un prover tiene una lista secreta $A$ de tamaño $N=n^2$ y necesita convencer a un verifier de que esa lista posee ciertos elementos en determinadas posiciones. Desde el punto de vista del verifier, quiere convencerse de que el prover tiene una lista $A$ con los elementos $e_1, \cdots, e_k$ en las posiciones $i=1,\cdots k$ ($k \leq N$). Para cada uno de estos elementos, el prover puede brindar una prueba criptográfica $\pi_{i,e_i}$. Veamos cómo es el protocolo:
+Supongamos que un prover tiene una lista secreta $A$ de tamaño $N=2^n$ y necesita convencer a un verifier de que esa lista posee ciertos elementos en determinadas posiciones. Desde el punto de vista del verifier, quiere convencerse de que el prover tiene una lista $A$ con los elementos $e_1, \cdots, e_k$ en las posiciones $i=1,\cdots k$ ($k \leq N$). Para cada uno de estos elementos, el prover puede brindar una prueba criptográfica $\pi_{i,e_i}$. Veamos cómo es el protocolo:
 
 \begin{enumerate}
-    \item $Commit(A) \rightarrow [A]$: el prover computa el Merkle Tree de $A$ y le pasa al verifier la raíz del árbol, que va a funcionar como el commit o ''huella digital'' de la lista $A$. Esto se debe a que ninguna otra lista podría tener la misma huella si asumimos que la función de hash se comporta como un oráculo aleatorio. 
+    \item $Commit(A) \rightarrow [A]$: el prover computa el Merkle Tree de $A$ y le pasa al verifier la raíz del árbol, que va a funcionar como el commit o “huella digital'' de la lista $A$. Si asumimos que la función de hash se comporta como un oráculo aleatorio, entonces la probabilidad de que otra lista tenga la misma huella es casi nula. 
     \item $Open(A, i) \rightarrow a_i, \pi_{i,a_i}$: la idea acá es mandar un \textbf{camino de autenticación} de la posición $i$-esima. Para esto alcanza con mandar un nodo interno del árbol por nivel. ¿Cómo funciona esto? Consideremos una lista $A$ de largo $N=4$ como la de la figura \ref{fig:merkle_tree}. Supongamos que el verifier quiere conocer el valor de la posición $3$, es decir, $a_3$. ¿Cuáles son los valores que el prover tiene que darle para que pueda llegar hasta la raíz? En este caso, esos valores serían $\pi_{3,a_3} = h(a_4)$ y $h(h(a_1)||h(a_2))$. ¿Por qué es suficiente con esto? Veamos los pasos que realiza el verifier en la verificación.
     \item $Verify([A], i, a_i, \pi_{i, a_i}) \rightarrow \{true, false\}$: 
     \begin{enumerate}
@@ -204,7 +204,7 @@ Supongamos que un prover tiene una lista secreta $A$ de tamaño $N=n^2$ y necesi
 \end{figure}
 
 \section{FRI}
-Otro protocolo que implementa oráculos de polinomios es FRI. Este protocolo no necesita un CRS para funcionar, sin embargo las pruebas que genera ocupan más espacio de almacenamiento que las de KZG para alcanzar el mismo nivel de seguridad. FRI también es un protocolo interactivo, con muchas más interacciones que KZG y que se apoya en los commitments de listas de los Merkle Trees vistos en la sección \ref{sec:merkle_tree}. 
+Otro protocolo que implementa oráculos de polinomios es FRI. Este protocolo tiene la ventaja de que no necesita un CRS para funcionar, sin embargo las pruebas que genera ocupan más espacio de almacenamiento que las de KZG para alcanzar el mismo nivel de seguridad. FRI también es un protocolo interactivo, con muchas más interacciones que KZG y que se apoya en los commitments de listas de los Merkle Trees vistos en la sección \ref{sec:merkle_tree}. 
 
 Concretamente, FRI es una Low Degree Proof: un protocolo que sirve para demostrar que el prover conoce un polinomio de grado \textbf{menor estricto a} un cierto $N = 2^n$. El polinomial commitment scheme se apoya en este protocolo para dar garantías de Soundness. 
 
