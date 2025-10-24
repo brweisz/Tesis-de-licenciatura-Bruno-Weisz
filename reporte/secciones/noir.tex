@@ -72,6 +72,8 @@ $$\textcolor{red}{3\cdot w_3\cdot w_2 + 5 \cdot w_1 \cdot w_2} \textcolor{blue}{
 \subsection{Operaciones de memoria}\label{sec:acir_memoria}
 En un programa tradicional usamos arreglos para almacenar datos. Noir también provee esa posibilidad, pero ¿cómo esto se traduce a código ACIR? El caso donde queremos leer y escribir posiciones con un indice constante es sencillo: el código ACIR simplemente modela estos casos con AssertZero. El caso intrincado es cuando las posiciones que leemos y escribimos son dinámicas, es decir, cuando no dependen del circuito estático sino de la ejecución concreta del mismo. Para esto, hay operaciones de memoria \textbf{abstractas} para crear un bloque de memoria, escribir en una posición y leer de esa posición. 
 
+Es importante aclarar que las listas en Noir son de tamaño estático: no se pueden agregar ni quitar elementos. También son creadas con valores iniciales para todas sus posiciones. 
+
 \subsubsection{\textbf{MemoryInit}}
 Este opcode dicta la creación de un bloque de memoria. El opcode tiene 3 campos:
 \begin{itemize}
