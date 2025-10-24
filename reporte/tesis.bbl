@@ -71,6 +71,10 @@ Ralph~C Merkle.
 \newblock In {\em Conference on the Theory and Application of Cryptology},
   pages 218--238. Springer, 1989.
 
+\bibitem{UltraHonk}
+https://github.com/AztecProtocol/barretenberg?tab=readme-ov file#ultrahonk.
+\newblock Ultrahonk.
+
 \bibitem{Rust}
 https://www.rust lang.org/es.
 \newblock Rust.

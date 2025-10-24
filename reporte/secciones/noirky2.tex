@@ -75,7 +75,7 @@ Lo primero que notamos es que dado un programa $P$ de ACIR, todos los witnesses 
 $$witness\_target\_map: W \rightarrow T$$
 que asigna a cada witness de $P$ un target de $P'$. Concretamente, esta función va a ser implementada con un diccionario que tendremos que mantener durante toda la generación de P'. ¿Por qué es necesario esto? Hay varios motivos para tener este mapeo:
 \begin{enumerate}
-    \item Supongamos que en el código ACIR tenemos el listado $OP$ de opcodes y que $$\exists w \in W: ~ w \in OP[i] \land w \in OP[j] ~~ i < j$$ 
+    \item Supongamos que en el código ACIR tenemos el listado $OP$ de opcodes y que un witness $w_k$ aparece mencionado en más de un opcode. 
     Si nosotros asociamos un target $t$ a $w$ queremos referirnos al mismo $t$ cuando vuelva a aparecer $w$ más adelante. Para eso definimos la función tal que $$witness\_target\_map(w) = t$$ 
     \item Cuando generamos la prueba de Plonky2, tenemos que proveer al \texttt{CircuitBuilder} con una función 
     $$partial\_witness: T \rightarrow \Fp$$ 
@@ -492,8 +492,8 @@ Internamente, el Generator recibe 1 target \texttt{full\_number} con su valor as
 \State \textbf{Entrada 3:} \texttt{limb\_targets: [Target; N]}
 \State \textbf{let mut} \texttt{full\_number\_value = target\_value\_mapping.get(full\_number\_target)}
 \For{\texttt{i = 0..N}}
-    \State \texttt{\textbf{let} current\_limb\_value = full\_number\_value$/ 2^8$}
-    \State \texttt{full\_number\_value = full\_number\_value$/2^8$}
+    \State \texttt{\textbf{let} current\_limb\_value = full\_number\_value$ ~\%~ 2^8$}
+    \State \texttt{full\_number\_value = full\_number\_value$~/~2^8$}
     \State \texttt{witness\_value\_mapping.set(limb\_targets[i], current\_limb\_value)}
 \EndFor
 \end{algorithmic}
