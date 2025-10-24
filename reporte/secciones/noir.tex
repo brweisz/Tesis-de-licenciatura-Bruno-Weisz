@@ -1,117 +1,51 @@
 \chapter{Noir}\label{sec:noir}
-Noir es un lenguaje de programación que permite generar pruebas de ejecución usando un protocolo ZK-SNARK. Podemos escribir programas tradicionales, librerías y Smart Contracts, aunque vamos a enfocarnos en los programas tradicionales. El prover que usa para esto se llama \textbf{Barretenberg} y está escrito en C++. La versión de Noir usada en este trabajo es la 0.47.0 por motivos que veremos más adelante. A su vez, la versión de Barretenberg usada es la 0.61.0. A continuación vamos a realizar un análisis en profundidad del flujo que realiza Noir para pasar de un código de alto nivel a una prueba de ejecución a través de su compilador: \textbf{Nargo}. 
+Noir es un lenguaje de programación que permite generar pruebas de ejecución usando un protocolo ZK-SNARK. Podemos escribir programas tradicionales, librerías y Smart Contracts, aunque vamos a enfocarnos en los programas tradicionales. El prover que usa para esto se llama \textbf{Barretenberg} y está escrito en C++. La versión de Noir usada en este trabajo es la 0.47.0 por motivos que veremos más adelante. A su vez, la versión de Barretenberg usada es la 0.61.0. En el apéndice \ref{sec:apendice_noir} vamos a realizar un análisis en profundidad del flujo que realiza Noir para pasar de un código de alto nivel a una prueba de ejecución a través de su compilador: \textbf{Nargo}. A continuación vamos a extraer los aspectos más relevantes de este flujo.
 
-\begin{enumerate}
-    \item Lo primero que tenemos que hacer instalar Nargo, el compilador de Noir.
-    \item Después tenemos que crear un nuevo proyecto con el comando \texttt{nargo new nombre\_proyecto}. Esto nos generará un directorio con la siguiente estructura:
-\end{enumerate}
-    \dirtree{%
-    .1 nombre\_proyecto.
-    .2 src.
-    .3 main.nr.
-    .2 Nargo.toml.
-    }
-\begin{enumerate}[start=3]
-    \item A continuación tenemos que escribir un programa en Noir  en el archivo \texttt{main.nr}. Noir es un lenguaje estáticamente tipado (es decir, se tiene que conocer el tipo de las variables en tiempo de compilación). Ahora es el momento donde cabe preguntarnos ¿qué tipo de programas queremos escribir en Noir? Estamos hablando de un lenguaje de propósito general, pero lo que este lenguaje nos permite es ejecutar un programa con inputs tanto públicos como privados.
-    \begin{itemize}
-        \item Los inputs públicos son conocidos tanto por el prover como por el verifier, potencialmente en un ejemplo del mundo real es el verifier el que provee estos inputs para delegar la ejecución del programa.
-        \item Los inputs privados que solo van a ser conocidos por el prover (quien genera la prueba de ejecución).
-    \end{itemize}
-    Veamos un ejemplo trivial con inputs tanto públicos como privados:
-    \begin{verbatim}
-    fn main(x: pub Field, y: Field) {
-        assert(x == y*y);
-    }
-    \end{verbatim}
-    ¿Qué es lo que hace este programa? \texttt{main} es el punto de entrada, recibe un parametro público y uno privado y no tiene un valor de retorno. Su propósito en lenguaje coloquial es generar una prueba de ejecución de que quien lo ejecuta conoce el valor de $\sqrt{x}$ en $\Fp$. 
-    
-    \item Lo siguiente que tenemos que hacer para generar la prueba de ejecución es proveer un listado de parámetros ''testigo'' para que este programa se instancie con valores concretos. Para esto vamos a ejecutar \texttt{nargo check}, comando que creará un archivo Prover.toml. En este archivo tenemos que completar los valores de los parámetros testigo: \texttt{x = 4 y = 2}
+Una vez que instalamos Nargo y creamos un proyecto, hay que escribir un programa de Noir. Noir tiene una particularidad frente a otros lenguajes: permite distinguir entre inputs públicos y privados. Los inputs privados serán conocidos únicamente por el prover mientras que los públicos serán conocidos también por el verifier. A continuación se ve un ejemplo:
 
-    
-    
-    
-    \item Una vez provistos estos parámetros, lo que vamos a querer es ejecutar el programa para generar un sistema de restricciones que lo respresente. Esto concretamente toma la forma de un \textbf{ACIR} (\textit{Abstract Circuit Intermediate Representation}). Para ejecutarlo tenemos que correr el comando \texttt{nargo execute witness --print-acir}. El sistema de ecuaciones generado puede verse en la figura \ref{fig:ACIR_ejemplo_1}.
+\begin{verbatim}
+fn main(x: pub Field, y: Field) {
+    assert(x == y*y);
+}
+\end{verbatim}
 
-    \begin{figure} 
-    \centering
-    \begin{minipage}{0.7\textwidth}
-    \begin{verbatim}
-        private parameters indices : [0]
-        public parameters indices : [1]
-        return value indices : []
-        EXPR [ (-1, _1, _1) (1, _0) 0 ]
-    \end{verbatim}
-    \end{minipage}
 
-    \caption{ACIR para el programa de ejemplo con un AssertZero}
-    \label{fig:ACIR_ejemplo_1}
-    \end{figure}
-    
-    Vamos a desglosar lo anterior: el output de la ejecución del programa en formato ACIR se maneja con variables llamadas \textbf{Witnesses}. Los Witnesses son nombrados de forma secuencial (de 0 en adelante) según su orden de aparición en el código. 
-    \begin{itemize}
-        \item \textbf{private parameters indices} es un listado de los inputs privados del circuito. En nuestro programa de alto nivel llamamos \texttt{x} al input privado, pero en el ACIR este input es representado por el witness $0$. Esto se debe a que \texttt{x} es la primera variable que procesa el compilador.  
-        \item \textbf{public parameters indices} es un listado de los inputs públicos del circuito. En este caso, ''y'' es representado por el witness $1$. 
-        \item \textbf{return value indices} es el listado de los witness de retorno. En este caso no hay ninguno, pero serían los siguientes en ser nombrados.
-        \item \textbf{Circuito}: la última linea representa la única ecuación del sistema de ecuaciones del circuito. El Opcode que denota es el \textbf{AssertZero}, con lo cual esa linea se puede traducir a la ecuación:
+¿Qué es lo que hace este programa? \texttt{main} es el punto de entrada, recibe un parámetro público y uno privado y no tiene un valor de retorno. Su propósito en lenguaje coloquial es generar una prueba de ejecución de que el prover conoce el valor de $\sqrt{x}$ en $\Fp$, pero sin revelar su valor. 
 
-        \begin{center}
-        $-1 \cdot w_1 \cdot w_1 + 1 \cdot w_0 + 0 = 0$, 
-        \end{center}
-        que si la despejamos es equivalente a 
-        \begin{center}
-        $w_0 = w_1^2$,
-        \end{center}
-        que es lo que el programa busca demostrar. Estamos usando la notación $w_i$ para denotar al $i$-esimo witness (lo que vimos como $\_i$). Vamos a desarrollar sobre el \texttt{AssertZero} en breve, pero antes sigamos con el flujo de generar una prueba de ejecución. 
-    \end{itemize}
-    En este punto el directorio debería verse parecido a esto:
-    
-    \end{enumerate}
+A continuación, el prover deberá brindar una asignación de valores concretos para las variables de input, en este caso $x$ e $y$. Esto es necesario para obtener la traza de una ejecución concreta del programa. Se puede tomar por ejemplo \texttt{x = 4, y = 2}. Una vez provistos estos valores, el programa se puede ejecutar para obtener 2 artefactos:
 
-	\noindent\parbox{\linewidth}{%
-    \dirtree{%
-    .1 nombre\_proyecto.
-    .2 Nargo.toml.
-    .2 Prover.toml.
-    .2 src.
-    .3 main.nr.
-    .2 target.
-    .3 witness.gz.
-    .3 nombre\_proyecto.json.
-    }}
+\begin{itemize}
+	\item un sistema de restricciones en formato \textbf{ACIR} (\textit{Abstract Circuit Intermediate Representation}). Este está compuesto por un conjunto de \textbf{witnesses}, que son las variables inmutables del programa, y un sistema de ecuaciones que establece restricciones sobre ellas. En términos de PLONK, son las matrices $Q$ y $V$. Veremos más en detalle el código ACIR en la sección \ref{sec:acir}.
+	\item un diccionario que asigna valores concretos a todos los witnesses, que tienen que ver con la ejecución concreta del programa dados los inputs suministrados por el prover. En términos de PLONK, son las matrices $T$ y $PI$.
+\end{itemize}. 
 
-    Los 2 recursos que generó la ejecución anterior son:
-    \begin{itemize}
-        \item \textbf{ACIR}: en archivo ubicado en \texttt{target/nombre\_proyecto.json}.
-        \item \textbf{Valores generados de witness}: en \texttt{target/witness.gz}. En esta instancia Nargo ya resolvió todos los valores de los witnesses. Para hacerlo, tomó $\Fp$ con 
-        $$p=2^{254}+2^{224}+2^{192}+2^{96}-1$$
-    \end{itemize}
-    \begin{enumerate}[start=6]
-    \item El siguiente paso va a ser generar la prueba de ejecución de este circuito. Para esto vamos a usar un prover. El único prover que sabe interpretar código ACIR al momento es \textbf{Barretenberg}, por lo cual tendremos que instalarlo. Lo siguiente que tenemos que hacer es generar la prueba de ejecución de Barretenberg, con el comando:
+Para este programa concreto, los witnesses son:
+\begin{itemize}
+	\item $w_0$ representando a la variable $x$ (pública)
+	\item $w_1$ representando a la variable $y$ (privada)
+\end{itemize}
+y el sistema de restricciones está dado por una única ecuación:
+\begin{center}
+	$-1 \cdot w_1 \cdot w_1 + 1 \cdot w_0 = 0$, 
+\end{center}
+que es equivalente a 
+\begin{center}
+	$w_0 = w_1^2$,
+\end{center}
 
-    \vspace{0.5em}
+Conceptualmente podemos pensarlo en términos de PLONK como que ya tenemos las matrices $T$ (traza), $Q$ y $V$ (programa) y $PI$ (public inputs). El siguiente paso es generar la prueba de ejecución con un \textbf{prover} específico, en este caso Barretenberg. Alcanza con suministrar a Barretenberg los artefactos que generamos para que este genere la prueba deseada.
 
-    \texttt{bb prove -c target/nombre\_proyecto.json -w /target/witness -o proof}
+Ahora bien, el verifier quiere verificar esta prueba. Va a tener acceso al programa y a los inputs públicos, pero no a los inputs privados. Una prueba no puede ser verificada en el vacío, sino que tiene que ser contextualizada para que tenga significado o semántica. Concretamente, el verifier adempás de la prueba necesita una \textbf{Verifying Key}: un artefacto que contiene la información sobre el programa y los inputs públicos. La VK puede ser armada por el prover y pasada al verifier, o puede ser armada directamente por el verifier. Barretenberg tiene herramientas para crear la VK sin necesidad de generar una prueba. Esto se puede ver en más detalle en el apéndice \ref{sec:apendice_noir}. 
 
-    \vspace{0.5em}
+Los comandos usados en cada paso son:
+\begin{itemize}
+	\item \textbf{prove}: para generar la prueba
+	\item \textbf{write\_vk}: para generar la Verification Key
+	\item \textbf{verify}: para verificar la prueba (requiere haber generado la VK)
+\end{itemize}
 
-    Esto va a crear una prueba ($\pi$) de Barretenberg y la va a guardar en el archivo \texttt{nombre\_proyecto/proof}.
-    
-    \item A continuación queremos verificar la prueba. Esto consta de 2 partes: generar la clave de verificación y verificarla. En un caso real querríamos que la verificación sea hecha por un agente distinto al que generó la prueba, por ende, tanto la clave de verificación como la prueba deberían ser pasadas al verifier. La clave de verificación también puede ser creada por el mismo verifier. 
-
-    \vspace{0.5em}
-    \texttt{1. bb write\_vk -b target/nombre\_proyecto.json -o target/vk}
-    
-    \texttt{2. bb verify -k target/vk -p proof}
-    \vspace{0.5em}
-    
-    El primer comando va a generar una \textbf{Verification Key} en la ruta indicada. Esta contiene toda la información necesaria para verificar la prueba: el programa codificado, los public inputs, etc. En lenguaje de PLONK, podríamos pensarlo como las matrices $Q$, $V$ y $PI$ (o sus polinomios interpoladores en un dominio $D$). El segundo comando va a realizar la verificación, valiéndose de la Verification Key y la prueba. 
-
-    Es importante notar también que la semántica que da Noir a las operaciones hace que el comando \texttt{prove} y el comando \texttt{write\_vk} repitan acciones. En particular, podemos decir que \texttt{write\_vk} realiza un subconjunto de las acciones que realiza \texttt{prove} ya que este último tiene que generar una verifying key antes de poder generar la prueba. Una decisión de diseño distinta sería que el comando \texttt{prove} reciba como parámetro una proving key previamente generada, sin embargo no pretendemos en este trabajo modificar la semántica de las operaciones del programa sobre el cual deseamos construir. 
-
-\end{enumerate}
-
-\section{ACIR}
-Como mencionamos previamente, el \textit{Abstract Circuit Intermediate Representation} (ACIR) es el bytecode de alto nivel en el cual deriva todo programa escrito en Noir. Esencialmente, un código ACIR determina un sistema de ecuaciones \textbf{en abstracto}. Esto quiere decir que no siempre va a proveer explícitamente todas las ecuaciones polinomiales, sino que muchas veces simplemente va a decir qué características deben cumplir estas ecuaciones, delegando en el proving system la implementación concreta. 
+\section{ACIR}\label{sec:acir}
+El \textit{Abstract Circuit Intermediate Representation} (ACIR) es el bytecode de alto nivel en el cual deriva todo programa escrito en Noir. Esencialmente, un código ACIR determina un sistema de ecuaciones \textbf{en abstracto}. Esto quiere decir que no siempre va a proveer explícitamente todas las ecuaciones polinomiales, sino que muchas veces simplemente va a decir qué características deben cumplir estas ecuaciones, delegando en el proving system la implementación concreta. 
 
 Las variables de este sistema de ecuaciones son los \textbf{witnesses}. Un código ACIR describe qué variables van a ser \textbf{inputs públicos}, \textbf{inputs privados} y \textbf{valores de retorno}. Esto no significa nada para el sistema de ecuaciones en sí, pero provee información para que el proving system pueda replicar el programa escrito en Noir con su propio modelo. Los witnesses están numerados del $0$ en adelante, y los notamos $w_i$ o simplemente $\_i$. Podemos pensar a los witnesses como variables \textbf{inmutables} del programa, aunque en realidad sabemos que su inmutabilidad se debe a que estamos parados en otro modelo: en el de los sistemas de ecuaciones. 
 

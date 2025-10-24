@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2025.9.26)  24 OCT 2025 17:59
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2025.9.26)  24 OCT 2025 18:58
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -991,7 +991,7 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 9.
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-<logofcen.pdf, id=280, 108.405pt x 108.405pt>
+<logofcen.pdf, id=284, 108.405pt x 108.405pt>
 File: logofcen.pdf Graphic file (type pdf)
 <use logofcen.pdf>
 Package pdftex.def Info: logofcen.pdf  used on input line 10.
@@ -1052,7 +1052,7 @@ LaTeX Info: Redefining \% on input line 169.
 LaTeX Info: Redefining \. on input line 198.
 LaTeX Info: Redefining \% on input line 198.
  [9]
-<imagenes/intuicion_shwartz_zippel.png, id=469, 509.905pt x 500.87125pt>
+<imagenes/intuicion_shwartz_zippel.png, id=474, 509.905pt x 500.87125pt>
 File: imagenes/intuicion_shwartz_zippel.png Graphic file (type png)
 <use imagenes/intuicion_shwartz_zippel.png>
 Package pdftex.def Info: imagenes/intuicion_shwartz_zippel.png  used on input l
@@ -1062,7 +1062,7 @@ ine 217.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<imagenes/curvas elipticas de ejemplo.png, id=472, 1393.205pt x 620.3175pt>
+<imagenes/curvas elipticas de ejemplo.png, id=477, 1393.205pt x 620.3175pt>
 File: imagenes/curvas elipticas de ejemplo.png Graphic file (type png)
 <use imagenes/curvas elipticas de ejemplo.png>
 Package pdftex.def Info: imagenes/curvas elipticas de ejemplo.png  used on inpu
@@ -1071,13 +1071,13 @@ t line 230.
 LaTeX Info: Redefining \. on input line 233.
 LaTeX Info: Redefining \% on input line 233.
 [10]
-<imagenes/elliptic_curve_addition.png, id=481, 1134.2375pt x 917.4275pt>
+<imagenes/elliptic_curve_addition.png, id=487, 1134.2375pt x 917.4275pt>
 File: imagenes/elliptic_curve_addition.png Graphic file (type png)
 <use imagenes/elliptic_curve_addition.png>
 Package pdftex.def Info: imagenes/elliptic_curve_addition.png  used on input li
 ne 244.
 (pdftex.def)             Requested size: 213.39568pt x 172.59119pt.
-<imagenes/suma tangente curva eliptica.png, id=483, 1134.2375pt x 917.4275pt>
+<imagenes/suma tangente curva eliptica.png, id=489, 1134.2375pt x 917.4275pt>
 File: imagenes/suma tangente curva eliptica.png Graphic file (type png)
 <use imagenes/suma tangente curva eliptica.png>
 Package pdftex.def Info: imagenes/suma tangente curva eliptica.png  used on inp
@@ -1094,7 +1094,7 @@ liptica.png>]
 LaTeX Info: Redefining \. on input line 298.
 LaTeX Info: Redefining \% on input line 298.
  [13]
-<imagenes/curva eliptica Fp.png, id=507, 467.7475pt x 402.50375pt>
+<imagenes/curva eliptica Fp.png, id=512, 467.7475pt x 402.50375pt>
 File: imagenes/curva eliptica Fp.png Graphic file (type png)
 <use imagenes/curva eliptica Fp.png>
 Package pdftex.def Info: imagenes/curva eliptica Fp.png  used on input line 306
@@ -1134,7 +1134,7 @@ LaTeX Info: Redefining \% on input line 82.
 LaTeX Info: Redefining \. on input line 108.
 LaTeX Info: Redefining \% on input line 108.
  [21]
-<imagenes/Circuito Plonk.jpg, id=570, 675.52374pt x 1489.565pt>
+<imagenes/Circuito Plonk.jpg, id=575, 675.52374pt x 1489.565pt>
 File: imagenes/Circuito Plonk.jpg Graphic file (type jpg)
 <use imagenes/Circuito Plonk.jpg>
 Package pdftex.def Info: imagenes/Circuito Plonk.jpg  used on input line 127.
@@ -1144,7 +1144,7 @@ Underfull \hbox (badness 4229) in paragraph at lines 128--128
 \OT1/cmr/m/n/10 cir-cui-to del pro-gra-ma de
  []
 
-<imagenes/circuito plonk valores.jpg, id=571, 652.4375pt x 1542.76375pt>
+<imagenes/circuito plonk valores.jpg, id=576, 652.4375pt x 1542.76375pt>
 File: imagenes/circuito plonk valores.jpg Graphic file (type jpg)
 <use imagenes/circuito plonk valores.jpg>
 Package pdftex.def Info: imagenes/circuito plonk valores.jpg  used on input lin
@@ -1252,49 +1252,31 @@ Cap\'{\i }tulo 4.
 
  (./secciones/noir.tex
 Cap\'{\i }tulo 5.
-
-Overfull \hbox (35.72572pt too wide) in paragraph at lines 6--7
-[]\OT1/cmr/m/n/10.95 Despu^^Ses te-ne-mos que crear un nue-vo pro-yec-to con el
- co-man-do \OT1/cmtt/m/n/10.95 nargo new nombre[]proyecto\OT1/cmr/m/n/10.95 .
- []
-
 [45
 
 
 ]
-LaTeX Info: Redefining \. on input line 82.
-LaTeX Info: Redefining \% on input line 82.
+LaTeX Info: Redefining \. on input line 58.
+LaTeX Info: Redefining \% on input line 58.
  [46]
-Overfull \hbox (12.89726pt too wide) in paragraph at lines 114--115
-[]\OT1/cmr/m/n/10.95 Como men-cio-na-mos pre-via-men-te, el \OT1/cmr/m/it/10.95
- Abs-tract Cir-cuit In-ter-me-dia-te Re-pre-sen-ta-tion \OT1/cmr/m/n/10.95 (ACI
-R)
- []
-
-LaTeX Info: Redefining \. on input line 115.
-LaTeX Info: Redefining \% on input line 115.
-[47]
-LaTeX Info: Redefining \. on input line 140.
-LaTeX Info: Redefining \% on input line 140.
+LaTeX Info: Redefining \. on input line 86.
+LaTeX Info: Redefining \% on input line 86.
+ [47]
+LaTeX Info: Redefining \. on input line 130.
+LaTeX Info: Redefining \% on input line 130.
  [48]
-LaTeX Info: Redefining \. on input line 173.
-LaTeX Info: Redefining \% on input line 173.
+LaTeX Info: Redefining \. on input line 174.
+LaTeX Info: Redefining \% on input line 174.
  [49]
-LaTeX Info: Redefining \. on input line 234.
-LaTeX Info: Redefining \% on input line 234.
+LaTeX Info: Redefining \. on input line 227.
+LaTeX Info: Redefining \% on input line 227.
  [50]
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-LaTeX Info: Redefining \. on input line 271.
-LaTeX Info: Redefining \% on input line 271.
-[51]
-LaTeX Info: Redefining \. on input line 308.
-LaTeX Info: Redefining \% on input line 308.
- [52])
+LaTeX Info: Redefining \. on input line 247.
+LaTeX Info: Redefining \% on input line 247.
+ [51])
 LaTeX Info: Redefining \. on input line 68.
 LaTeX Info: Redefining \% on input line 68.
- [53]
+ [52]
 \openout2 = `secciones/plonky2.aux'.
 
  (./secciones/plonky2.tex
@@ -1315,7 +1297,7 @@ ci^^Son de-fault \OT1/cmtt/m/n/10.95 standard[]recursion[]config\OT1/cmr/m/n/10
 .95 .
  []
 
-[54
+[53
 
 
 
@@ -1323,18 +1305,18 @@ ci^^Son de-fault \OT1/cmtt/m/n/10.95 standard[]recursion[]config\OT1/cmr/m/n/10
 ]
 LaTeX Info: Redefining \. on input line 63.
 LaTeX Info: Redefining \% on input line 63.
- [55]
+ [54]
 LaTeX Info: Redefining \. on input line 92.
 LaTeX Info: Redefining \% on input line 92.
- [56])
+ [55])
 LaTeX Info: Redefining \. on input line 69.
 LaTeX Info: Redefining \% on input line 69.
- [57]
+ [56]
 \openout2 = `secciones/noirky2.aux'.
 
  (./secciones/noirky2.tex
 Cap\'{\i }tulo 7.
-[58
+[57
 
 
 
@@ -1342,17 +1324,17 @@ Cap\'{\i }tulo 7.
 ]
 LaTeX Info: Redefining \. on input line 62.
 LaTeX Info: Redefining \% on input line 62.
- [59]
+ [58]
 LaTeX Info: Redefining \. on input line 81.
 LaTeX Info: Redefining \% on input line 81.
- [60]
+ [59]
 LaTeX Info: Redefining \. on input line 112.
 LaTeX Info: Redefining \% on input line 112.
- [61]
+ [60]
 LaTeX Info: Redefining \. on input line 145.
 LaTeX Info: Redefining \% on input line 145.
- [62]
-<imagenes/circuito_assert_zero.jpg, id=918, 758.835pt x 1325.95375pt>
+ [61]
+<imagenes/circuito_assert_zero.jpg, id=914, 758.835pt x 1325.95375pt>
 File: imagenes/circuito_assert_zero.jpg Graphic file (type jpg)
 <use imagenes/circuito_assert_zero.jpg>
 Package pdftex.def Info: imagenes/circuito_assert_zero.jpg  used on input line 
@@ -1366,19 +1348,19 @@ Overfull \hbox (4.00479pt too wide) in paragraph at lines 202--203
 
 LaTeX Info: Redefining \. on input line 205.
 LaTeX Info: Redefining \% on input line 205.
-[63]
+[62]
 LaTeX Info: Redefining \. on input line 205.
 LaTeX Info: Redefining \% on input line 205.
- [64 <./imagenes/circuito_assert_zero.jpg>]
+ [63 <./imagenes/circuito_assert_zero.jpg>]
 LaTeX Info: Redefining \. on input line 277.
 LaTeX Info: Redefining \% on input line 277.
- [65]
+ [64]
 LaTeX Info: Redefining \. on input line 307.
 LaTeX Info: Redefining \% on input line 307.
- [66]
+ [65]
 LaTeX Info: Redefining \. on input line 344.
 LaTeX Info: Redefining \% on input line 344.
- [67]
+ [66]
 Underfull \hbox (badness 10000) in paragraph at lines 411--412
 [] \OT1/cmtt/m/n/10.95 let new[]target[]i = builder.conditional[]assign(is[]cur
 rent[]position,
@@ -1386,7 +1368,7 @@ rent[]position,
 
 LaTeX Info: Redefining \. on input line 418.
 LaTeX Info: Redefining \% on input line 418.
-[68]
+[67]
 Overfull \hbox (37.0281pt too wide) in paragraph at lines 420--421
 []\OT1/cmr/m/n/10.95 La pri-me-ra Black-Box Fun-ction que va-mos a ana-li-zar v
 a a ser \OT1/cmtt/m/n/10.95 BlackBoxFunction::RangeCheck\OT1/cmr/m/n/10.95 .
@@ -1394,13 +1376,13 @@ a a ser \OT1/cmtt/m/n/10.95 BlackBoxFunction::RangeCheck\OT1/cmr/m/n/10.95 .
 
 LaTeX Info: Redefining \. on input line 436.
 LaTeX Info: Redefining \% on input line 436.
-[69]
+[68]
 LaTeX Info: Redefining \. on input line 467.
 LaTeX Info: Redefining \% on input line 467.
- [70]
+ [69]
 LaTeX Info: Redefining \. on input line 503.
 LaTeX Info: Redefining \% on input line 503.
- [71]
+ [70]
 Overfull \hbox (10.07672pt too wide) in paragraph at lines 520--521
 []\OT1/cmr/m/n/10.95 La for-ma de tra-du-cir la ope-ra-cio-nes \OT1/cmtt/m/n/10
 .95 BlackBoxFunction::AND \OT1/cmr/m/n/10.95 y \OT1/cmtt/m/n/10.95 BlackBoxFunc
@@ -1409,18 +1391,18 @@ tion::XOR
 
 LaTeX Info: Redefining \. on input line 523.
 LaTeX Info: Redefining \% on input line 523.
-[72]
+[71]
 LaTeX Info: Redefining \. on input line 564.
 LaTeX Info: Redefining \% on input line 564.
- [73]
+ [72]
 LaTeX Info: Redefining \. on input line 601.
 LaTeX Info: Redefining \% on input line 601.
- [74])
+ [73])
 LaTeX Info: Redefining \. on input line 70.
 LaTeX Info: Redefining \% on input line 70.
- [75]
+ [74]
 Cap\'{\i }tulo 8.
-[76
+[75
 
 
 
@@ -1437,7 +1419,7 @@ See the caption package documentation for explanation.
 
 LaTeX Info: Redefining \. on input line 125.
 LaTeX Info: Redefining \% on input line 125.
-[77]
+[76]
 \openout3 = `tesis.pyg'.
 
 
@@ -1445,7 +1427,7 @@ LaTeX Info: Redefining \% on input line 125.
 1B.pygtex)
 LaTeX Info: Redefining \. on input line 164.
 LaTeX Info: Redefining \% on input line 164.
- [78]
+ [77]
 \openout3 = `tesis.pyg'.
 
 
@@ -1458,7 +1440,7 @@ LaTeX Info: Redefining \% on input line 164.
 1B.pygtex)
 LaTeX Info: Redefining \. on input line 198.
 LaTeX Info: Redefining \% on input line 198.
- [79]
+ [78]
 \openout3 = `tesis.pyg'.
 
 
@@ -1466,33 +1448,33 @@ LaTeX Info: Redefining \% on input line 198.
 1B.pygtex)
 LaTeX Info: Redefining \. on input line 229.
 LaTeX Info: Redefining \% on input line 229.
- [80]
+ [79]
 LaTeX Info: Redefining \. on input line 256.
 LaTeX Info: Redefining \% on input line 256.
- [81]
+ [80]
 LaTeX Info: Redefining \. on input line 262.
 LaTeX Info: Redefining \% on input line 262.
- [82] [83
+ [81] [82
 
 ]
 
 Package hyperref Warning: Difference (2) between bookmark levels is greater 
 (hyperref)                than one, level fixed on input line 292.
 
-<imagenes/tiempos/prove-Xor-u8.png, id=1087, 433.62pt x 433.62pt>
+<imagenes/tiempos/prove-Xor-u8.png, id=1083, 433.62pt x 433.62pt>
 File: imagenes/tiempos/prove-Xor-u8.png Graphic file (type png)
 <use imagenes/tiempos/prove-Xor-u8.png>
 Package pdftex.def Info: imagenes/tiempos/prove-Xor-u8.png  used on input line 
 302.
 (pdftex.def)             Requested size: 256.07741pt x 256.09163pt.
-[84]
-<imagenes/tiempos/write_vk-Xor-u8.png, id=1098, 433.62pt x 433.62pt>
+[83]
+<imagenes/tiempos/write_vk-Xor-u8.png, id=1094, 433.62pt x 433.62pt>
 File: imagenes/tiempos/write_vk-Xor-u8.png Graphic file (type png)
 <use imagenes/tiempos/write_vk-Xor-u8.png>
 Package pdftex.def Info: imagenes/tiempos/write_vk-Xor-u8.png  used on input li
 ne 313.
 (pdftex.def)             Requested size: 256.07741pt x 256.09163pt.
-<imagenes/tiempos/prove-vs-vk-AssertZero-Noirky2.png, id=1100, 433.62pt x 433.6
+<imagenes/tiempos/prove-vs-vk-AssertZero-Noirky2.png, id=1096, 433.62pt x 433.6
 2pt>
 File: imagenes/tiempos/prove-vs-vk-AssertZero-Noirky2.png Graphic file (type pn
 g)
@@ -1500,9 +1482,9 @@ g)
 Package pdftex.def Info: imagenes/tiempos/prove-vs-vk-AssertZero-Noirky2.png  u
 sed on input line 325.
 (pdftex.def)             Requested size: 256.07741pt x 256.09163pt.
- [85 <./imagenes/tiempos/prove-Xor-u8.png>] [86 <./imagenes/tiempos/write_vk-Xo
+ [84 <./imagenes/tiempos/prove-Xor-u8.png>] [85 <./imagenes/tiempos/write_vk-Xo
 r-u8.png> <./imagenes/tiempos/prove-vs-vk-AssertZero-Noirky2.png>]
-<imagenes/tiempos/verify-Assert Zero.png, id=1121, 433.62pt x 433.62pt>
+<imagenes/tiempos/verify-Assert Zero.png, id=1117, 433.62pt x 433.62pt>
 File: imagenes/tiempos/verify-Assert Zero.png Graphic file (type png)
 <use imagenes/tiempos/verify-Assert Zero.png>
 Package pdftex.def Info: imagenes/tiempos/verify-Assert Zero.png  used on input
@@ -1513,22 +1495,22 @@ Package pdftex.def Info: imagenes/tiempos/verify-Assert Zero.png  used on input
 Package hyperref Warning: Difference (2) between bookmark levels is greater 
 (hyperref)                than one, level fixed on input line 353.
 
-[87 <./imagenes/tiempos/verify-Assert Zero.png>]
-<imagenes/tiempos/prove-Assert Zero-log.png, id=1133, 433.62pt x 433.62pt>
+[86 <./imagenes/tiempos/verify-Assert Zero.png>]
+<imagenes/tiempos/prove-Assert Zero-log.png, id=1128, 433.62pt x 433.62pt>
 File: imagenes/tiempos/prove-Assert Zero-log.png Graphic file (type png)
 <use imagenes/tiempos/prove-Assert Zero-log.png>
 Package pdftex.def Info: imagenes/tiempos/prove-Assert Zero-log.png  used on in
 put line 366.
 (pdftex.def)             Requested size: 209.1301pt x 209.13432pt.
-<imagenes/tiempos/prove-Assert Zero.png, id=1134, 433.62pt x 433.62pt>
+<imagenes/tiempos/prove-Assert Zero.png, id=1129, 433.62pt x 433.62pt>
 File: imagenes/tiempos/prove-Assert Zero.png Graphic file (type png)
 <use imagenes/tiempos/prove-Assert Zero.png>
 Package pdftex.def Info: imagenes/tiempos/prove-Assert Zero.png  used on input 
 line 373.
 (pdftex.def)             Requested size: 209.1301pt x 209.13432pt.
- [88 <./imagenes/tiempos/prove-Assert Zero-log.png> <./imagenes/tiempos/prove-A
+ [87 <./imagenes/tiempos/prove-Assert Zero-log.png> <./imagenes/tiempos/prove-A
 ssert Zero.png>]
-<imagenes/tiempos/prove-AssertZero-vs-mem-Noirky2.png, id=1145, 433.62pt x 433.
+<imagenes/tiempos/prove-AssertZero-vs-mem-Noirky2.png, id=1141, 433.62pt x 433.
 62pt>
 File: imagenes/tiempos/prove-AssertZero-vs-mem-Noirky2.png Graphic file (type p
 ng)
@@ -1536,7 +1518,7 @@ ng)
 Package pdftex.def Info: imagenes/tiempos/prove-AssertZero-vs-mem-Noirky2.png  
 used on input line 392.
 (pdftex.def)             Requested size: 192.0548pt x 192.05714pt.
-<imagenes/tiempos/prove-AssertZero-vs-mem-Barretenberg.png, id=1146, 433.62pt x
+<imagenes/tiempos/prove-AssertZero-vs-mem-Barretenberg.png, id=1142, 433.62pt x
  433.62pt>
 File: imagenes/tiempos/prove-AssertZero-vs-mem-Barretenberg.png Graphic file (t
 ype png)
@@ -1544,7 +1526,7 @@ ype png)
 Package pdftex.def Info: imagenes/tiempos/prove-AssertZero-vs-mem-Barretenberg.
 png  used on input line 399.
 (pdftex.def)             Requested size: 192.0548pt x 192.05714pt.
-<imagenes/tiempos/prove-Memoria (varía operaciones).png, id=1150, 433.62pt x 4
+<imagenes/tiempos/prove-Memoria (varía operaciones).png, id=1146, 433.62pt x 4
 33.62pt>
 File: imagenes/tiempos/prove-Memoria (varía operaciones).png Graphic file (typ
 e png)
@@ -1556,9 +1538,9 @@ g  used on input line 411.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[89 <./imagenes/tiempos/prove-AssertZero-vs-mem-Noirky2.png> <./imagenes/tiempo
+[88 <./imagenes/tiempos/prove-AssertZero-vs-mem-Noirky2.png> <./imagenes/tiempo
 s/prove-AssertZero-vs-mem-Barretenberg.png>]
-<imagenes/tiempos/prove-Range-u8-table-vs-bits.png, id=1161, 433.62pt x 433.62p
+<imagenes/tiempos/prove-Range-u8-table-vs-bits.png, id=1157, 433.62pt x 433.62p
 t>
 File: imagenes/tiempos/prove-Range-u8-table-vs-bits.png Graphic file (type png)
 
@@ -1566,9 +1548,9 @@ File: imagenes/tiempos/prove-Range-u8-table-vs-bits.png Graphic file (type png)
 Package pdftex.def Info: imagenes/tiempos/prove-Range-u8-table-vs-bits.png  use
 d on input line 427.
 (pdftex.def)             Requested size: 256.07741pt x 256.09163pt.
- [90 <./imagenes/tiempos/prove-Memoria (varía operaciones).png> <./imagenes/ti
+ [89 <./imagenes/tiempos/prove-Memoria (varía operaciones).png> <./imagenes/ti
 empos/prove-Range-u8-table-vs-bits.png>]
-<imagenes/tiempos/prove-Range-u16-Noirky2-vs-Barretenberg.png, id=1173, 433.62p
+<imagenes/tiempos/prove-Range-u16-Noirky2-vs-Barretenberg.png, id=1169, 433.62p
 t x 433.62pt>
 File: imagenes/tiempos/prove-Range-u16-Noirky2-vs-Barretenberg.png Graphic file
  (type png)
@@ -1576,7 +1558,7 @@ File: imagenes/tiempos/prove-Range-u16-Noirky2-vs-Barretenberg.png Graphic file
 Package pdftex.def Info: imagenes/tiempos/prove-Range-u16-Noirky2-vs-Barretenbe
 rg.png  used on input line 436.
 (pdftex.def)             Requested size: 256.07741pt x 256.09163pt.
-<imagenes/tiempos/prove-Xor-u16-Noirky2-vs-Barretenberg.png, id=1178, 433.62pt 
+<imagenes/tiempos/prove-Xor-u16-Noirky2-vs-Barretenberg.png, id=1174, 433.62pt 
 x 433.62pt>
 File: imagenes/tiempos/prove-Xor-u16-Noirky2-vs-Barretenberg.png Graphic file (
 type png)
@@ -1588,8 +1570,8 @@ Package pdftex.def Info: imagenes/tiempos/prove-Xor-u16-Noirky2-vs-Barretenberg
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[91 <./imagenes/tiempos/prove-Range-u16-Noirky2-vs-Barretenberg.png>]
-<imagenes/tiempos/prove-Xor-Noirky2-bits.png, id=1189, 433.62pt x 433.62pt>
+[90 <./imagenes/tiempos/prove-Range-u16-Noirky2-vs-Barretenberg.png>]
+<imagenes/tiempos/prove-Xor-Noirky2-bits.png, id=1184, 433.62pt x 433.62pt>
 File: imagenes/tiempos/prove-Xor-Noirky2-bits.png Graphic file (type png)
 <use imagenes/tiempos/prove-Xor-Noirky2-bits.png>
 Package pdftex.def Info: imagenes/tiempos/prove-Xor-Noirky2-bits.png  used on i
@@ -1599,7 +1581,7 @@ nput line 459.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<imagenes/tamanios/tamanio-write_vk-Assert Zero.png, id=1192, 433.62pt x 433.62
+<imagenes/tamanios/tamanio-write_vk-Assert Zero.png, id=1187, 433.62pt x 433.62
 pt>
 File: imagenes/tamanios/tamanio-write_vk-Assert Zero.png Graphic file (type png
 )
@@ -1610,19 +1592,19 @@ ed on input line 474.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<imagenes/tamanios/tamanio-write_vk-Xor-u8.png, id=1195, 433.62pt x 433.62pt>
+<imagenes/tamanios/tamanio-write_vk-Xor-u8.png, id=1190, 433.62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-write_vk-Xor-u8.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-write_vk-Xor-u8.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-write_vk-Xor-u8.png  used on
  input line 483.
 (pdftex.def)             Requested size: 256.07741pt x 256.09163pt.
-[92 <./imagenes/tiempos/prove-Xor-u16-Noirky2-vs-Barretenberg.png>]
+[91 <./imagenes/tiempos/prove-Xor-u16-Noirky2-vs-Barretenberg.png>]
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[93 <./imagenes/tiempos/prove-Xor-Noirky2-bits.png> <./imagenes/tamanios/tamani
+[92 <./imagenes/tiempos/prove-Xor-Noirky2-bits.png> <./imagenes/tamanios/tamani
 o-write_vk-Assert Zero.png>]
-<imagenes/tamanios/tamanio-prove-Range-u8.png, id=1218, 433.62pt x 433.62pt>
+<imagenes/tamanios/tamanio-prove-Range-u8.png, id=1213, 433.62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-prove-Range-u8.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-prove-Range-u8.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-prove-Range-u8.png  used on 
@@ -1632,354 +1614,370 @@ input line 497.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[94 <./imagenes/tamanios/tamanio-write_vk-Xor-u8.png>]
+[93 <./imagenes/tamanios/tamanio-write_vk-Xor-u8.png>]
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[95 <./imagenes/tamanios/tamanio-prove-Range-u8.png>] [96] [97
+[94 <./imagenes/tamanios/tamanio-prove-Range-u8.png>] [95] [96
 
-] [98] [99]
-[100
+] [97] [98]
+[99
 
 ]
 Cap\'{\i }tulo A.
+
+Overfull \hbox (35.72572pt too wide) in paragraph at lines 562--563
+[]\OT1/cmr/m/n/10.95 Despu^^Ses te-ne-mos que crear un nue-vo pro-yec-to con el
+ co-man-do \OT1/cmtt/m/n/10.95 nargo new nombre[]proyecto\OT1/cmr/m/n/10.95 .
+ []
+
+[100
+
+]
+LaTeX Info: Redefining \. on input line 646.
+LaTeX Info: Redefining \% on input line 646.
+ [101]
+LaTeX Info: Redefining \. on input line 670.
+LaTeX Info: Redefining \% on input line 670.
+ [102]
+Cap\'{\i }tulo B.
 File: imagenes/tiempos/prove-Assert Zero.png Graphic file (type png)
 <use imagenes/tiempos/prove-Assert Zero.png>
 Package pdftex.def Info: imagenes/tiempos/prove-Assert Zero.png  used on input 
-line 569.
+line 675.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
 File: imagenes/tiempos/prove-Memoria (varía operaciones).png Graphic file (typ
 e png)
 <use imagenes/tiempos/prove-Memoria (varía operaciones).png>
 Package pdftex.def Info: imagenes/tiempos/prove-Memoria (varía operaciones).pn
-g  used on input line 575.
+g  used on input line 681.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/prove-Memoria (varía tamaño de lista).png, id=1262, 433.62p
+<imagenes/tiempos/prove-Memoria (varía tamaño de lista).png, id=1278, 433.62p
 t x 433.62pt>
 File: imagenes/tiempos/prove-Memoria (varía tamaño de lista).png Graphic file
  (type png)
 <use imagenes/tiempos/prove-Memoria (varía tamaño de lista).png>
 Package pdftex.def Info: imagenes/tiempos/prove-Memoria (varía tamaño de list
-a).png  used on input line 581.
+a).png  used on input line 687.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/prove-Range-u8.png, id=1263, 433.62pt x 433.62pt>
+<imagenes/tiempos/prove-Range-u8.png, id=1279, 433.62pt x 433.62pt>
 File: imagenes/tiempos/prove-Range-u8.png Graphic file (type png)
 <use imagenes/tiempos/prove-Range-u8.png>
 Package pdftex.def Info: imagenes/tiempos/prove-Range-u8.png  used on input lin
-e 590.
+e 696.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/prove-Range-u16.png, id=1264, 433.62pt x 433.62pt>
+<imagenes/tiempos/prove-Range-u16.png, id=1280, 433.62pt x 433.62pt>
 File: imagenes/tiempos/prove-Range-u16.png Graphic file (type png)
 <use imagenes/tiempos/prove-Range-u16.png>
 Package pdftex.def Info: imagenes/tiempos/prove-Range-u16.png  used on input li
-ne 596.
+ne 702.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/prove-Range-u32.png, id=1265, 433.62pt x 433.62pt>
+<imagenes/tiempos/prove-Range-u32.png, id=1281, 433.62pt x 433.62pt>
 File: imagenes/tiempos/prove-Range-u32.png Graphic file (type png)
 <use imagenes/tiempos/prove-Range-u32.png>
 Package pdftex.def Info: imagenes/tiempos/prove-Range-u32.png  used on input li
-ne 602.
+ne 708.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
 File: imagenes/tiempos/prove-Xor-u8.png Graphic file (type png)
 <use imagenes/tiempos/prove-Xor-u8.png>
 Package pdftex.def Info: imagenes/tiempos/prove-Xor-u8.png  used on input line 
-611.
+717.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/prove-Xor-u16.png, id=1266, 433.62pt x 433.62pt>
+<imagenes/tiempos/prove-Xor-u16.png, id=1282, 433.62pt x 433.62pt>
 File: imagenes/tiempos/prove-Xor-u16.png Graphic file (type png)
 <use imagenes/tiempos/prove-Xor-u16.png>
 Package pdftex.def Info: imagenes/tiempos/prove-Xor-u16.png  used on input line
- 617.
+ 723.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/prove-Xor-u32.png, id=1267, 433.62pt x 433.62pt>
+<imagenes/tiempos/prove-Xor-u32.png, id=1283, 433.62pt x 433.62pt>
 File: imagenes/tiempos/prove-Xor-u32.png Graphic file (type png)
 <use imagenes/tiempos/prove-Xor-u32.png>
 Package pdftex.def Info: imagenes/tiempos/prove-Xor-u32.png  used on input line
- 623.
+ 729.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/write_vk-Assert Zero.png, id=1268, 433.62pt x 433.62pt>
+<imagenes/tiempos/write_vk-Assert Zero.png, id=1284, 433.62pt x 433.62pt>
 File: imagenes/tiempos/write_vk-Assert Zero.png Graphic file (type png)
 <use imagenes/tiempos/write_vk-Assert Zero.png>
 Package pdftex.def Info: imagenes/tiempos/write_vk-Assert Zero.png  used on inp
-ut line 638.
+ut line 744.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/write_vk-Memoria (varía operaciones).png, id=1269, 433.62pt 
+<imagenes/tiempos/write_vk-Memoria (varía operaciones).png, id=1285, 433.62pt 
 x 433.62pt>
 File: imagenes/tiempos/write_vk-Memoria (varía operaciones).png Graphic file (
 type png)
 <use imagenes/tiempos/write_vk-Memoria (varía operaciones).png>
 Package pdftex.def Info: imagenes/tiempos/write_vk-Memoria (varía operaciones)
-.png  used on input line 644.
+.png  used on input line 750.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/write_vk-Memoria (varía tamaño de lista).png, id=1270, 433.
+<imagenes/tiempos/write_vk-Memoria (varía tamaño de lista).png, id=1286, 433.
 62pt x 433.62pt>
 File: imagenes/tiempos/write_vk-Memoria (varía tamaño de lista).png Graphic f
 ile (type png)
 <use imagenes/tiempos/write_vk-Memoria (varía tamaño de lista).png>
 Package pdftex.def Info: imagenes/tiempos/write_vk-Memoria (varía tamaño de l
-ista).png  used on input line 650.
+ista).png  used on input line 756.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/write_vk-Range-u8.png, id=1271, 433.62pt x 433.62pt>
+<imagenes/tiempos/write_vk-Range-u8.png, id=1287, 433.62pt x 433.62pt>
 File: imagenes/tiempos/write_vk-Range-u8.png Graphic file (type png)
 <use imagenes/tiempos/write_vk-Range-u8.png>
 Package pdftex.def Info: imagenes/tiempos/write_vk-Range-u8.png  used on input 
-line 659.
+line 765.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/write_vk-Range-u16.png, id=1272, 433.62pt x 433.62pt>
+<imagenes/tiempos/write_vk-Range-u16.png, id=1288, 433.62pt x 433.62pt>
 File: imagenes/tiempos/write_vk-Range-u16.png Graphic file (type png)
 <use imagenes/tiempos/write_vk-Range-u16.png>
 Package pdftex.def Info: imagenes/tiempos/write_vk-Range-u16.png  used on input
- line 665.
+ line 771.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/write_vk-Range-u32.png, id=1273, 433.62pt x 433.62pt>
+<imagenes/tiempos/write_vk-Range-u32.png, id=1289, 433.62pt x 433.62pt>
 File: imagenes/tiempos/write_vk-Range-u32.png Graphic file (type png)
 <use imagenes/tiempos/write_vk-Range-u32.png>
 Package pdftex.def Info: imagenes/tiempos/write_vk-Range-u32.png  used on input
- line 671.
+ line 777.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
 File: imagenes/tiempos/write_vk-Xor-u8.png Graphic file (type png)
 <use imagenes/tiempos/write_vk-Xor-u8.png>
 Package pdftex.def Info: imagenes/tiempos/write_vk-Xor-u8.png  used on input li
-ne 680.
+ne 786.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/write_vk-Xor-u16.png, id=1274, 433.62pt x 433.62pt>
+<imagenes/tiempos/write_vk-Xor-u16.png, id=1290, 433.62pt x 433.62pt>
 File: imagenes/tiempos/write_vk-Xor-u16.png Graphic file (type png)
 <use imagenes/tiempos/write_vk-Xor-u16.png>
 Package pdftex.def Info: imagenes/tiempos/write_vk-Xor-u16.png  used on input l
-ine 686.
+ine 792.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/write_vk-Xor-u32.png, id=1275, 433.62pt x 433.62pt>
+<imagenes/tiempos/write_vk-Xor-u32.png, id=1291, 433.62pt x 433.62pt>
 File: imagenes/tiempos/write_vk-Xor-u32.png Graphic file (type png)
 <use imagenes/tiempos/write_vk-Xor-u32.png>
 Package pdftex.def Info: imagenes/tiempos/write_vk-Xor-u32.png  used on input l
-ine 692.
+ine 798.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
 File: imagenes/tiempos/verify-Assert Zero.png Graphic file (type png)
 <use imagenes/tiempos/verify-Assert Zero.png>
 Package pdftex.def Info: imagenes/tiempos/verify-Assert Zero.png  used on input
- line 705.
+ line 811.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/verify-Memoria (varia operaciones).png, id=1276, 433.62pt x 4
+<imagenes/tiempos/verify-Memoria (varia operaciones).png, id=1292, 433.62pt x 4
 33.62pt>
 File: imagenes/tiempos/verify-Memoria (varia operaciones).png Graphic file (typ
 e png)
 <use imagenes/tiempos/verify-Memoria (varia operaciones).png>
 Package pdftex.def Info: imagenes/tiempos/verify-Memoria (varia operaciones).pn
-g  used on input line 711.
+g  used on input line 817.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/verify-Memoria (varía tamaño de lista).png, id=1277, 433.62
+<imagenes/tiempos/verify-Memoria (varía tamaño de lista).png, id=1293, 433.62
 pt x 433.62pt>
 File: imagenes/tiempos/verify-Memoria (varía tamaño de lista).png Graphic fil
 e (type png)
 <use imagenes/tiempos/verify-Memoria (varía tamaño de lista).png>
 Package pdftex.def Info: imagenes/tiempos/verify-Memoria (varía tamaño de lis
-ta).png  used on input line 717.
+ta).png  used on input line 823.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/verify-Range-u8.png, id=1278, 433.62pt x 433.62pt>
+<imagenes/tiempos/verify-Range-u8.png, id=1294, 433.62pt x 433.62pt>
 File: imagenes/tiempos/verify-Range-u8.png Graphic file (type png)
 <use imagenes/tiempos/verify-Range-u8.png>
 Package pdftex.def Info: imagenes/tiempos/verify-Range-u8.png  used on input li
-ne 726.
+ne 832.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/verify-Range-u16.png, id=1279, 433.62pt x 433.62pt>
+<imagenes/tiempos/verify-Range-u16.png, id=1295, 433.62pt x 433.62pt>
 File: imagenes/tiempos/verify-Range-u16.png Graphic file (type png)
 <use imagenes/tiempos/verify-Range-u16.png>
 Package pdftex.def Info: imagenes/tiempos/verify-Range-u16.png  used on input l
-ine 732.
+ine 838.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/verify-Range-u32.png, id=1280, 433.62pt x 433.62pt>
+<imagenes/tiempos/verify-Range-u32.png, id=1296, 433.62pt x 433.62pt>
 File: imagenes/tiempos/verify-Range-u32.png Graphic file (type png)
 <use imagenes/tiempos/verify-Range-u32.png>
 Package pdftex.def Info: imagenes/tiempos/verify-Range-u32.png  used on input l
-ine 738.
+ine 844.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/verify-Xor-u8.png, id=1281, 433.62pt x 433.62pt>
+<imagenes/tiempos/verify-Xor-u8.png, id=1297, 433.62pt x 433.62pt>
 File: imagenes/tiempos/verify-Xor-u8.png Graphic file (type png)
 <use imagenes/tiempos/verify-Xor-u8.png>
 Package pdftex.def Info: imagenes/tiempos/verify-Xor-u8.png  used on input line
- 747.
+ 853.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/verify-Xor-u16.png, id=1282, 433.62pt x 433.62pt>
+<imagenes/tiempos/verify-Xor-u16.png, id=1298, 433.62pt x 433.62pt>
 File: imagenes/tiempos/verify-Xor-u16.png Graphic file (type png)
 <use imagenes/tiempos/verify-Xor-u16.png>
 Package pdftex.def Info: imagenes/tiempos/verify-Xor-u16.png  used on input lin
-e 753.
+e 859.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tiempos/verify-Xor-u32.png, id=1283, 433.62pt x 433.62pt>
+<imagenes/tiempos/verify-Xor-u32.png, id=1299, 433.62pt x 433.62pt>
 File: imagenes/tiempos/verify-Xor-u32.png Graphic file (type png)
 <use imagenes/tiempos/verify-Xor-u32.png>
 Package pdftex.def Info: imagenes/tiempos/verify-Xor-u32.png  used on input lin
-e 759.
+e 865.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
 File: imagenes/tamanios/tamanio-write_vk-Assert Zero.png Graphic file (type png
 )
 <use imagenes/tamanios/tamanio-write_vk-Assert Zero.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-write_vk-Assert Zero.png  us
-ed on input line 773.
+ed on input line 879.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-write_vk-Memoria (varía operaciones).png, id=1284, 
+<imagenes/tamanios/tamanio-write_vk-Memoria (varía operaciones).png, id=1300, 
 433.62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-write_vk-Memoria (varía operaciones).png Graph
 ic file (type png)
 <use imagenes/tamanios/tamanio-write_vk-Memoria (varía operaciones).png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-write_vk-Memoria (varía ope
-raciones).png  used on input line 779.
+raciones).png  used on input line 885.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
 <imagenes/tamanios/tamanio-write_vk-Memoria (varía tamaño de lista).png, id=1
-285, 433.62pt x 433.62pt>
+301, 433.62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-write_vk-Memoria (varía tamaño de lista).png 
 Graphic file (type png)
 <use imagenes/tamanios/tamanio-write_vk-Memoria (varía tamaño de lista).png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-write_vk-Memoria (varía tam
-año de lista).png  used on input line 785.
+año de lista).png  used on input line 891.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-write_vk-Range-u8.png, id=1286, 433.62pt x 433.62pt>
+<imagenes/tamanios/tamanio-write_vk-Range-u8.png, id=1302, 433.62pt x 433.62pt>
 
 File: imagenes/tamanios/tamanio-write_vk-Range-u8.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-write_vk-Range-u8.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-write_vk-Range-u8.png  used 
-on input line 794.
+on input line 900.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-write_vk-Range-u16.png, id=1287, 433.62pt x 433.62pt
+<imagenes/tamanios/tamanio-write_vk-Range-u16.png, id=1303, 433.62pt x 433.62pt
 >
 File: imagenes/tamanios/tamanio-write_vk-Range-u16.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-write_vk-Range-u16.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-write_vk-Range-u16.png  used
- on input line 800.
+ on input line 906.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-write_vk-Range-u32.png, id=1288, 433.62pt x 433.62pt
+<imagenes/tamanios/tamanio-write_vk-Range-u32.png, id=1304, 433.62pt x 433.62pt
 >
 File: imagenes/tamanios/tamanio-write_vk-Range-u32.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-write_vk-Range-u32.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-write_vk-Range-u32.png  used
- on input line 806.
+ on input line 912.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
 File: imagenes/tamanios/tamanio-write_vk-Xor-u8.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-write_vk-Xor-u8.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-write_vk-Xor-u8.png  used on
- input line 815.
+ input line 921.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-write_vk-Xor-u16.png, id=1289, 433.62pt x 433.62pt>
+<imagenes/tamanios/tamanio-write_vk-Xor-u16.png, id=1305, 433.62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-write_vk-Xor-u16.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-write_vk-Xor-u16.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-write_vk-Xor-u16.png  used o
-n input line 821.
+n input line 927.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-write_vk-Xor-u32.png, id=1290, 433.62pt x 433.62pt>
+<imagenes/tamanios/tamanio-write_vk-Xor-u32.png, id=1306, 433.62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-write_vk-Xor-u32.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-write_vk-Xor-u32.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-write_vk-Xor-u32.png  used o
-n input line 827.
+n input line 933.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-prove-Assert Zero.png, id=1291, 433.62pt x 433.62pt>
+<imagenes/tamanios/tamanio-prove-Assert Zero.png, id=1307, 433.62pt x 433.62pt>
 
 File: imagenes/tamanios/tamanio-prove-Assert Zero.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-prove-Assert Zero.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-prove-Assert Zero.png  used 
-on input line 841.
+on input line 947.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-prove-Memoria (varía operaciones).png, id=1292, 433
+<imagenes/tamanios/tamanio-prove-Memoria (varía operaciones).png, id=1308, 433
 .62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-prove-Memoria (varía operaciones).png Graphic 
 file (type png)
 <use imagenes/tamanios/tamanio-prove-Memoria (varía operaciones).png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-prove-Memoria (varía operac
-iones).png  used on input line 847.
+iones).png  used on input line 953.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-prove-Memoria (varía tamaño de lista).png, id=1293
+<imagenes/tamanios/tamanio-prove-Memoria (varía tamaño de lista).png, id=1309
 , 433.62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-prove-Memoria (varía tamaño de lista).png Gra
 phic file (type png)
 <use imagenes/tamanios/tamanio-prove-Memoria (varía tamaño de lista).png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-prove-Memoria (varía tamañ
-o de lista).png  used on input line 853.
+o de lista).png  used on input line 959.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
 File: imagenes/tamanios/tamanio-prove-Range-u8.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-prove-Range-u8.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-prove-Range-u8.png  used on 
-input line 862.
+input line 968.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-prove-Range-u16.png, id=1294, 433.62pt x 433.62pt>
+<imagenes/tamanios/tamanio-prove-Range-u16.png, id=1310, 433.62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-prove-Range-u16.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-prove-Range-u16.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-prove-Range-u16.png  used on
- input line 868.
+ input line 974.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-prove-Range-u32.png, id=1295, 433.62pt x 433.62pt>
+<imagenes/tamanios/tamanio-prove-Range-u32.png, id=1311, 433.62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-prove-Range-u32.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-prove-Range-u32.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-prove-Range-u32.png  used on
- input line 874.
+ input line 980.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-prove-Xor-u8.png, id=1296, 433.62pt x 433.62pt>
+<imagenes/tamanios/tamanio-prove-Xor-u8.png, id=1312, 433.62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-prove-Xor-u8.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-prove-Xor-u8.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-prove-Xor-u8.png  used on in
-put line 883.
+put line 989.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-prove-Xor-u16.png, id=1297, 433.62pt x 433.62pt>
+<imagenes/tamanios/tamanio-prove-Xor-u16.png, id=1313, 433.62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-prove-Xor-u16.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-prove-Xor-u16.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-prove-Xor-u16.png  used on i
-nput line 889.
+nput line 995.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-<imagenes/tamanios/tamanio-prove-Xor-u32.png, id=1298, 433.62pt x 433.62pt>
+<imagenes/tamanios/tamanio-prove-Xor-u32.png, id=1314, 433.62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-prove-Xor-u32.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-prove-Xor-u32.png>
 Package pdftex.def Info: imagenes/tamanios/tamanio-prove-Xor-u32.png  used on i
-nput line 895.
+nput line 1001.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
-[101
+[103
 
  <./imagenes/tiempos/prove-Memoria (varía tamaño de lista).png> <./imagenes/t
 iempos/prove-Range-u8.png> <./imagenes/tiempos/prove-Range-u16.png> <./imagenes
 /tiempos/prove-Range-u32.png> <./imagenes/tiempos/prove-Xor-u16.png> <./imagene
 s/tiempos/prove-Xor-u32.png>]
-LaTeX Info: Redefining \. on input line 904.
-LaTeX Info: Redefining \% on input line 904.
- [102 <./imagenes/tiempos/write_vk-Assert Zero.png> <./imagenes/tiempos/write_v
+LaTeX Info: Redefining \. on input line 1010.
+LaTeX Info: Redefining \% on input line 1010.
+ [104 <./imagenes/tiempos/write_vk-Assert Zero.png> <./imagenes/tiempos/write_v
 k-Memoria (varía operaciones).png> <./imagenes/tiempos/write_vk-Memoria (varí
 a tamaño de lista).png> <./imagenes/tiempos/write_vk-Range-u8.png> <./imagenes
 /tiempos/write_vk-Range-u16.png> <./imagenes/tiempos/write_vk-Range-u32.png> <.
 /imagenes/tiempos/write_vk-Xor-u16.png> <./imagenes/tiempos/write_vk-Xor-u32.pn
 g>]
-LaTeX Info: Redefining \. on input line 904.
-LaTeX Info: Redefining \% on input line 904.
- [103 <./imagenes/tiempos/verify-Memoria (varia operaciones).png> <./imagenes/t
+LaTeX Info: Redefining \. on input line 1010.
+LaTeX Info: Redefining \% on input line 1010.
+ [105 <./imagenes/tiempos/verify-Memoria (varia operaciones).png> <./imagenes/t
 iempos/verify-Memoria (varía tamaño de lista).png> <./imagenes/tiempos/verify
 -Range-u8.png> <./imagenes/tiempos/verify-Range-u16.png> <./imagenes/tiempos/ve
 rify-Range-u32.png> <./imagenes/tiempos/verify-Xor-u8.png> <./imagenes/tiempos/
 verify-Xor-u16.png> <./imagenes/tiempos/verify-Xor-u32.png>]
-LaTeX Info: Redefining \. on input line 904.
-LaTeX Info: Redefining \% on input line 904.
- [104 <./imagenes/tamanios/tamanio-write_vk-Memoria (varía operaciones).png> <
+LaTeX Info: Redefining \. on input line 1010.
+LaTeX Info: Redefining \% on input line 1010.
+ [106 <./imagenes/tamanios/tamanio-write_vk-Memoria (varía operaciones).png> <
 ./imagenes/tamanios/tamanio-write_vk-Memoria (varía tamaño de lista).png> <./
 imagenes/tamanios/tamanio-write_vk-Range-u8.png> <./imagenes/tamanios/tamanio-w
 rite_vk-Range-u16.png> <./imagenes/tamanios/tamanio-write_vk-Range-u32.png> <./
 imagenes/tamanios/tamanio-write_vk-Xor-u16.png> <./imagenes/tamanios/tamanio-wr
 ite_vk-Xor-u32.png>]
-LaTeX Info: Redefining \. on input line 904.
-LaTeX Info: Redefining \% on input line 904.
- [105 <./imagenes/tamanios/tamanio-prove-Assert Zero.png> <./imagenes/tamanios/
+LaTeX Info: Redefining \. on input line 1010.
+LaTeX Info: Redefining \% on input line 1010.
+ [107 <./imagenes/tamanios/tamanio-prove-Assert Zero.png> <./imagenes/tamanios/
 tamanio-prove-Memoria (varía operaciones).png> <./imagenes/tamanios/tamanio-pr
 ove-Memoria (varía tamaño de lista).png> <./imagenes/tamanios/tamanio-prove-R
 ange-u16.png> <./imagenes/tamanios/tamanio-prove-Range-u32.png> <./imagenes/tam
 anios/tamanio-prove-Xor-u8.png> <./imagenes/tamanios/tamanio-prove-Xor-u16.png>
  <./imagenes/tamanios/tamanio-prove-Xor-u32.png>]
-Cap\'{\i }tulo B.
-[106
-
-]
-LaTeX Info: Redefining \. on input line 947.
-LaTeX Info: Redefining \% on input line 947.
- [107]
 Cap\'{\i }tulo C.
 [108
 
 ]
-LaTeX Info: Redefining \. on input line 988.
-LaTeX Info: Redefining \% on input line 988.
- [109] (./tesis.bbl) [110
+LaTeX Info: Redefining \. on input line 1053.
+LaTeX Info: Redefining \% on input line 1053.
+ [109]
+Cap\'{\i }tulo D.
+[110
+
+]
+LaTeX Info: Redefining \. on input line 1094.
+LaTeX Info: Redefining \% on input line 1094.
+ [111] (./tesis.bbl) [112
 
 ] (./tesis.aux
 LaTeX Info: Redefining \. on input line 25.
@@ -1989,15 +1987,15 @@ LaTeX Info: Redefining \% on input line 25.
 (./secciones/pcs.aux) (./secciones/problema_a_resolver.aux)
 (./secciones/noir.aux) (./secciones/plonky2.aux) (./secciones/noirky2.aux))
 Package rerunfilecheck Info: File `tesis.out' has not changed.
-(rerunfilecheck)             Checksum: D0C52643A4167BC248EBD0D89BD292A3;11360.
+(rerunfilecheck)             Checksum: C179649DFAD1266D866D87E8D96B4767;11536.
 runsystem(rm tesis.pyg)...executed.
 
  ) 
 Here is how much of TeX's memory you used:
- 30144 strings out of 480112
- 584686 string characters out of 5892631
- 883439 words of memory out of 5000000
- 47049 multiletter control sequences out of 15000+600000
+ 30150 strings out of 480112
+ 584761 string characters out of 5892631
+ 883524 words of memory out of 5000000
+ 47052 multiletter control sequences out of 15000+600000
  483414 words of font info for 82 fonts, out of 8000000 for 9000
  85 hyphenation exceptions out of 8191
  99i,15n,131p,1201b,1331s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -2029,10 +2027,10 @@ texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/share/texlive/texmf-d
 ist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/share/texlive/texmf-dist/fon
 ts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf/fonts/type1/publi
 c/cm-super/sfrm1095.pfb>
-Output written on tesis.pdf (114 pages, 3179184 bytes).
+Output written on tesis.pdf (116 pages, 3184215 bytes).
 PDF statistics:
- 1596 PDF objects out of 1728 (max. 8388607)
- 1289 compressed objects within 13 object streams
- 409 named destinations out of 1000 (max. 500000)
- 867 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1614 PDF objects out of 1728 (max. 8388607)
+ 1304 compressed objects within 14 object streams
+ 412 named destinations out of 1000 (max. 500000)
+ 875 words of extra memory for PDF output out of 10000 (max. 10000000)
 
