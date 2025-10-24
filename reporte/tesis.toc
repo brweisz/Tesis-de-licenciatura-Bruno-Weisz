@@ -1,107 +1,107 @@
 \babel@toc {spanish}{}\relax 
 \contentsline {part}{Parte\ I\hspace {1em}Introducción}{1}{part.1}%
-\contentsline {chapter}{\numberline {1.}Primitivas Criptográficas}{3}{chapter.1}%
-\contentsline {section}{\numberline {1.1}Aritmética modular y cuerpos finitos}{3}{section.1.1}%
-\contentsline {subsection}{\numberline {1.1.1}Problema del logaritmo discreto}{6}{subsection.1.1.1}%
-\contentsline {subsection}{\numberline {1.1.2}Diffie-Hellman}{7}{subsection.1.1.2}%
-\contentsline {section}{\numberline {1.2}Polinomios}{8}{section.1.2}%
-\contentsline {subsection}{\numberline {1.2.1}Interpolación}{9}{subsection.1.2.1}%
-\contentsline {subsection}{\numberline {1.2.2}Lema de Schwartz-Zippel}{9}{subsection.1.2.2}%
-\contentsline {section}{\numberline {1.3}Curvas elípticas}{9}{section.1.3}%
-\contentsline {subsubsection}{\textbf {Operaciones básicas}}{10}{section*.5}%
-\contentsline {subsubsection}{\textbf {Curvas Elípticas como grupos conmutativos}}{12}{section*.8}%
-\contentsline {subsection}{\numberline {1.3.1}Curvas elípticas sobre cuerpos finitos}{12}{subsection.1.3.1}%
-\contentsline {subsection}{\numberline {1.3.2}Problema del logaritmo discreto para curvas elípticas}{13}{subsection.1.3.2}%
-\contentsline {subsection}{\numberline {1.3.3}BLS y Pairings}{14}{subsection.1.3.3}%
-\contentsline {chapter}{\numberline {2.}Proving Systems}{16}{chapter.2}%
-\contentsline {section}{\numberline {2.1}Provers y verifiers}{16}{section.2.1}%
-\contentsline {section}{\numberline {2.2}Protocolo de Schnorr}{17}{section.2.2}%
-\contentsline {section}{\numberline {2.3}Propiedades de los SNARKS}{18}{section.2.3}%
-\contentsline {section}{\numberline {2.4}Heurística de Fiat-Shamir}{19}{section.2.4}%
-\contentsline {section}{\numberline {2.5}PLONK}{21}{section.2.5}%
-\contentsline {subsection}{\numberline {2.5.1}Matrices de PLONK}{21}{subsection.2.5.1}%
-\contentsline {subsubsection}{\textbf {La matriz Q}}{23}{section*.12}%
+\contentsline {chapter}{\numberline {1.}Primitivas Criptográficas}{4}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Aritmética modular y cuerpos finitos}{4}{section.1.1}%
+\contentsline {subsection}{\numberline {1.1.1}Problema del logaritmo discreto}{7}{subsection.1.1.1}%
+\contentsline {subsection}{\numberline {1.1.2}Diffie-Hellman}{8}{subsection.1.1.2}%
+\contentsline {section}{\numberline {1.2}Polinomios}{9}{section.1.2}%
+\contentsline {subsection}{\numberline {1.2.1}Interpolación}{10}{subsection.1.2.1}%
+\contentsline {subsection}{\numberline {1.2.2}Lema de Schwartz-Zippel}{10}{subsection.1.2.2}%
+\contentsline {section}{\numberline {1.3}Curvas elípticas}{10}{section.1.3}%
+\contentsline {subsubsection}{\textbf {Operaciones básicas}}{11}{section*.5}%
+\contentsline {subsubsection}{\textbf {Curvas Elípticas como grupos conmutativos}}{13}{section*.8}%
+\contentsline {subsection}{\numberline {1.3.1}Curvas elípticas sobre cuerpos finitos}{14}{subsection.1.3.1}%
+\contentsline {subsection}{\numberline {1.3.2}Problema del logaritmo discreto para curvas elípticas}{15}{subsection.1.3.2}%
+\contentsline {subsection}{\numberline {1.3.3}BLS y Pairings}{16}{subsection.1.3.3}%
+\contentsline {chapter}{\numberline {2.}Proving Systems}{17}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Provers y verifiers}{17}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Protocolo de Schnorr}{18}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Propiedades de los SNARKS}{19}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Heurística de Fiat-Shamir}{20}{section.2.4}%
+\contentsline {section}{\numberline {2.5}PLONK}{22}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}Matrices de PLONK}{22}{subsection.2.5.1}%
+\contentsline {subsubsection}{\textbf {La matriz Q}}{24}{section*.12}%
 \contentsline {subsubsection}{\textbf {La matriz V}}{25}{section*.17}%
 \contentsline {subsubsection}{\textbf {Compuertas personalizadas}}{26}{section*.21}%
-\contentsline {subsubsection}{\textbf {Public Inputs y Output}}{26}{section*.23}%
-\contentsline {subsection}{\numberline {2.5.2}De matrices a polinomios}{28}{subsection.2.5.2}%
+\contentsline {subsubsection}{\textbf {Public Inputs y Output}}{27}{section*.23}%
+\contentsline {subsection}{\numberline {2.5.2}De matrices a polinomios}{29}{subsection.2.5.2}%
 \contentsline {subsubsection}{\textbf {Oráculos de polinomios}}{30}{section*.25}%
-\contentsline {subsection}{\numberline {2.5.3}Protocolo parcial}{30}{subsection.2.5.3}%
-\contentsline {subsection}{\numberline {2.5.4}Blindings}{31}{subsection.2.5.4}%
+\contentsline {subsection}{\numberline {2.5.3}Protocolo parcial}{31}{subsection.2.5.3}%
+\contentsline {subsection}{\numberline {2.5.4}Blindings}{32}{subsection.2.5.4}%
 \contentsline {section}{\numberline {2.6}Turbo-PLONK}{32}{section.2.6}%
 \contentsline {subsection}{\numberline {2.6.1}Custom Gates}{32}{subsection.2.6.1}%
-\contentsline {subsection}{\numberline {2.6.2}Lookup Tables}{33}{subsection.2.6.2}%
-\contentsline {chapter}{\numberline {3.}Polynomial Commitment Schemes}{34}{chapter.3}%
-\contentsline {section}{\numberline {3.1}KZG}{34}{section.3.1}%
-\contentsline {subsubsection}{\textbf {Vulnerabilidad con $\tau $ conocido}}{37}{section*.28}%
-\contentsline {subsection}{\numberline {3.1.1}Costo del CRS}{37}{subsection.3.1.1}%
-\contentsline {subsubsection}{¿Cuánto pesa un punto de curva?}{37}{section*.29}%
-\contentsline {subsubsection}{¿Qué tan largo es el CRS?}{37}{section*.30}%
-\contentsline {subsubsection}{Costo Final}{37}{section*.31}%
-\contentsline {section}{\numberline {3.2}Merkle Trees}{37}{section.3.2}%
-\contentsline {section}{\numberline {3.3}FRI}{39}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}Polinomial Commitment Scheme sobre FRI}{40}{subsection.3.3.1}%
-\contentsline {chapter}{\numberline {4.}Problema a resolver}{42}{chapter.4}%
-\contentsline {part}{Parte\ II\hspace {1em}Desarrollo}{43}{part.2}%
-\contentsline {chapter}{\numberline {5.}Noir}{44}{chapter.5}%
-\contentsline {section}{\numberline {5.1}ACIR}{47}{section.5.1}%
-\contentsline {subsection}{\numberline {5.1.1}AssertZero}{47}{subsection.5.1.1}%
-\contentsline {subsection}{\numberline {5.1.2}Operaciones de memoria}{48}{subsection.5.1.2}%
-\contentsline {subsubsection}{\textbf {MemoryInit}}{48}{section*.36}%
-\contentsline {subsubsection}{\textbf {MemoryRead}}{48}{section*.37}%
-\contentsline {subsubsection}{\textbf {MemoryWrite}}{49}{section*.40}%
-\contentsline {subsection}{\numberline {5.1.3}BlackBoxFunctions}{50}{subsection.5.1.3}%
-\contentsline {subsection}{\numberline {5.1.4}BrilligCall}{51}{subsection.5.1.4}%
-\contentsline {section}{\numberline {5.2}Barretenberg}{52}{section.5.2}%
-\contentsline {chapter}{\numberline {6.}Plonky2}{53}{chapter.6}%
-\contentsline {subsubsection}{\textbf {Lookup tables en Plonky2}}{55}{section*.47}%
-\contentsline {chapter}{\numberline {7.}Noirky2}{57}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Cuerpo finito utilizado}{57}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Tiempos de ejecución}{58}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Traducción de ACIR a Plonky2}{59}{section.7.3}%
-\contentsline {subsection}{\numberline {7.3.1}Traducción de AssertZero}{60}{subsection.7.3.1}%
-\contentsline {subsection}{\numberline {7.3.2}Traducción de operaciones de memoria}{62}{subsection.7.3.2}%
-\contentsline {subsubsection}{\textbf {Asignación condicional en Plonky2}}{64}{section*.51}%
-\contentsline {subsubsection}{\textbf {Lectura de memoria}}{66}{section*.54}%
-\contentsline {subsubsection}{\textbf {Escritura de memoria}}{67}{section*.55}%
-\contentsline {subsection}{\numberline {7.3.3}Traducción de Range-Check}{68}{subsection.7.3.3}%
-\contentsline {subsubsection}{\textbf {Range-Check con descomposición en bits}}{68}{section*.57}%
-\contentsline {subsubsection}{\textbf {Range-Check con lookup tables}}{69}{section*.58}%
-\contentsline {subsubsection}{\textbf {Range-Check con descomposición en limbs y lookup tables}}{69}{section*.60}%
-\contentsline {subsection}{\numberline {7.3.4}Traducción de XOR y AND}{71}{subsection.7.3.4}%
-\contentsline {subsubsection}{\textbf {XOR con descomposición en bits}}{72}{section*.61}%
-\contentsline {subsubsection}{\textbf {XOR con descomposición en limbs y lookup tables}}{73}{section*.63}%
-\contentsline {chapter}{\numberline {8.}Evaluación de la herramienta}{75}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Validación con tests funcionales}{75}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Profiling}{76}{section.8.2}%
-\contentsline {subsubsection}{\textbf {Programas orientados a AssertZero}}{76}{section*.65}%
-\contentsline {subsubsection}{\textbf {Programas orientados a operaciones de memoria}}{77}{section*.66}%
-\contentsline {subsubsection}{\textbf {Programas orientados a RangeCheck}}{78}{section*.68}%
-\contentsline {subsubsection}{\textbf {Programas orientados a XOR}}{79}{section*.69}%
-\contentsline {subsection}{\numberline {8.2.1}Variantes de Noirky2}{79}{subsection.8.2.1}%
-\contentsline {subsection}{\numberline {8.2.2}Blowup factor}{80}{subsection.8.2.2}%
-\contentsline {subsection}{\numberline {8.2.3}Medición de tiempos}{80}{subsection.8.2.3}%
-\contentsline {subsection}{\numberline {8.2.4}Medición de tamaño de artefactos}{81}{subsection.8.2.4}%
-\contentsline {part}{Parte\ III\hspace {1em}Resultados y discusión}{82}{part.3}%
-\contentsline {section}{\numberline {8.3}Análisis de tiempos}{83}{section.8.3}%
-\contentsline {subsubsection}{Comando \textbf {prove}}{83}{section*.71}%
-\contentsline {subsubsection}{Comando \textbf {write\_vk}}{84}{section*.73}%
-\contentsline {subsubsection}{\textbf {prove} vs. \textbf {write\_vk}}{84}{section*.75}%
-\contentsline {subsubsection}{Comando \textbf {verify}}{84}{section*.77}%
-\contentsline {subsection}{\numberline {8.3.1}Análisis particular de opcodes}{86}{subsection.8.3.1}%
-\contentsline {subsubsection}{AssertZero}{86}{section*.79}%
-\contentsline {subsubsection}{Operaciones de memoria}{87}{section*.81}%
-\contentsline {subsubsection}{Operaciones de Range}{88}{section*.84}%
-\contentsline {subsubsection}{Operaciones de XOR}{90}{section*.87}%
-\contentsline {section}{\numberline {8.4}Análisis de tamaños de artefactos}{91}{section.8.4}%
-\contentsline {subsection}{\numberline {8.4.1}Tamaño de la Verification Key}{91}{subsection.8.4.1}%
-\contentsline {subsection}{\numberline {8.4.2}Tamaño de la prueba}{93}{subsection.8.4.2}%
-\contentsline {subsection}{\numberline {8.4.3}Comparación entre artefactos y el CRS}{93}{subsection.8.4.3}%
-\contentsline {part}{Parte\ IV\hspace {1em}Conclusiones y trabajo futuro}{96}{part.4}%
-\contentsline {subsubsection}{Conclusiones}{97}{section*.94}%
-\contentsline {subsubsection}{Trabajo futuro}{97}{section*.95}%
-\contentsline {part}{Ap\'{e}ndice}{99}{part*.96}%
-\contentsline {chapter}{\numberline {A.}Gráficos de resultados de la experimentación}{100}{appendix.Alph1}%
-\contentsline {chapter}{\numberline {B.}Protocolo para la matriz V}{105}{appendix.Alph2}%
-\contentsline {subsubsection}{\textbf {Igualdad de conjuntos}}{106}{section*.102}%
-\contentsline {chapter}{\numberline {C.}FRI: Low Degree Proof}{107}{appendix.Alph3}%
+\contentsline {subsection}{\numberline {2.6.2}Lookup Tables}{34}{subsection.2.6.2}%
+\contentsline {chapter}{\numberline {3.}Polynomial Commitment Schemes}{35}{chapter.3}%
+\contentsline {section}{\numberline {3.1}KZG}{35}{section.3.1}%
+\contentsline {subsubsection}{\textbf {Vulnerabilidad con $\tau $ conocido}}{38}{section*.28}%
+\contentsline {subsection}{\numberline {3.1.1}Costo del CRS}{38}{subsection.3.1.1}%
+\contentsline {subsubsection}{¿Cuánto pesa un punto de curva?}{38}{section*.29}%
+\contentsline {subsubsection}{¿Qué tan largo es el CRS?}{38}{section*.30}%
+\contentsline {subsubsection}{Costo Final}{38}{section*.31}%
+\contentsline {section}{\numberline {3.2}Merkle Trees}{38}{section.3.2}%
+\contentsline {section}{\numberline {3.3}FRI}{40}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Polinomial Commitment Scheme sobre FRI}{41}{subsection.3.3.1}%
+\contentsline {chapter}{\numberline {4.}Problema a resolver}{43}{chapter.4}%
+\contentsline {part}{Parte\ II\hspace {1em}Desarrollo}{44}{part.2}%
+\contentsline {chapter}{\numberline {5.}Noir}{45}{chapter.5}%
+\contentsline {section}{\numberline {5.1}ACIR}{48}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}AssertZero}{48}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}Operaciones de memoria}{49}{subsection.5.1.2}%
+\contentsline {subsubsection}{\textbf {MemoryInit}}{49}{section*.36}%
+\contentsline {subsubsection}{\textbf {MemoryRead}}{49}{section*.37}%
+\contentsline {subsubsection}{\textbf {MemoryWrite}}{50}{section*.40}%
+\contentsline {subsection}{\numberline {5.1.3}BlackBoxFunctions}{51}{subsection.5.1.3}%
+\contentsline {subsection}{\numberline {5.1.4}BrilligCall}{52}{subsection.5.1.4}%
+\contentsline {section}{\numberline {5.2}Barretenberg}{53}{section.5.2}%
+\contentsline {chapter}{\numberline {6.}Plonky2}{54}{chapter.6}%
+\contentsline {subsubsection}{\textbf {Lookup tables en Plonky2}}{56}{section*.47}%
+\contentsline {chapter}{\numberline {7.}Noirky2}{58}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Cuerpo finito utilizado}{58}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Tiempos de ejecución}{59}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Traducción de ACIR a Plonky2}{60}{section.7.3}%
+\contentsline {subsection}{\numberline {7.3.1}Traducción de AssertZero}{61}{subsection.7.3.1}%
+\contentsline {subsection}{\numberline {7.3.2}Traducción de operaciones de memoria}{63}{subsection.7.3.2}%
+\contentsline {subsubsection}{\textbf {Asignación condicional en Plonky2}}{65}{section*.51}%
+\contentsline {subsubsection}{\textbf {Lectura de memoria}}{67}{section*.54}%
+\contentsline {subsubsection}{\textbf {Escritura de memoria}}{68}{section*.55}%
+\contentsline {subsection}{\numberline {7.3.3}Traducción de Range-Check}{69}{subsection.7.3.3}%
+\contentsline {subsubsection}{\textbf {Range-Check con descomposición en bits}}{69}{section*.57}%
+\contentsline {subsubsection}{\textbf {Range-Check con lookup tables}}{70}{section*.58}%
+\contentsline {subsubsection}{\textbf {Range-Check con descomposición en limbs y lookup tables}}{70}{section*.60}%
+\contentsline {subsection}{\numberline {7.3.4}Traducción de XOR y AND}{72}{subsection.7.3.4}%
+\contentsline {subsubsection}{\textbf {XOR con descomposición en bits}}{73}{section*.61}%
+\contentsline {subsubsection}{\textbf {XOR con descomposición en limbs y lookup tables}}{74}{section*.63}%
+\contentsline {chapter}{\numberline {8.}Evaluación de la herramienta}{76}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Validación con tests funcionales}{76}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Profiling}{77}{section.8.2}%
+\contentsline {subsubsection}{\textbf {Programas orientados a AssertZero}}{77}{section*.65}%
+\contentsline {subsubsection}{\textbf {Programas orientados a operaciones de memoria}}{78}{section*.66}%
+\contentsline {subsubsection}{\textbf {Programas orientados a RangeCheck}}{79}{section*.68}%
+\contentsline {subsubsection}{\textbf {Programas orientados a XOR}}{80}{section*.69}%
+\contentsline {subsection}{\numberline {8.2.1}Variantes de Noirky2}{80}{subsection.8.2.1}%
+\contentsline {subsection}{\numberline {8.2.2}Blowup factor}{81}{subsection.8.2.2}%
+\contentsline {subsection}{\numberline {8.2.3}Medición de tiempos}{81}{subsection.8.2.3}%
+\contentsline {subsection}{\numberline {8.2.4}Medición de tamaño de artefactos}{82}{subsection.8.2.4}%
+\contentsline {part}{Parte\ III\hspace {1em}Resultados y discusión}{83}{part.3}%
+\contentsline {section}{\numberline {8.3}Análisis de tiempos}{84}{section.8.3}%
+\contentsline {subsubsection}{Comando \textbf {prove}}{84}{section*.71}%
+\contentsline {subsubsection}{Comando \textbf {write\_vk}}{85}{section*.73}%
+\contentsline {subsubsection}{\textbf {prove} vs. \textbf {write\_vk}}{85}{section*.75}%
+\contentsline {subsubsection}{Comando \textbf {verify}}{85}{section*.77}%
+\contentsline {subsection}{\numberline {8.3.1}Análisis particular de opcodes}{87}{subsection.8.3.1}%
+\contentsline {subsubsection}{AssertZero}{87}{section*.79}%
+\contentsline {subsubsection}{Operaciones de memoria}{88}{section*.81}%
+\contentsline {subsubsection}{Operaciones de Range}{89}{section*.84}%
+\contentsline {subsubsection}{Operaciones de XOR}{91}{section*.87}%
+\contentsline {section}{\numberline {8.4}Análisis de tamaños de artefactos}{92}{section.8.4}%
+\contentsline {subsection}{\numberline {8.4.1}Tamaño de la Verification Key}{92}{subsection.8.4.1}%
+\contentsline {subsection}{\numberline {8.4.2}Tamaño de la prueba}{94}{subsection.8.4.2}%
+\contentsline {subsection}{\numberline {8.4.3}Comparación entre artefactos y el CRS}{94}{subsection.8.4.3}%
+\contentsline {part}{Parte\ IV\hspace {1em}Conclusiones y trabajo futuro}{97}{part.4}%
+\contentsline {subsubsection}{Conclusiones}{98}{section*.94}%
+\contentsline {subsubsection}{Trabajo futuro}{98}{section*.95}%
+\contentsline {part}{Ap\'{e}ndice}{100}{part*.96}%
+\contentsline {chapter}{\numberline {A.}Gráficos de resultados de la experimentación}{101}{appendix.Alph1}%
+\contentsline {chapter}{\numberline {B.}Protocolo para la matriz V}{106}{appendix.Alph2}%
+\contentsline {subsubsection}{\textbf {Igualdad de conjuntos}}{107}{section*.102}%
+\contentsline {chapter}{\numberline {C.}FRI: Low Degree Proof}{108}{appendix.Alph3}%
