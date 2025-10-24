@@ -60,15 +60,13 @@ Se llama \textbf{Soundness} a la propiedad de un protocolo criptográfico que di
 Se llama \textbf{Zero Knowledge} a la propiedad de un protocolo criptográfico que dicta que el verifier no aprende nada más que la afirmación que se está probando. Esta es una categorización coloquial que alcanza por el momento, para no adentrarnos en definiciones más complejas. En este caso podemos decir que el prover pudo demostrar al verifier el conocimiento de $a$ sin revelar ningún tipo de información nueva sobre $a$. La ecuación $s = r + a\cdot c$ no aporta ningún tipo de información, ya que $r$ es un valor aleatorio, convirtiendo a $s$ en otro valor aleatorio.
 
 \section{Propiedades de los SNARKS} \label{sec:snarks}
-Cuando hablamos de SNARKs, no es enteramente correcto hablar de ´´demostrar la ejecución de un programa'' aunque sea una frase que coloquialmente usamos con frecuencia. En la realidad lo que ocurre es que el prover \textbf{demuestra que conoce la traza de una ejecución válida del programa}. Es decir, no es necesario que el prover ejecute el programa en cuestión, aunque en general esa es la forma de obtener dicha traza. Por ahora podemos pensar en la traza como los valores que toman todas sus variables a lo largo de su ejecución. Dado un programa fijo, la traza define inequívocamente su ejecución.  
-
-Los protocolos son interactivos por lo que hay una comunicación entre el prover y el verifier que sirve para garantizar que un prover malicioso no pueda demostrar que conoce un dato que en realidad no, como vimos recientemente con el protocolo de Schnorr.  
+Cuando hablamos de SNARKs, no es enteramente correcto hablar de “demostrar la ejecución de un programa'' aunque sea una frase que coloquialmente usamos con frecuencia. En la realidad lo que ocurre es que el prover \textbf{demuestra que conoce la traza de una ejecución válida del programa}. Es decir, no es necesario que el prover ejecute el programa en cuestión, aunque en general esa es la forma de obtener dicha traza. Por ahora podemos pensar en la traza como los valores que toman todas sus variables a lo largo de su ejecución. Dado un programa fijo, la traza define inequívocamente su ejecución.
 
 Veamos entonces como se descompone el término SNARK:
 \begin{itemize}
     \item \textbf{Succint}: la traducción más correcta de esta palabra sería 'conciso'. La propiedad de succintness de los SNARKs nos dice que las pruebas generadas tienen que tener un tamaño pequeño respecto al de la ejecución o 'traza' del programa cuya ejecución demuestra. También nos dice que la verificación de dicha prueba tiene que ser rápida, por ejemplo, en tiempo constante $\mathcal{O}(1)$. Esto no establece ninguna limitación sobre el tiempo de generación de una prueba, o sobre el overhead de almacenamiento que generar dicha prueba conlleva.
     
-    \item \textbf{Non-interactive}: esta propiedad nos habla de la ausencia de interactividad en el protocolo, es decir, una prueba puede ser generada de forma offline y luego ser verificada en cualquier momento del futuro. Dijimos que los protocolos SNARK eran interactivos, pero esta interactividad puede ser removida con la heurística de Fiat-Shamir, que será vista en la sección \ref{sec:shamir}.
+    \item \textbf{Non-interactive}: esta propiedad nos habla de la ausencia de interactividad en el protocolo, es decir, una prueba puede ser generada de forma offline y luego ser verificada en cualquier momento del futuro. La heurística de Fiat-Shamir que será vista en la sección \ref{sec:shamir} es lo que permite que estos protocolos no sean interactivos.
 
     \item \textbf{ARgument of Knowledge}: esto hace referencia a la pieza de conocimiento que tiene el prover, cuya posesión quiere demostrarle a un verifier.
 \end{itemize}
@@ -383,7 +381,7 @@ Este segundo chequeo impide que el ejemplo de la traza en \ref{tab:matrices_comp
 
 \subsubsection{\textbf{Compuertas personalizadas}} \label{sec:plonk_custom_gates}
 
-Hasta ahora vimos algunas configuraciones que pueden tener filas de la matriz $Q$, en particular para operaciones básicas como sumar y multiplicar. Sin embargo, PLONK nos permite definir compuertas personalizadas, customizando como queramos la matriz $Q$ para conseguir la operación deseada. En particular, vemos que podemos comprimir todo nuestro programa de ejemplo en una sola fila de la matriz Q, quedándonos de esta manera un conjunto de matrices como se puede ver en la tabla \ref{tab:matrices_completas_comprimidas}.
+Hasta ahora vimos algunas configuraciones que pueden tomar las filas de la matriz $Q$, en particular para operaciones básicas como sumar y multiplicar. Sin embargo, PLONK nos permite definir compuertas personalizadas dándole una forma arbitraria a la matriz $Q$ para conseguir la operación deseada. En particular, vemos que podemos comprimir todo nuestro programa de ejemplo en una sola fila de la matriz Q, quedándonos de esta manera un conjunto de matrices como se puede ver en la tabla \ref{tab:matrices_completas_comprimidas}. Podemos hacer esto porque hasta ahora no estábamos aprovechando al máximo la expresividad que poseen las ecuaciones de PLONK, que nos permiten describir nuestro programa por completo en una sola ecuación. 
 
 
 \begin{table}[h!]
@@ -551,7 +549,7 @@ Vamos a darle uso a toda la teoría de cuerpos y polinomios que tratamos en las 
     \item Tenemos un dominio de interpolación $D=[\omega^i : 0 \leq i < N] = [1, \omega, \omega^2, ..., \omega^{N-1}]$.
 \end{itemize}
 
-\textbf{Vamos a interpolar cada una de las columnas} sobre el dominio $D$. Esto nos va a dejar como resultado los 9 polinomios interpoladores, los cuales vamos a nombrar respectivamente (al igual que sus funciones asociadas en $\Fp$) $q_L$, $q_R$, $q_M$, $q_O$, $q_C$, $a$, $b$, $c$ y $pi$. Conceptualmente, lo que acabamos de hacer es crear 9 polinomios que cumplen una propiedad muy interesante. Tomemos por ejemplo el polinomio $a$, obtenido a partir de interpolar los valores de la columna $A$. Sin perder generalidad, vamos a notar $A[i]$ al valor en la i-ésima fila de la columna $A$. Dado el dominio de interpolación elegido y los valores que estamos interpolando, podemos ver que por definición se cumple la igualdad
+\textbf{Vamos a interpolar cada una de las columnas} sobre el dominio $D$. Esto nos va a dejar como resultado los 9 polinomios interpoladores, los cuales vamos a nombrar respectivamente (al igual que sus funciones asociadas en $\Fp$) $q_L$, $q_R$, $q_M$, $q_O$, $q_C$, $a$, $b$, $c$ y $pi$. Conceptualmente, lo que acabamos de hacer es crear 9 polinomios que cumplen una propiedad muy interesante. Tomemos por ejemplo el polinomio $a$, obtenido a partir de interpolar los valores de la columna $A$. Vamos a notar $A[i]$ al valor en la i-ésima fila de la columna $A$. Dado el dominio de interpolación elegido y los valores que estamos interpolando, podemos ver que por definición se cumple la igualdad
 
 $$a(\omega^i) = A[i]$$
 

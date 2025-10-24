@@ -18,18 +18,18 @@
 \contentsline {section}{\numberline {2.2}Protocolo de Schnorr}{18}{section.2.2}%
 \contentsline {section}{\numberline {2.3}Propiedades de los SNARKS}{19}{section.2.3}%
 \contentsline {section}{\numberline {2.4}Heurística de Fiat-Shamir}{20}{section.2.4}%
-\contentsline {section}{\numberline {2.5}PLONK}{22}{section.2.5}%
+\contentsline {section}{\numberline {2.5}PLONK}{21}{section.2.5}%
 \contentsline {subsection}{\numberline {2.5.1}Matrices de PLONK}{22}{subsection.2.5.1}%
-\contentsline {subsubsection}{\textbf {La matriz Q}}{24}{section*.12}%
+\contentsline {subsubsection}{\textbf {La matriz Q}}{23}{section*.12}%
 \contentsline {subsubsection}{\textbf {La matriz V}}{25}{section*.17}%
-\contentsline {subsubsection}{\textbf {Compuertas personalizadas}}{26}{section*.21}%
+\contentsline {subsubsection}{\textbf {Compuertas personalizadas}}{27}{section*.21}%
 \contentsline {subsubsection}{\textbf {Public Inputs y Output}}{27}{section*.23}%
 \contentsline {subsection}{\numberline {2.5.2}De matrices a polinomios}{29}{subsection.2.5.2}%
-\contentsline {subsubsection}{\textbf {Oráculos de polinomios}}{30}{section*.25}%
+\contentsline {subsubsection}{\textbf {Oráculos de polinomios}}{31}{section*.25}%
 \contentsline {subsection}{\numberline {2.5.3}Protocolo parcial}{31}{subsection.2.5.3}%
 \contentsline {subsection}{\numberline {2.5.4}Blindings}{32}{subsection.2.5.4}%
-\contentsline {section}{\numberline {2.6}Turbo-PLONK}{32}{section.2.6}%
-\contentsline {subsection}{\numberline {2.6.1}Custom Gates}{32}{subsection.2.6.1}%
+\contentsline {section}{\numberline {2.6}Turbo-PLONK}{33}{section.2.6}%
+\contentsline {subsection}{\numberline {2.6.1}Custom Gates}{33}{subsection.2.6.1}%
 \contentsline {subsection}{\numberline {2.6.2}Lookup Tables}{34}{subsection.2.6.2}%
 \contentsline {chapter}{\numberline {3.}Polynomial Commitment Schemes}{35}{chapter.3}%
 \contentsline {section}{\numberline {3.1}KZG}{35}{section.3.1}%
