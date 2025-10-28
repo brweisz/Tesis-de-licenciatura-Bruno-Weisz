@@ -74,7 +74,7 @@ En este caso particular alcanza con proveer al \texttt{PartialWitness} con el va
  
  Notamos que como Plonky2 solo trabaja nativamente con elementos de $\Fp$, los valores que demos para los targets tienen que estar en $\Fp$, que es lo que consigue la expresión \texttt{F::from\_canonical\_u32(1)}. Finalmente el \texttt{circuit\_data} nos abstrae la acción de generar y verificar la prueba. 
 
-\subsubsection{\textbf{Lookup tables en Plonky2}}\label{sec:lookup_plonky2}
+\section{Lookup tables en Plonky2}\label{sec:lookup_plonky2}
 La API de Plonky2 también nos provee mecanismos para definir y realizar consultas en lookup tables, tales como están definidas en la sección \ref{sec:plonk_lookup_tables}. En realidad, las lookup tables en Plonky2 presentan leves diferencias y restricciones respecto a la definición general. Se definen como \texttt{vec<(u16,u16)>}, es decir, dos columnas con un máximo de $2^{16}$ elementos de tamaño máximo $2^{16}-1$. 
 
 Una vez que tenemos definido un listado de valores
@@ -101,3 +101,23 @@ Para usar estas lookup tables necesitamos un target $t$. Podemos ver en tiempo d
 En este caso el resultado de llamar al método será otro target \texttt{lookup\_result} que estará restringido por el circuito a tomar el valor de la segunda componente de la tupla. 
 
 En pocas palabras: una lookup table en Plonky2 nos permite definir un diccionario $u16 \rightarrow u16$ que opera de forma eficiente, pero que tiene que estar definido en tiempo de generación de circuito para realizar consultas sobre valores dinámicos en tiempo de resolución de circuito. Si en tiempo de resolución de circuito (mientras se genera la prueba) se realiza un lookup para un valor que no está en la primera componente de ninguna tupla, la generación de la prueba fallará.
+
+\section{Gates y Generators}\label{sec:hints}
+En Plonky2 y cualquier otro proving system es muy importante para entender la diferencia entre hacer una cuenta matemática y verificar que la misma está bien hecha. Tomemos por ejemplo el caso de la descomposición de un número en $n$ bits. Un algoritmo básico para realizar esta operación es iterar $n$ veces sobre un número, que va a ir dividiéndose sucesivamente por $2$ y guardando en cada iteración su resto módulo $2$. Si se quisiera expresar esta serie de operaciones como un sistema de ecuaciones implicaría el uso de muchas restricciones. Más aún, si se quisiera representar una operación de XOR de $n$ bits habría que descomponer primero ambos términos, después aplicar la operación bit a bit y por último afirmar que el resultado de la operación está formado por la descomposición obtenida. Sin embargo, si queremos verificar la operación alcanza con hacer únicamente el último paso.
+
+Supongamos que tenemos un valor $k$ y queremos obtener su descomposición en $n$ bits ($k_0, k_1, \cdots, k_{n-1}$). La verificación de esta cuenta puede hacerse con una única ecuación de la forma 
+
+$$k_0 \cdot 2^0 + k_1 + 2^1 + \cdots + k_{n-1}*2^{n-1} = k$$
+
+Entonces nace la pregunta “¿de dónde sacamos los valores de $k_0, k_1, \cdots, k_{n-1}$?''. Recordemos que el proceso de generar una prueba de tipo PLONK se basa en 2 pasos fundamentales: armar el sistema de ecuaciones y proveer una solución válida para el mismo. Esta idea de “proveer una solución válida'' es la que separa la implementación de la verificación. El proving system no tiene la necesidad de realizar paso por paso las operaciones que llevaron a la obtención de un número, sino que su única responsabilidad es verificar que esta cuenta es correcta. 
+
+Volviendo concretamente a Plonky2, esta distinción está dada por las \textbf{Gates} y los \textbf{Generators}. Las Gates son abstracciones del modelo de Plonky2 que encapsulan la verificación de las operaciones, mientras que los Generators son abstracciones que se ocupan de calcular los valores que van a satisfacer a las Gates. Por ejemplo: Plonky2 cuenta con una ArithmeticGate y un ArithmeticGenerator que van de la mano, de manera que las operaciones calculadas por el Generator son Verificadas por la Gate. Esta dualidad se ve también en operaciones más complejas, como puede ser hallar el inverso multiplicativo de un valor en $\Fp$. También existe para la descomposición en bits.
+
+En el caso general, un programa de Plonky2 puede requerir la descomposición en bits de un número que no es conocido en tiempo de compilación (cuyo valor va a conocerse recién cuando se trate de una ejecución concreta, un input de usuario). Un Generator en este contexto es una forma de establecer cómo va a ser realizada una cuenta, para luego ser verificada por una Gate. Los Generators son los que resuelven el sistema de ecuaciones en su totalidad, exceptuando a los valores iniciales brindados por el usuario. 
+
+
+
+
+
+
+

@@ -195,6 +195,97 @@ Podemos ver que estableciendo las constantes correctas, todas las operaciones qu
 
 La \texttt{ArithmeticGate} no es la única compuerta que vamos a utilizar a lo largo de la traducción.
 
+\subsection{Asignación condicional en Plonky2}
+
+Antes de incursionar en la lectura y escritura de bloques de memoria, veamos cómo podemos implementar una asignación condicional en el modelo de Plonky2. Más concretamente, nos interesa tener una restricción de la forma
+\[
+\texttt{res = \textbf{if} (x = y) \textbf{then} a \textbf{else} b}
+\]
+donde \texttt{x,y,a,b} y \texttt{res} son targets, y por ende su valor no se conoce en tiempo de generación de circuito. Esta expresión puede ser separada en 2 partes: 
+\[
+\texttt{1.(res = \textbf{if} equal \textbf{then} a \textbf{else} b) \textbf{|} 2.(equal = \textbf{if} (a == b) \textbf{then} 1 \textbf{else} 0)}
+\]
+donde \texttt{equal} es un target booleano.
+
+\vspace{1em}
+
+Podemos expresar \textbf{1.} como un sistema de ecuaciones
+\begin{figure}[H]
+	\centering
+	\begin{minipage}[c]{0.6\textwidth}
+		\centering
+		\[
+		\left\{
+		\begin{array}{rl}
+			not\_z &= 1 - z \\
+			conditional\_a &= a \cdot z \\
+			conditional\_b &= b \cdot not\_z \\
+			res &= conditional\_a + conditional\_b
+		\end{array}
+		\right.
+		\]
+	\end{minipage}
+\end{figure}
+
+
+o más simplemente como la ecuación 
+$$res = z \cdot a + (1-z) \cdot b$$
+
+Para \textbf{2.} el proceso es conceptualmente distinto. Primero vamos a calcular un valor 
+\[
+\texttt{
+	diff\_inverse := \textbf{if} $(x \neq y)$ \textbf{then} $\frac{1}{x-y}$  \textbf{else} 0
+}
+\]
+
+
+Pero ¿cómo podemos calcularlo si no conocemos los valores que toman $x$ e $y$ en tiempo de generación de circuito? Antes mencionamos que Plonky2 tiene mecanismos para hacer operaciones en tiempo de resolución de circuito: es lo que usa para resolver los valores de todos los targets. La condición de la operación solo puede resolverse en tiempo de resolución de circuito, y eso es lo que va a ocurrir. Conceptualmente no estamos estableciendo una restricción, estamos \textbf{fijando} una forma con la que un valor va a ser calculado cuando haya valores concretos. Esta cuenta, hecha por un Generator, viene acompañada por el siguiente sistema de ecuaciones asociado como se vio en la sección \ref{sec:hints}:
+\begin{figure}[H]
+	\centering
+	\begin{minipage}[c]{0.6\textwidth}
+		\centering
+		\[
+		\left\{
+		\begin{array}{rl}
+			equal \cdot (equal - 1) &= 0 \\
+			equal \cdot (x - y) &= 0 \\
+			(x - y) \cdot diff\_inverse + equal &= 1 \\
+		\end{array}
+		\right.
+		\]
+	\end{minipage}
+\end{figure}
+
+Estas ecuaciones sirven restringir a la variable $equal$ a que sea un valor binario: $0$ si $x$ e $y$ son distintos y $1$ si son iguales. 
+\begin{enumerate}
+	\item La primera ecuación se ocupa de que $equal$ sea binaria. 
+	
+	\item Para analizar la segunda ecuación separemos en casos:
+	\begin{itemize}
+		\item \textbf{Si $x$ e $y$ son iguales} entonces la ecuación se cumple porque se anula el factor de la derecha.
+		\item \textbf{Si son distintos} entonces la variable $equal$ debería tener el valor $0$, anulando nuevamente el término.
+	\end{itemize}
+	Si $x$ e $y$ son distintos pero $equal \neq 0$ la ecuación no se cumpliría, por lo tanto esta ecuación nos da la implicación 
+	$$x \neq y \Longrightarrow equal = 0$$
+	pero nada más.
+	
+	\item Para analizar la tercera ecuación también separemos en casos:
+	\begin{itemize}
+		\item \textbf{Si $x$ e $y$ son iguales} entonces la ecuación se cumple si solo si $equal = 1$.
+		\item \textbf{Si son distintos} entonces $(x-y)\cdot diff\_inverse = 1$ por lo tanto la ecuación se cumple si solo si $equal = 0$.
+	\end{itemize}
+\end{enumerate}
+Uno podría preguntarse para qué está la segunda ecuación, ¿no alcanza con la primera y la tercera? Pensándolo con cuidado vemos que $diff\_inverse$ no está restringido ya que solo es una pista para el prover, por lo que a priori no tendría por qué ser lo que dice ser (eg. $\frac{1}{x-y}$). Si tratamos de romper este sistema de ecuaciones podríamos hacer una asignación que cumpla
+
+\begin{itemize}
+	\item \texttt{diff\_inverse := 0}
+	\item \texttt{equal := 1}
+	\item \texttt{x $\neq$ y}
+\end{itemize}
+Esta asignación cumple la primera y la tercera ecuación, sin embargo es incorrecta respecto a lo que buscamos. Necesitamos que $equal = 1 \Longleftrightarrow x = y$ y esto no ocurre. La segunda ecuación nos salva en este caso ya que no hay forma de que cumpla bajo estas condiciones, ya que no existe ningún valor en $z \in \Fp$ no nulo tal que $z \cdot 1 = 0$.
+
+Recién vimos cómo podemos modelar asignaciones condicionales en Plonky2. Esta es una herramienta que nos va a servir para modelar operaciones de memoria, ya que justamente vamos a necesitar asignar condicionalmente un valor dependiendo de la igualdad entre dos índices.
+
 
 \subsection{Traducción de operaciones de memoria}
 Para implementar las operaciones de memoria vamos a pensarlas a través del lente de los tiempos de ejecución mencionados en la sección \ref{sec:tiempos_de_ejecución}. Dijimos cuando presentamos los opcodes de memoria en \ref{sec:acir_memoria} que las operaciones de memoria en el código ACIR aparecían en el contexto de accesos a bloques de memoria en posiciones dinámicas, por ejemplo, con un índice como input. ¿Qué significa esto respecto a los tiempos de ejecución? Significa que el índice con el que vamos a acceder al bloque de memoria \textbf{no es conocido en tiempo de generación de circuito} sino recién en tiempo de resolución de circuito, por ende no podemos indexar de una manera tradicional.
@@ -215,96 +306,6 @@ Cuando procesamos un opcode $MemoryInit(idx, [w_{m_1}, \cdots, w_{m_n}])$ signif
     
 \end{enumerate}
 
-\subsubsection{\textbf{Asignación condicional en Plonky2}}
-
-La parte más complicada está relacionada con la lectura y la modificación de los bloques de memoria, que veremos a continuación. Pero antes, veamos cómo podemos implementar una asignación condicional en este modelo. Más concretamente, nos interesa tener una restricción de la forma
-\[
-\texttt{res = \textbf{if} (x = y) \textbf{then} a \textbf{else} b}
-\]
-donde \texttt{x,y,a,b} y \texttt{res} son targets, y por ende su valor no se conoce en tiempo de generación de circuito. Esta expresión puede ser separada en 2 partes: 
-\[
-\texttt{1.(res = \textbf{if} equal \textbf{then} a \textbf{else} b) \textbf{|} 2.(equal = \textbf{if} (a == b) \textbf{then} 1 \textbf{else} 0)}
-\]
-donde \texttt{equal} es un target booleano.
-
-\vspace{1em}
-
-Podemos expresar \textbf{1.} como un sistema de ecuaciones
-\begin{figure}[H]
-  \centering
-  \begin{minipage}[c]{0.6\textwidth}
-    \centering
-    \[
-    \left\{
-    \begin{array}{rl}
-    not\_z &= 1 - z \\
-    conditional\_a &= a \cdot z \\
-    conditional\_b &= b \cdot not\_z \\
-    res &= conditional\_a + conditional\_b
-    \end{array}
-    \right.
-    \]
-  \end{minipage}
-\end{figure}
-
-
-o más simplemente como la ecuación 
-$$res = z \cdot a + (1-z) \cdot b$$
-
-Para \textbf{2.} el proceso es conceptualmente distinto. Primero vamos a calcular un valor 
-\[
-    \texttt{
-        diff\_inverse := \textbf{if} $(x \neq y)$ \textbf{then} $\frac{1}{x-y}$  \textbf{else} 0
-    }
-\]
-
-
-Pero ¿cómo podemos calcularlo si no conocemos los valores que toman $x$ e $y$ en tiempo de generación de circuito? Antes mencionamos que Plonky2 tiene mecanismos para hacer operaciones en tiempo de resolución de circuito: es lo que usa para resolver los valores de todos los targets. La condición de la operación solo puede resolverse en tiempo de resolución de circuito, y eso es lo que va a ocurrir. Conceptualmente no estamos estableciendo una restricción, estamos \textbf{fijando} una forma con la que un valor va a ser calculado cuando haya valores concretos. Esto es lo que llamamos una “pista'' para el prover, que viene acompañada por el siguiente sistema de ecuaciones:
-\begin{figure}[H]
-  \centering
-  \begin{minipage}[c]{0.6\textwidth}
-    \centering
-    \[
-    \left\{
-    \begin{array}{rl}
-    equal \cdot (equal - 1) &= 0 \\
-    equal \cdot (x - y) &= 0 \\
-    (x - y) \cdot diff\_inverse + equal &= 1 \\
-    \end{array}
-    \right.
-    \]
-  \end{minipage}
-\end{figure}
-
-Estas ecuaciones sirven restringir a la variable $equal$ a que sea un valor binario: $0$ si $x$ e $y$ son distintos y $1$ si son iguales. 
-\begin{enumerate}
-    \item La primera ecuación se ocupa de que $equal$ sea binaria. 
-    
-    \item Para analizar la segunda ecuación separemos en casos:
-    \begin{itemize}
-        \item \textbf{Si $x$ e $y$ son iguales} entonces la ecuación se cumple porque se anula el factor de la derecha.
-        \item \textbf{Si son distintos} entonces la variable $equal$ debería tener el valor $0$, anulando nuevamente el término.
-    \end{itemize}
-    Si $x$ e $y$ son distintos pero $equal \neq 0$ la ecuación no se cumpliría, por lo tanto esta ecuación nos da la implicación 
-    $$x \neq y \Longrightarrow equal = 0$$
-    pero nada más.
-
-    \item Para analizar la tercera ecuación también separemos en casos:
-    \begin{itemize}
-        \item \textbf{Si $x$ e $y$ son iguales} entonces la ecuación se cumple si solo si $equal = 1$.
-        \item \textbf{Si son distintos} entonces $(x-y)\cdot diff\_inverse = 1$ por lo tanto la ecuación se cumple si solo si $equal = 0$.
-    \end{itemize}
-\end{enumerate}
-Uno podría preguntarse para qué está la segunda ecuación, ¿no alcanza con la primera y la tercera? Pensándolo con cuidado vemos que $diff\_inverse$ no está restringido ya que solo es una pista para el prover, por lo que a priori no tendría por qué ser lo que dice ser (eg. $\frac{1}{x-y}$). Si tratamos de romper este sistema de ecuaciones podríamos hacer una asignación que cumpla
-
-\begin{itemize}
-    \item \texttt{diff\_inverse := 0}
-    \item \texttt{equal := 1}
-    \item \texttt{x $\neq$ y}
-\end{itemize}
-Esta asignación cumple la primera y la tercera ecuación, sin embargo es incorrecta respecto a lo que buscamos. Necesitamos que $equal = 1 \Longleftrightarrow x = y$ y esto no ocurre. La segunda ecuación nos salva en este caso ya que no hay forma de que cumpla bajo estas condiciones, ya que no existe ningún valor en $z \in \Fp$ no nulo tal que $z \cdot 1 = 0$.
-
-Recién vimos cómo podemos modelar asignaciones condicionales en Plonky2. Esta es una herramienta que nos va a servir para modelar operaciones de memoria, ya que justamente vamos a necesitar asignar condicionalmente un valor dependiendo de la igualdad entre dos índices.
 
 \subsubsection{\textbf{Lectura de memoria}}
 Veamos cómo traducir un opcode de lectura de memoria. Este está conformado por un $blockId$ (índice del bloque que se va a leer), $w_{index}$ (witness que contiene al índice que se va a leer) y $w_{value}$ (witness que tomará el valor leído). 
