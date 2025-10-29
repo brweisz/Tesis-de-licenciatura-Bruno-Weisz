@@ -275,7 +275,7 @@ Estas ecuaciones sirven restringir a la variable $equal$ a que sea un valor bina
 		\item \textbf{Si son distintos} entonces $(x-y)\cdot diff\_inverse = 1$ por lo tanto la ecuación se cumple si solo si $equal = 0$.
 	\end{itemize}
 \end{enumerate}
-Uno podría preguntarse para qué está la segunda ecuación, ¿no alcanza con la primera y la tercera? Pensándolo con cuidado vemos que $diff\_inverse$ no está restringido ya que solo es una pista para el prover, por lo que a priori no tendría por qué ser lo que dice ser (eg. $\frac{1}{x-y}$). Si tratamos de romper este sistema de ecuaciones podríamos hacer una asignación que cumpla
+Uno podría preguntarse para qué está la segunda ecuación, ¿no alcanza con la primera y la tercera? Pensándolo con cuidado vemos que $diff\_inverse$ no está restringido, por lo que a priori no tendría por qué ser lo que dice ser (eg. $\frac{1}{x-y}$). Si tratamos de romper este sistema de ecuaciones podríamos hacer una asignación que cumpla
 
 \begin{itemize}
 	\item \texttt{diff\_inverse := 0}
@@ -433,7 +433,7 @@ $$\prod_{i=0}^{n-1}2^i\cdot b_i = t$$
 En Plonky2 podemos hacer esto a través de una Custom Gate llamada \texttt{BaseSumGate}, que se encarga de la descomposición de números en distintas bases (en este caso, base 2). Si no es posible generar esa descomposición entonces podemos afirmar que el número concreto con el que se está ejecutando no está en rango. Notamos que $b_0, b_1, \cdots, b_{n-1}$ deben ser targets binarios, sino la ecuación no nos daría la información que queremos obtener. Por eso también vamos tener que agregar las restricciones 
 $$b_i \cdot (b_i - 1) = 0 ~~~ \forall i\in [0,n-1]$$
 
-Es importante destacar que los valores de $b_i$ van a ser \textbf{pistas} para el sistema de ecuaciones, calculadas por Plonky2 en tiempo de resolución de circuito en base al valor concreto que se le asigne a $t$. Le vamos a indicar a Plonky2 que lo descomponga en una cantidad fija de elementos, y este va a intentar hacerlo partiendo del bit menos significativo ($b_0$), sin embargo va a fallar si es incapaz de completar la descomposición del número. 
+Es importante destacar que los valores de $b_i$ van a ser calculados por Plonky2 en tiempo de resolución de circuito en base al valor concreto que se le asigne a $t$. Le vamos a indicar a Plonky2 que lo descomponga en una cantidad fija de elementos, y este va a intentar hacerlo partiendo del bit menos significativo ($b_0$), sin embargo va a fallar si es incapaz de completar la descomposición del número. 
 
 Recordemos también que dado que el primo que usa Plonky2 es $p_{goldilocks} = 2^{64} - 2^{32} + 1$ no podemos trabajar nativamente con números de más de $63$ bits. Por esto, también hubo que restringir la operación de range-check. 
 
@@ -466,16 +466,14 @@ También hay que tener en cuenta el overhead de tener la lookup table: las consu
 \subsubsection{\textbf{Range-Check con descomposición en limbs y lookup tables}}
 Una alternativa intermedia entre las dos opciones consideradas es hacer una descomposición del número, pero no en base 2 (bits), sino en una base más grande. Por ejemplo, un número de 32 bits puede pensarse como la composición de cuatro números de 8 bits; entonces alcanzaría con verificar que esas 4 componentes (o \textit{limbs}, como solemos llamarlas) están en el rango de un $u8$ y juntas conforman al número que queremos restringir. Para verificar el rango de $u8$ podemos reutilizar la idea de las lookup tables.
 
-¿Cómo separamos al target $t$ en limbs de 8 bits cada una? Podríamos pensar en usar la compuerta que usamos para la separación en bits: \texttt{BaseSumGate}, pero esta no soporta bases mayores a $9$ y necesitamos una base $256$. Esto nos obliga a meternos más adentro de Plonky2 para entender cómo construye en tiempo de resolución de circuito los valores para los targets intermedios, y cómo podemos aprovecharnos de este mecanismo para crear pistas para el prover en tiempo de resolución. 
-
-Descubrimos entonces que Plonky2 usa \texttt{Generators}, un tipo de objeto que se suele asociar a las Custom Gates pero pueden usarse de manera independiente. Los Generators:
+¿Cómo separamos al target $t$ en limbs de 8 bits cada una? Podríamos pensar en usar la compuerta que usamos para la separación en bits: \texttt{BaseSumGate}, pero esta no soporta bases mayores a $9$ y necesitamos una base $256$. Esto nos obliga a meternos más adentro de Plonky2 para entender cómo construye en tiempo de resolución de circuito los valores para los targets intermedios, y cómo podemos aprovecharnos de este mecanismo para calcular valores en tiempo de resolución. Recordamos entonces que Plonky2 usa \texttt{Generators}, como vimos en la sección \ref{sec:hints}. Estos objetos se suelen asociar a las Gates pero también pueden usarse de manera independiente a ellas. Los Generators:
 \begin{itemize}
     \item calculan el valor que se va a asociar los targets en tiempo de resolución de circuito. 
     \item tienen dependencias de Targets: siempre ocurre que el valor de $0$ o más targets tiene que estar resuelto para poder calcular el valor de un target nuevo. En este caso tiene sentido pensar en el circuito de la figura \ref{fig:assert_zero_plonky2} a). Por ejemplo, para resolver el valor del target $t_{aux_4}$ es necesario tener antes el valor de $t_{aux_2}$ y $t_{aux_3}$.
     \item implementan el método \texttt{run\_once()}, donde se ejecuta la operación. 
     \item pueden tener una cantidad arbitraria de dependencias y de targets calculados. Por ejemplo, en el ejemplo anterior teníamos 2 dependencias ($t_{aux_2}$ y $t_{aux_3}$) y un resultado ($t_{aux_4}$).
-    \item se usan de la siguiente forma: en tiempo de generación de circuito se instancian con targets (de entrada y de salida), haciendo que quede pre-seteado el cálculo en tiempo de resolución de circuito.
-    \item no son suficientes para garantizar un circuito correcto: los Generators generan pistas para el prover a través de calcular valores que van a llenar la traza, pero no verifican polinomialmente que los resultados calculados sean correctos. Si simplemente confiamos en que el Generator va a calcular el valor pero no restringimos sus operaciones, estaríamos creando una vulnerabilidad en el sistema. 
+    \item se usan de la siguiente forma: en tiempo de generación de circuito se instancian con targets (de entrada y de salida), haciendo que quede pre-seteado en tiempo de generación de circuito el cálculo que será realizado en tiempo de resolución de circuito.
+    \item no son suficiente para garantizar un circuito correcto: los Generators generan valores que el prover va a usar para llenar la traza, pero no verifican con ecuaciones que los resultados calculados sean correctos. Si simplemente confiamos en que el Generator va a calcular el valor pero no restringimos sus operaciones, estaríamos creando una vulnerabilidad en el sistema. 
 \end{itemize}
 
 Con esto en mente, creamos un Generator propio de la forma 
