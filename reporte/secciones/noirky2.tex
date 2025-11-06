@@ -51,7 +51,7 @@ Otro problema relacionado con el uso de $p_{goldilocks} = 2^{64}-2^{32}+1$ en Pl
 
 
 
-\section{Tiempos de ejecución}\label{sec:tiempos_de_ejecución}
+\section{Momentos de ejecución}\label{sec:tiempos_de_ejecución}
 Hay un concepto que es tan importante para este proyecto que merece una sección aparte. Noirky2 cuenta con 3 momentos de ejecución distintos. Entender la diferencia entre ellos es crucial para entender conceptualmente donde estamos parados y qué recursos tenemos en cada momento. Notar que esto es algo abstracto y no nos estamos refiriendo literalmente a la cantidad de tiempo que lleva cada fase, sino al momento del flujo del programa en el que estamos parados:
 \begin{enumerate}
     \item \textbf{Tiempo de compilación}: es el momento donde se compila Noirky2 y no es más que la compilación de un programa de Rust. En esta instancia contamos con nuestro código, pero no sabemos nada acerca de los programas ACIR que vamos a recibir ni de los inputs concretos con los que va a ser ejecutado.
