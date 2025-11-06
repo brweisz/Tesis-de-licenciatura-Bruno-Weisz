@@ -1,0 +1,326 @@
+use super::*;
+use acir::circuit::opcodes;
+use acir::circuit::opcodes::MemOp as GenericMemOp;
+use acir::circuit::opcodes::{BlockId, FunctionInput};
+use acir::circuit::Circuit as GenericCircuit;
+use acir::circuit::Opcode as GenericOpcode;
+use acir::circuit::Program as GenericProgram;
+use acir::native_types::Expression as GenericExpression;
+pub use acir::native_types::Witness;
+use acir::native_types::WitnessStack as GenericWitnessStack;
+use num_bigint::BigUint;
+use std::collections::HashMap;
+// Generics
+pub use acir_field::AcirField;
+pub use acir_field::FieldElement;
+use plonky2::field::types::Field;
+use plonky2::iop::target::{BoolTarget, Target};
+use plonky2::plonk::circuit_builder::CircuitBuilder;
+use plonky2::plonk::circuit_data::CircuitConfig;
+use plonky2::plonk::circuit_data::CircuitData;
+
+mod memory_translator;
+mod sha256_translator;
+mod ecdsa_secp256k1_translator;
+
+use crate::binary_digits_target::BinaryDigitsTarget;
+use memory_translator::MemoryOperationsTranslator;
+use plonky2::fri::FriConfig;
+use sha256_translator::Sha256CompressionTranslator;
+use crate::circuit_translation::ecdsa_secp256k1_translator::EcdsaSecp256k1Translator;
+use crate::circuit_translation::opcode_translators::range_check_strategies::RangeCheckStrategy;
+use crate::circuit_translation::opcode_translators::xor_strategies::XorStrategy;
+use crate::circuit_translation::opcode_translators::strategy_picker::StrategyPicker;
+
+#[cfg(test)]
+mod tests;
+
+pub mod assert_zero_translator;
+pub mod opcode_translators;
+
+pub(crate) type CB = CircuitBuilder<F, D>;
+
+/// The FieldElement is imported from the Noir library, but for this backend to work the
+/// GoldilocksField should be used (and the witnesses generated accordingly).
+
+pub type Opcode = GenericOpcode<FieldElement>;
+pub type Circuit = GenericCircuit<FieldElement>;
+pub type Program = GenericProgram<FieldElement>;
+pub type Expression = GenericExpression<FieldElement>;
+pub type MemOp = GenericMemOp<FieldElement>;
+pub type WitnessStack = GenericWitnessStack<FieldElement>;
+
+/// This is the most important part of the backend. The CircuitBuilderFromAcirToPlonky2 translates
+/// the ACIR Circuit into an equivalent Plonky2 circuit. Besides the Plonky2 circuit, the output
+/// contains a mapping from ACIR Witnesses to Plonky2 Targets, which is not only for internal use
+/// but for assigning values to the targets when generating the proof.
+///
+/// The opcodes suported are: AssertZero, MemoryInit, MemoryOp, BrilligCall, Directive(ToLeRadix),
+/// and the BlackboxFunctions: Range, And, Xor, SHA256Compression.
+///
+/// Internally it uses a Plonky2 CircuitBuilder for generating the circuit, a mapping of memory
+/// blocks for the memory operations and the witness to targets mapping to retain the information
+/// about which target is which.
+
+pub struct CircuitBuilderFromAcirToPlonky2 {
+    pub builder: CB,
+    pub witness_target_map: HashMap<Witness, Target>,
+    pub memory_blocks: HashMap<BlockId, (Vec<Target>, usize)>,
+    pub range_check_strategy: Box<dyn RangeCheckStrategy>,
+    pub xor_strategy: Box<dyn XorStrategy>
+}
+
+impl CircuitBuilderFromAcirToPlonky2 {
+    pub fn new() -> Self {
+        let standard_recursion_config = CircuitConfig::standard_recursion_zk_config();
+        // let config = standard_recursion_config.clone();
+        let config = CircuitConfig {
+            fri_config: FriConfig {
+                rate_bits: 3,
+                num_query_rounds: 17,
+                proof_of_work_bits: 0,
+                ..standard_recursion_config.fri_config
+            },
+            security_bits: 50,
+            ..standard_recursion_config
+        };
+        let builder = CB::new(config);
+        let witness_target_map: HashMap<Witness, Target> = HashMap::new();
+        let memory_blocks: HashMap<BlockId, (Vec<Target>, usize)> = HashMap::new();
+
+        Self {
+            builder,
+            witness_target_map,
+            memory_blocks,
+            xor_strategy: StrategyPicker::xor_strategy(),
+            range_check_strategy: StrategyPicker::range_check_strategy()
+        }
+    }
+
+    pub fn unpack(self) -> (CircuitData<F, C, 2>, HashMap<Witness, Target>) {
+        (self.builder.build::<C>(), self.witness_target_map)
+    }
+
+    /// Main function of the module. It sequentially parses the ACIR opcodes, applying changes
+    /// in the CircuitBuilder accordingly.
+    pub fn translate_circuit(self: &mut Self, circuit: &Circuit) {
+
+        self._register_witnesses_from_acir_circuit(circuit);
+        for opcode in &circuit.opcodes {
+            match opcode {
+                Opcode::AssertZero(expr) => {
+                    let mut translator = assert_zero_translator::AssertZeroTranslator::new_for(
+                        &mut self.builder,
+                        &mut self.witness_target_map,
+                        &expr,
+                    );
+                    translator.translate();
+                }
+                Opcode::BrilligCall {
+                    id: _,
+                    inputs: _,
+                    outputs: _,
+                    predicate: _,
+                } => {} // The brillig call is ignored since it has no impact in the circuit
+                Opcode::Directive(_directive) => {} // The same happens with the Directive
+                Opcode::MemoryInit {
+                    block_id,
+                    init,
+                    block_type: _,
+                } => {
+                    MemoryOperationsTranslator::new_for(
+                        &mut self.builder,
+                        &mut self.witness_target_map,
+                        &mut self.memory_blocks,
+                    )
+                    .translate_memory_init(init, block_id);
+                }
+                Opcode::MemoryOp {
+                    block_id,
+                    op,
+                    predicate: _,
+                } => {
+                    MemoryOperationsTranslator::new_for(
+                        &mut self.builder,
+                        &mut self.witness_target_map,
+                        &mut self.memory_blocks,
+                    )
+                    .translate_memory_op(block_id, op);
+                }
+                Opcode::BlackBoxFuncCall(func_call) => {
+                    match func_call {
+                        opcodes::BlackBoxFuncCall::RANGE { input } => {
+                            let long_max_bits = input.num_bits.clone() as usize;
+                            let input_witness = input.witness;
+                            let input_target = self._get_or_create_target_for_witness(input_witness);
+
+                            let range_check_strategy = &mut self.range_check_strategy;
+                            range_check_strategy.perform_range_operation_for_input(long_max_bits, input_target, &mut self.builder);
+                        }
+                        opcodes::BlackBoxFuncCall::AND { lhs, rhs, output } => {
+                            let target_left = self._get_or_create_target_for_witness(lhs.witness);
+                            let target_right = self._get_or_create_target_for_witness(rhs.witness);
+                            let target_output = self._get_or_create_target_for_witness(*output);
+                            let num_bits_left = lhs.num_bits;
+                            let num_bits_right = rhs.num_bits;
+                            assert_eq!(num_bits_left, num_bits_right);
+                            let num_bits = num_bits_left;
+
+                            BinaryDigitsTarget::extend_circuit_with_bitwise_operation(
+                                target_left, target_right, target_output, num_bits, &mut self.builder,
+                                BinaryDigitsTarget::and,
+                            );
+                        }
+                        opcodes::BlackBoxFuncCall::XOR { lhs, rhs, output } => {
+                            let target_left = self._get_or_create_target_for_witness(lhs.witness);
+                            let target_right = self._get_or_create_target_for_witness(rhs.witness);
+                            let target_output = self._get_or_create_target_for_witness(*output);
+                            let num_bits_left = lhs.num_bits;
+                            let num_bits_right = rhs.num_bits;
+                            assert_eq!(num_bits_left, num_bits_right);
+                            let num_bits = num_bits_left;
+
+                            self.xor_strategy.perform_xor_operation_for_input(target_left, target_right, target_output, num_bits, &mut self.builder);
+                        }
+                        opcodes::BlackBoxFuncCall::Sha256Compression {
+                            inputs,
+                            hash_values,
+                            outputs,
+                        } => {
+                            self._extend_circuit_with_sha256_compression_operation(
+                                inputs,
+                                hash_values,
+                                outputs,
+                            );
+                        }
+                        opcodes::BlackBoxFuncCall::EcdsaSecp256k1 {
+                            public_key_x,
+                            public_key_y,
+                            signature,
+                            hashed_message,
+                            output,
+                        } => {
+                            self._extend_circuit_with_ecdsa_secp256k1_operation(
+                                public_key_x,
+                                public_key_y,
+                                signature,
+                                hashed_message,
+                                *output
+                            );
+                        }
+                        blackbox_func => {
+                            panic!("Blackbox func not supported yet: {:?}", blackbox_func);
+                        }
+                    };
+                }
+
+                opcode => {
+                    panic!("Opcode not supported yet: {:?}", opcode);
+                }
+            }
+        }
+    }
+
+    fn _extend_circuit_with_sha256_compression_operation(
+        &mut self,
+        inputs: &Box<[FunctionInput; 16]>,
+        hash_values: &Box<[FunctionInput; 8]>,
+        outputs: &Box<[Witness; 8]>,
+    ) {
+        let mut sha256_compression_translator =
+            Sha256CompressionTranslator::new_for(self, inputs, hash_values, outputs);
+        sha256_compression_translator.translate();
+    }
+
+    fn _extend_circuit_with_ecdsa_secp256k1_operation(
+        &mut self,
+        public_key_x: &Box<[FunctionInput; 32]>,
+        public_key_y: &Box<[FunctionInput; 32]>,
+        signature: &Box<[FunctionInput; 64]>,
+        hashed_message: &Box<[FunctionInput; 32]>,
+        output: Witness,
+    ) {
+        let mut ecdsa_secp256k1_translator =
+            EcdsaSecp256k1Translator::new_for(self, hashed_message, public_key_x, public_key_y, signature, output);
+        ecdsa_secp256k1_translator.translate();
+    }
+
+    pub fn target_for_witness(&mut self, w: Witness) -> Target {
+        self._get_or_create_target_for_witness(w)
+    }
+
+    pub fn binary_number_target_for_witness(
+        &mut self,
+        w: Witness,
+        digits: usize,
+    ) -> BinaryDigitsTarget {
+        let target = self._get_or_create_target_for_witness(w);
+        BinaryDigitsTarget::convert_target_to_binary_target(target, digits, &mut self.builder)
+    }
+
+    pub fn binary_number_target_for_constant(
+        &mut self,
+        constant: usize,
+        digits: usize,
+    ) -> BinaryDigitsTarget {
+        let bit_targets = (0..digits)
+            .map(|bit_position| self._constant_bool_target_for_bit(constant, bit_position))
+            .rev()
+            .collect();
+        BinaryDigitsTarget { bits: bit_targets }
+    }
+
+    fn convert_binary_number_to_number(&mut self, a: BinaryDigitsTarget) -> Target {
+        self.builder.le_sum(a.bits.into_iter().rev())
+    }
+
+    fn _constant_bool_target_for_bit(
+        &mut self,
+        constant_value: usize,
+        bit_position: usize,
+    ) -> BoolTarget {
+        let cond = (constant_value & (1 << bit_position)) != 0;
+        self.builder.constant_bool(cond)
+    }
+
+    fn _register_witnesses_from_acir_circuit(self: &mut Self, circuit: &Circuit) {
+        // Public parameters
+        let public_parameters_as_list: Vec<Witness> =
+            circuit.public_parameters.0.iter().cloned().collect();
+        for public_parameter_witness in public_parameters_as_list {
+            self._register_new_public_input_from_witness(public_parameter_witness);
+        }
+        // Private parameters
+        let private_parameters_as_list: Vec<Witness> =
+            circuit.private_parameters.iter().cloned().collect();
+        for private_parameter_witness in private_parameters_as_list {
+            self._register_new_private_input_from_witness(private_parameter_witness);
+        }
+    }
+
+    fn _register_new_public_input_from_witness(self: &mut Self, public_input_witness: Witness) {
+        let public_input_target = self.builder.add_virtual_target();
+        self.builder.register_public_input(public_input_target);
+        self.witness_target_map
+            .insert(public_input_witness, public_input_target);
+    }
+
+    fn _register_new_private_input_from_witness(self: &mut Self, private_input_witness: Witness) {
+        self._get_or_create_target_for_witness(private_input_witness);
+    }
+
+    /// This method is key. The ACIR Opcodes talk about witnesses, while Plonky2 operates with
+    /// targets, so when we want to know which target corresponds to a certain witness we might
+    /// encounter that there isn't a target yet in the builder for the witness, so we need to
+    /// create it.
+    fn _get_or_create_target_for_witness(self: &mut Self, witness: Witness) -> Target {
+        match self.witness_target_map.get(&witness) {
+            Some(target) => *target,
+            None => {
+                let target = self.builder.add_virtual_target();
+                self.witness_target_map.insert(witness, target);
+                target
+            }
+        }
+    }
+}
