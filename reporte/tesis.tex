@@ -12,7 +12,7 @@
 \usepackage{xcolor}
 \usepackage{todonotes}
 \usepackage{xspace}
-\usepackage[hidelinks]{hyperref}
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue]{hyperref}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{dirtree}
@@ -65,9 +65,6 @@
 \include{secciones/problema_a_resolver}
 
 \part{Desarrollo}
-Todo el material referente al desarrollo de la tesis se puede encontrar en
-
-https://github.com/brweisz/Tesis-de-licenciatura-Bruno-Weisz. 
 \include{secciones/noir}
 \include{secciones/plonky2}
 \include{secciones/noirky2}
@@ -89,6 +86,8 @@ El problema con esto es que Plonky2 no va a generar una traza incorrecta. La res
 Al mismo tiempo, hacer tests por la negativa del primer tipo (que fallan en la generación de la prueba) no es tan malo como suena. El sistema de resolución de Targets de Plonky2 va a fallar si detecta una desconexión en el circuito (targets que no están resueltos), lo cual valida cierto grado de consistencia en la construcción del circuito. Si a eso le sumamos que las herramientas que se están usando para construir el circuito son propias de la API de Plonky2 (\texttt{CircuitBuilder} y las Custom Gates preexistentes) en realidad lo que estamos diciendo es que la confianza en lo que estamos construyendo depende directamente de la confianza que tengamos en que las herramientas preexistentes validan correctamente las operaciones que hacen. 
 
 Lo anterior no quita que no se puedan hacer tests adicionales para asegurar que se están verificando las operaciones, sin embargo la cantidad de trabajo requerido para intervenir la generación de la prueba de Plonky2 descarta esta alternativa en pos de un modelo de confianza más débil. 
+
+Por otro lado, también se realizaron tests funcionales que siguen el flujo completo: parten de un programa de Noir, realizan la traducción, generan la prueba y la verifican. Esto se hizo con algunos programas de ejemplo ya presentes en el repositorio de Noir.
 
 Todos los tests usados para validar la funcionalidad pueden encontrarse en el repositorio del proyecto.
 
@@ -266,7 +265,9 @@ En este caso alcanza con realizar una única iteración por experimento, ya que 
 %La tesis está en https://github.com/eryxcoop/acvm-backend-plonky2
 %Hacer un repo para la tesis, fork, meter lo de experimentación ahi, ahí después también va a estar el pdf con la tesis.
 %Explicar como se conforma el repo brevemente. ¿Qué hay en el repo?
+Todo el material referente al desarrollo de la tesis se puede encontrar en \href{https://github.com/brweisz/Tesis-de-licenciatura-Bruno-Weisz}{este repositorio}. Este contiene a grandes rasgos la implementación de Noirky2, la experimentación que se describirá a continuación y las fuentes del presente reporte.
 
+\vspace{0.5em}
 
 A continuación vamos a ver un reporte y análisis de los resultados obtenidos en las mediciones de tiempos de los comandos \textbf{prove}, \textbf{write\_vk} y \textbf{verify} y tamaños de los 2 artefactos generados en los comandos \textbf{prove} y \textbf{write\_vk}. Los resultados se corresponden con la experimentación planteada en la sección \ref{sec:materiales_y_metodos}. 
 
@@ -298,7 +299,7 @@ Vamos a hacer algunas observaciones a grandes rasgos de cada uno de los comandos
 
 \subsubsection{Comando \textbf{prove}}
 
-Comencemos viendo los resultados del comando \textbf{prove} en la figura \ref{fig:prove_tiempos}. Hay una generalidad que podemos observar en todos los casos. A grandes rasgos tenemos 2 variantes de Noirky2 para implementar las operaciones de Range y de XOR. Estas son bit a bit o usando lookup tables. Para cada una de estas también tenemos la opción de aplicar un blinding sobre la traza o no hacerlo. Podemos ver que en todos los casos, aplicar ese blinding incurre en un costo adicional, es decir, la versión que aplica este blinding siempre tiene un tiempo de ejecución mayor a la que no. Esto tiene sentido, ya que la fase de procesamiento de la traza en la generación de la prueba va a tener un costo mayor porque tienen que interpolarse polinomios de grado mayor. Podemos ver un representante de este fenómeno en la figura \ref{fig:prove_tiempo_representante}, con el caso del comando \textbf{XOR u8}.
+Comencemos viendo los resultados del comando \textbf{prove} en la figura \ref{fig:prove_tiempos}. Hay una generalidad que podemos observar en todos los casos. A grandes rasgos tenemos 2 variantes de Noirky2 para implementar las operaciones de Range y de XOR. Estas son bit a bit o usando lookup tables. Para cada una de estas también tenemos la opción de aplicar un blinding sobre la traza o no hacerlo. Podemos ver que en todos los casos, aplicar ese blinding incurre en un costo adicional, es decir, la versión que aplica este blinding siempre tiene un tiempo de ejecución mayor a la que no. La interpretación que le  la fase de procesamiento de la traza en la generación de la prueba va a tener un costo mayor porque tienen que interpolarse polinomios de grado mayor. Podemos ver un representante de este fenómeno en la figura \ref{fig:prove_tiempo_representante}, con el caso del comando \textbf{XOR u8}.
 
 \begin{figure}
 	\centering
@@ -311,7 +312,7 @@ Comencemos viendo los resultados del comando \textbf{prove} en la figura \ref{fi
 
 A continuación, veamos el caso de la operación \textbf{write\_vk}. Los resultados pueden verse en la figura \ref{fig:write_vk_tiempos}. Retomamos en este caso la observación realizada en el comando prove y vemos que esta se mantiene, aunque de forma menos notable. Un representante de este fenómeno puede encontrarse en la figura \ref{fig:write_vk_tiempo_representante}.
 
-\begin{figure}
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.6\linewidth]{imagenes/tiempos/write_vk-Xor-u8.png}
 	\caption{Representante de los tiempos de ejecución del comando \textbf{write\_vk}}
@@ -323,7 +324,7 @@ A continuación, veamos el caso de la operación \textbf{write\_vk}. Los resulta
 En este punto vamos a hacer una comparación entre los tiempos de ejecución del comando \textbf{prove} y el comando \textbf{write\_vk} para el caso de Noirky2 con blinding para el opcode \texttt{AssertZero}. Como podemos ver en la figura \ref{fig:prove_vs_write_vk}, los tiempos de ejecución del comando \textbf{prove} son mayores, y esto es esperable dado que \textbf{write\_vk} realiza un subconjunto de las acciones que realiza \textbf{prove}, como ya habíamos adelantado. Esto se va a repetir en todos los opcodes, en todas las variantes de Noirky2.
 
 
-\begin{figure}
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.6\linewidth]{imagenes/tiempos/prove-vs-vk-AssertZero-Noirky2.png}
 	\caption{Representante de los tiempos de ejecución del comando \textbf{prove} vs. el comando \textbf{write\_vk}}
