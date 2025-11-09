@@ -216,6 +216,7 @@ La intuición detrás de esto está dada por la propiedad de los polinomios de g
 \centering
 \includegraphics[width=0.5\textwidth]{imagenes/intuicion_shwartz_zippel.png}
 \label{schwartz-zippel-intuicion}
+\caption{Intuición de intersección de polinomios en $R^2$}
 \end{figure}
 
 Pensemos por un segundo qué pasaría si el valor elegido no fuera aleatorio, o más bien si el valor fuera elegido maliciosamente por un agente que conoce $P$ y $Q$. Supongamos también que $P \neq Q$. Si este agente conociera un valor $k^*$ tal que $p(k^*) = q(k^*)$ (alguno de los puntos donde los polinomios intersecan) podría alegar que $P = Q$ a los ojos de un protocolo que usa el lema de Schwartz-Zippel, dando lugar a una vulnerabilidad. Más adelante veremos cómo se resuelve esta obtención de números aleatorios en el contexto de los protocolos ZK. Para que este protocolo sea seguro se pide que $p \gg n$. 

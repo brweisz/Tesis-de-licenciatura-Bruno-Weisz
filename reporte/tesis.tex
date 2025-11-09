@@ -12,7 +12,7 @@
 \usepackage{xcolor}
 \usepackage{todonotes}
 \usepackage{xspace}
-\usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue]{hyperref}
+\usepackage[colorlinks=true, linkcolor=black, urlcolor=blue]{hyperref}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{dirtree}
@@ -336,7 +336,7 @@ En este punto vamos a hacer una comparación entre los tiempos de ejecución del
 Finalmente, vamos a ver los tiempos de la operación \textbf{verify}. Los resultados pueden verse en la figura \ref{fig:verify_tiempos}. Si bien en esta operación estamos viendo órdenes de magnitud mucho menores (del orden de $5ms$ a $25ms$ contra $1s$ a $50s$ en las operaciones de \texttt{prove} y \texttt{write\_vk}), podemos notar  en todos los casos que:
 \begin{itemize}
     \item Los tiempos de ejecución parecen estabilizarse en un tiempo constante, o por lo menos de crecimiento muy leve frente al aumento de cantidad de operaciones. Esto se ve especialmente en el caso del AssertZero, donde incluso ejecutando $1.000.000$ de operaciones se observa un crecimiento muy leve en los tiempos de ejecución.
-    \item Barretenberg (con KZG) tarda siempre un tiempo cercano a los $25ms$ mientras que todas las versiones de Noirky2 (con FRI) tardan alrededor de $5ms$. Esta comparación está más relacionada con la implementación de los provers en sí que con la implementación realizada en este trabajo. 
+    \item Barretenberg (con KZG) tarda siempre un tiempo cercano a los $25ms$ mientras que todas las versiones de Noirky2 (con FRI) tardan alrededor de $5ms$. Esta comparación está más relacionada con la implementación de los proving systems en sí que con la implementación realizada en este trabajo. 
 \end{itemize}
 
 Para dejar constancia de este comportamiento vamos a tomar como representante el caso del AssertZero, como podemos ver en la figura \ref{fig:verify_tiempo_representante}, pero teniendo en mente que todas las familias de programas se comportan de manera similar. 

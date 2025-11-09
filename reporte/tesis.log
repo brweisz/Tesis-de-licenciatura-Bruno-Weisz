@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2025.9.26)  9 NOV 2025 11:27
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2025.9.26)  9 NOV 2025 11:44
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1067,47 +1067,47 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 File: imagenes/curvas elipticas de ejemplo.png Graphic file (type png)
 <use imagenes/curvas elipticas de ejemplo.png>
 Package pdftex.def Info: imagenes/curvas elipticas de ejemplo.png  used on inpu
-t line 230.
+t line 231.
 (pdftex.def)             Requested size: 213.39568pt x 95.01237pt.
-LaTeX Info: Redefining \. on input line 233.
-LaTeX Info: Redefining \% on input line 233.
+LaTeX Info: Redefining \. on input line 234.
+LaTeX Info: Redefining \% on input line 234.
 [10]
 <imagenes/elliptic_curve_addition.png, id=507, 1134.2375pt x 917.4275pt>
 File: imagenes/elliptic_curve_addition.png Graphic file (type png)
 <use imagenes/elliptic_curve_addition.png>
 Package pdftex.def Info: imagenes/elliptic_curve_addition.png  used on input li
-ne 244.
+ne 245.
 (pdftex.def)             Requested size: 213.39568pt x 172.59119pt.
 <imagenes/suma tangente curva eliptica.png, id=509, 1134.2375pt x 917.4275pt>
 File: imagenes/suma tangente curva eliptica.png Graphic file (type png)
 <use imagenes/suma tangente curva eliptica.png>
 Package pdftex.def Info: imagenes/suma tangente curva eliptica.png  used on inp
-ut line 253.
+ut line 254.
 (pdftex.def)             Requested size: 213.39568pt x 172.59119pt.
-LaTeX Info: Redefining \. on input line 259.
-LaTeX Info: Redefining \% on input line 259.
+LaTeX Info: Redefining \. on input line 257.
+LaTeX Info: Redefining \% on input line 257.
  [11 <./imagenes/intuicion_shwartz_zippel.png> <./imagenes/curvas elipticas de 
 ejemplo.png>]
-LaTeX Info: Redefining \. on input line 259.
-LaTeX Info: Redefining \% on input line 259.
+LaTeX Info: Redefining \. on input line 268.
+LaTeX Info: Redefining \% on input line 268.
  [12 <./imagenes/elliptic_curve_addition.png> <./imagenes/suma tangente curva e
 liptica.png>]
-LaTeX Info: Redefining \. on input line 298.
-LaTeX Info: Redefining \% on input line 298.
- [13]
-<imagenes/curva eliptica Fp.png, id=532, 467.7475pt x 402.50375pt>
+<imagenes/curva eliptica Fp.png, id=528, 467.7475pt x 402.50375pt>
 File: imagenes/curva eliptica Fp.png Graphic file (type png)
 <use imagenes/curva eliptica Fp.png>
-Package pdftex.def Info: imagenes/curva eliptica Fp.png  used on input line 306
+Package pdftex.def Info: imagenes/curva eliptica Fp.png  used on input line 307
 .
 (pdftex.def)             Requested size: 213.39568pt x 183.63083pt.
+LaTeX Info: Redefining \. on input line 311.
+LaTeX Info: Redefining \% on input line 311.
+ [13]
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 315.
-LaTeX Info: Redefining \. on input line 347.
-LaTeX Info: Redefining \% on input line 347.
+put line 316.
+LaTeX Info: Redefining \. on input line 355.
+LaTeX Info: Redefining \% on input line 355.
  [14 <./imagenes/curva eliptica Fp.png>]
-LaTeX Info: Redefining \. on input line 359.
-LaTeX Info: Redefining \% on input line 359.
+LaTeX Info: Redefining \. on input line 371.
+LaTeX Info: Redefining \% on input line 371.
 
 [15])
 LaTeX Info: Redefining \. on input line 62.
@@ -2001,9 +2001,6 @@ LaTeX Info: Redefining \% on input line 25.
 (./secciones/primitivas_criptograficas.aux) (./secciones/proving_systems.aux)
 (./secciones/pcs.aux) (./secciones/problema_a_resolver.aux)
 (./secciones/noir.aux) (./secciones/plonky2.aux) (./secciones/noirky2.aux))
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package rerunfilecheck Info: File `tesis.out' has not changed.
 (rerunfilecheck)             Checksum: E8B26DCC8A1D4F12BD4305FF13736E64;12253.
 runsystem(rm tesis.pyg)...executed.
@@ -2012,7 +2009,7 @@ runsystem(rm tesis.pyg)...executed.
 Here is how much of TeX's memory you used:
  30165 strings out of 480112
  584967 string characters out of 5892631
- 883716 words of memory out of 5000000
+ 883719 words of memory out of 5000000
  47060 multiletter control sequences out of 15000+600000
  483414 words of font info for 82 fonts, out of 8000000 for 9000
  85 hyphenation exceptions out of 8191
@@ -2045,7 +2042,7 @@ texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/share/texlive/texmf-d
 ist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/share/texlive/texmf-dist/fon
 ts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf/fonts/type1/publi
 c/cm-super/sfrm1095.pfb>
-Output written on tesis.pdf (117 pages, 3196403 bytes).
+Output written on tesis.pdf (117 pages, 3195777 bytes).
 PDF statistics:
  1647 PDF objects out of 1728 (max. 8388607)
  1336 compressed objects within 14 object streams
