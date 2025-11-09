@@ -83,14 +83,15 @@ que asigna a cada witness de $P$ un target de $C$. Concretamente, esta función 
     $$witness\_target\_map: W \rightarrow T \text{  y  } val: W \rightarrow \Fp$$ 
     Con ambas, dado un witness $w \in P$ podemos saber cual es su target  correspondiente en $C$ y su valor en una ejecución concreta, por lo tanto también podemos construir la función $partial\_witness$ para que 
     $$partial\_witness(witness\_target\_map(w)) = val(w)$$ 
+    Es importante notar que la función $partial\_witness$ solo involucra a los targets que tienen una correspondencia directa con un witness.
 \end{enumerate}
 
 Otra cosa que notamos es que la traducción se puede hacer de forma secuencial sobre el listado de opcodes siguiendo las siguientes reglas:
 \begin{enumerate}
     \item Al principio vamos a registrar los public inputs. Dado el ACIR 
     \begin{verbatim}
-    private parameters indices : PUB
-    public parameters indices : PRIV
+    private parameters indices : PRIV
+    public parameters indices : PUB
     return value indices : OUT
     \end{verbatim}
     Donde $PUB,PRIV,OUT \subset W$ con $PUB\cap PRIV = \emptyset$, $PUB\cap OUT = \emptyset$ y $OUT\cap PRIV = \emptyset$. Vamos a crear targets para todos esos witnesses y registrarlos en la función $witness\_target\_map(w)$ haciendo que los witnesses en $PUB$ y $OUT$ sean públicos para el circuito de Plonky2. 
@@ -112,7 +113,7 @@ donde $\{a_i\},\{b_i\},\{c\} \subset \Fp$. Vamos a comenzar asignando targets a 
     \item Términos lineales: $LIN = [(b_0, t_0), (b_1, t_1), \cdots, (b_m, t_m)]$
     \item Constante: $c$
 \end{itemize}
-La API que nos provee Plonky2 para construir circuitos nos invita a pensar con sus funciones en un circuito binario, donde las operaciones tienen 2 inputs y un output. En este caso las operaciones necesarias para llevar esto a cabo son la \textbf{suma}, la \textbf{multiplicación}, el \textbf{assert\_zero} y la creación de targets con valor \textbf{constante}\footnote{El target en sí no contiene un valor constante porque los targets son solo ''cables en el circuito''. El \texttt{CircuitBuilder} contiene un diccionario que mapea ciertos targets a valores constantes y los va a usar en el tiempo de resolución de circuito.}. El algoritmo a llevar a cabo es el que se puede ver en \ref{alg:traduccion_assert_zero}.
+La API que nos provee Plonky2 para construir circuitos nos invita a pensar sus funciones como un circuito, donde las operaciones tienen 2 o más inputs y un output. En este caso las operaciones necesarias para llevar esto a cabo son la \textbf{suma}, la \textbf{multiplicación}, el \textbf{assert\_zero} y la creación de targets con valor \textbf{constante}\footnote{El target en sí no contiene un valor constante porque los targets son solo ''cables en el circuito''. El \texttt{CircuitBuilder} contiene un diccionario que mapea ciertos targets a valores constantes y los va a usar en el tiempo de resolución de circuito.}. El algoritmo a llevar a cabo es el que se puede ver en \ref{alg:traduccion_assert_zero}.
 
 \begin{algorithm}
 \caption{Traducción del opcode AssertZero}
@@ -171,7 +172,7 @@ Podemos pensar al producto de Noirky2 como un circuito o un sistema de ecuacione
     t_0 \cdot t_1 &= t_{aux_1} \\
     1 \cdot t_1 &= t_{aux_3} \\
     1 \cdot t_{aux_1} &= t_{aux_2} \\
-    t_{aux_2} + t_{aux_1} &= t_{aux_4} \\
+    t_{aux_3} + t_{aux_2} &= t_{aux_4} \\
     -1 \cdot t_2 &= t_{aux_5} \\
     t_{aux_4} + t_{aux_5} &= t_{aux_6} \\
     -1 + t_{aux_6} &= t_{aux_7} \\
@@ -187,7 +188,7 @@ Podemos pensar al producto de Noirky2 como un circuito o un sistema de ecuacione
   \label{fig:assert_zero_plonky2}
 \end{figure}
 
-En este punto pueden empezar a surgir dudas sobre qué tan óptima es esta construcción. Vamos a tratar el tema de las optimizaciones más adelante, sin embargo el mecanismo interno con el que Plonky2 arma la traza tiene optimizaciones que vale la pena mencionar ahora. Antes dijimos que la configuración del circuito con la que instanciamos al \texttt{CircuitBuilder} establece una traza con 135 columnas, sin embargo todas nuestras las ecuaciones del ejemplo tienen a lo sumo 3 términos. Plonky2 empaqueta operaciones similares en las mismas filas, aprovechando el espacio total de la traza para reducir la cantidad de filas totales. Esto es muy importante a la hora de evitar cierto tipo de optimizaciones que en la práctica no tendrán ningún impacto real. 
+En este punto pueden empezar a surgir dudas sobre qué tan óptima es esta construcción. Vamos a tratar el tema de las optimizaciones más adelante, sin embargo el mecanismo interno con el que Plonky2 arma la traza tiene optimizaciones que vale la pena mencionar ahora. Antes dijimos que la configuración del circuito con la que instanciamos al \texttt{CircuitBuilder} establece una traza con 135 columnas, sin embargo todas las ecuaciones del ejemplo tienen a lo sumo 3 términos. Plonky2 empaqueta operaciones similares en las mismas filas, aprovechando el espacio total de la traza para reducir la cantidad de filas totales. Esto es muy importante a la hora de evitar cierto tipo de optimizaciones que en la práctica no tendrán ningún impacto real. 
 
 ¿A qué nos referimos con operaciones similares? Plonky2 usa Custom Gates para todas sus operaciones. Todas las operaciones que vimos hasta el momento son distintas configuraciones de una misma \texttt{ArithmeticGate}. Esta compuerta sirve para establecer restricciones de la forma 
 $$t_{result} = const_1 \cdot t_1 \cdot t_2 + const_2 \cdot t_3$$
@@ -217,6 +218,7 @@ Podemos expresar \textbf{1.} como un sistema de ecuaciones
 		\[
 		\left\{
 		\begin{array}{rl}
+			z\cdot (z-1) &= 0 \\
 			not\_z &= 1 - z \\
 			conditional\_a &= a \cdot z \\
 			conditional\_b &= b \cdot not\_z \\
@@ -228,8 +230,21 @@ Podemos expresar \textbf{1.} como un sistema de ecuaciones
 \end{figure}
 
 
-o más simplemente como la ecuación 
-$$res = z \cdot a + (1-z) \cdot b$$
+o más simplemente como el sistema de ecuaciones
+\begin{figure}[H]
+	\centering
+	\begin{minipage}[c]{0.6\textwidth}
+		\centering
+		\[
+		\left\{
+		\begin{array}{rl}
+			z\cdot (z-1) &= 0 \\
+			res &= z \cdot a + (1-z) \cdot b \\
+		\end{array}
+		\right.
+		\]
+	\end{minipage}
+\end{figure}
 
 Para \textbf{2.} el proceso es conceptualmente distinto. Primero vamos a calcular un valor 
 \[
@@ -256,7 +271,7 @@ Pero ¿cómo podemos calcularlo si no conocemos los valores que toman $x$ e $y$ 
 	\end{minipage}
 \end{figure}
 
-Estas ecuaciones sirven restringir a la variable $equal$ a que sea un valor binario: $0$ si $x$ e $y$ son distintos y $1$ si son iguales. 
+Estas ecuaciones sirven para restringir a la variable $equal$ a que sea un valor binario: $0$ si $x$ e $y$ son distintos y $1$ si son iguales. 
 \begin{enumerate}
 	\item La primera ecuación se ocupa de que $equal$ sea binaria. 
 	
@@ -319,7 +334,7 @@ Recordemos en qué consiste una lectura de memoria en este contexto. Visto como 
 \]
 por lo que queremos una restricción de la forma
 $$res = block[index]$$
-donde $res$ es el target correspondiente al witness $w_{value}$ e $index$ es el target correspondiente al witness $w_{index}$. La solución es construir un circuito que considere todos los casos (es decir, si se tiene que modificar el índice 0, índice 1, indice 2, etc.). Se recorren todas las posiciones del bloque de memoria, comparando el índice con el valor de $index$ y asignándole condicionalmente a $res$ su propio valor o el valor del target en el índice dependiendo de si la igualdad se cumple o no. El pseudocódigo se puede ver en la figura \ref{alg:traduccion_mem_read}.
+donde $res$ es el target correspondiente al witness $w_{value}$ e $index$ es el target correspondiente al witness $w_{index}$. La solución es construir un circuito que considere todos los casos (es decir, si se tiene que leer el índice 0, índice 1, indice 2, etc.). Se recorren todas las posiciones del bloque de memoria, comparando el índice actual con el valor de $index$ y asignándole condicionalmente a $res$ su propio valor o el valor del target en el índice dependiendo de si la igualdad se cumple o no. El pseudocódigo se puede ver en la figura \ref{alg:traduccion_mem_read}.
 
 \begin{algorithm}
 \begin{algorithmic}[1]
@@ -349,7 +364,7 @@ Veamos cómo traducir un opcode de escritura de memoria. Este está conformado p
 
 El enfoque que vamos a tomar en este caso es parecido al de la operación de lectura, con la diferencia de que tenemos que modificar el contenido del bloque de memoria. Recordemos que los targets toman un único valor a lo largo de toda la ejecución, por lo tanto para cambiar el valor en una posición del bloque vamos a tener que reemplazar un target por otro. Pero no solo eso: reemplazar un único target sería posible si supiéramos en tiempo de generación de circuito cuál es el índice que tenemos que reemplazar, pero no lo sabemos. En cambio, lo que vamos a hacer es \textbf{cambiar todos los targets} de todas las posiciones. Todos los targets excepto uno van a estar restringidos a tomar el mismo valor que su antecesor. La excepción va a ser en el índice a modificar, donde va a tomar el nuevo valor. 
 
-Conceptualmente podemos pensar todas las posiciones de manera independiente. En cada posición se hace la pregunta ¿es esta la posición que tiene que ser modificada? Solamente una va a tener un sí como respuesta. En el caso que la respuesta es no, el nuevo target que tomará esa posición tendrá el mismo valor que el anterior. En el caso que la respuesta es sí, el nuevo target que tomará esa posición tendrá el valor nuevo. Es otro caso más donde podemos aplicar la asignación condicional. Se pueden ver gráficamente las acciones a tomar en la figura \ref{fig:memory_write} y el pseudocódigo en la figura \ref{alg:traduccion_mem_write}.
+Conceptualmente podemos pensar todas las posiciones de manera independiente. En cada posición se hace la pregunta ¿es esta la posición que tiene que ser modificada? Solamente una va a tener un sí como respuesta. En el caso que la respuesta sea no, el nuevo target que tomará esa posición tendrá el mismo valor que el anterior. En el caso que la respuesta sea sí, el nuevo target que tomará esa posición tendrá el valor nuevo. Es otro caso más donde podemos aplicar la asignación condicional. Se pueden ver gráficamente las acciones a tomar en la figura \ref{fig:memory_write} y el pseudocódigo en la figura \ref{alg:traduccion_mem_write}.
 
 
 \begin{figure}[h]
