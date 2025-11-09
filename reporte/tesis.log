@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2025.9.26)  9 NOV 2025 10:40
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2025.9.26)  9 NOV 2025 10:45
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -2003,9 +2003,6 @@ LaTeX Info: Redefining \% on input line 25.
 (./secciones/primitivas_criptograficas.aux) (./secciones/proving_systems.aux)
 (./secciones/pcs.aux) (./secciones/problema_a_resolver.aux)
 (./secciones/noir.aux) (./secciones/plonky2.aux) (./secciones/noirky2.aux))
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package rerunfilecheck Info: File `tesis.out' has not changed.
 (rerunfilecheck)             Checksum: 3BAAB20F9CB5A3002C61ED4EDE48AE7A;12253.
 runsystem(rm tesis.pyg)...executed.
@@ -2047,7 +2044,7 @@ texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/share/texlive/texmf-d
 ist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/share/texlive/texmf-dist/fon
 ts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf/fonts/type1/publi
 c/cm-super/sfrm1095.pfb>
-Output written on tesis.pdf (118 pages, 3193931 bytes).
+Output written on tesis.pdf (118 pages, 3193837 bytes).
 PDF statistics:
  1649 PDF objects out of 1728 (max. 8388607)
  1337 compressed objects within 14 object streams

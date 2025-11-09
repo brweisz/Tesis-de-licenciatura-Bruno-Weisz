@@ -39,7 +39,7 @@ Noirky2 tiene que poder:
 \end{itemize}
 
 \section{Cuerpo finito utilizado}
-Esta solución haría que tanto Noir como Plonky2 sean agnósticos a la existencia de Noirky2, ya que Noirky2 solo usa a Nargo y Plonky2 como dependencias y no al revés. Sin embargo hay lidiar con una dificultad extra: el cuerpo finito usado por Noir no es el mismo que el usado por Plonky2. Adicionalmente, el desarrollo de Noirky2 se produce en simultaneo con el desarrollo de Nargo por parte de otro equipo de trabajo (Aztec~\cite{Aztec}), por lo tanto el repositorio de Nargo está en constante cambio. La decisión respecto a esto fue crear un \textbf{fork} del repositorio de Nargo y realizar las modificaciones pertinentes sobre el mismo. La cantidad de cambios en el compilador hacía muy engorrosa cualquier otra modalidad de trabajo; aunque al principio se intentó mantener una versión actualizada rápidamente se descartó esta alternativa.
+Esta solución hace que tanto Noir como Plonky2 sean agnósticos a la existencia de Noirky2, ya que Noirky2 solo usa a Nargo y Plonky2 como dependencias y no al revés. Sin embargo hay que lidiar con una dificultad extra: el cuerpo finito usado por Noir no es el mismo que el usado por Plonky2. Adicionalmente, el desarrollo de Noirky2 se produce en simultaneo con el desarrollo de Nargo por parte de otro equipo de trabajo (Aztec~\cite{Aztec}), por lo tanto el repositorio de Nargo está en constante cambio. La decisión respecto a esto fue crear un \textbf{fork} del repositorio de Nargo y realizar las modificaciones pertinentes sobre el mismo. La cantidad de cambios en el compilador hacía muy engorrosa cualquier otra modalidad de trabajo; aunque al principio se intentó mantener una versión actualizada rápidamente se descartó esta alternativa.
 
 La primera traba del trabajo fue la siguiente: hacer que la resolución de witnesses de Nargo se realizara con un cuerpo finito con $p_{goldilocks} = 2^{64}-2^{32}+1$ (primo utilizado por Plonky2) en lugar de $p_{grumpkin}=2^{254}+2^{224}+2^{192}+2^{96}-1$ (primo usado por Nargo y Barretenberg). 
 
@@ -47,7 +47,7 @@ Pensemos por qué esto es un problema con un ejemplo más simple. Supongamos que
 
 La descripción de la solución es puramente implementativa y no es de interés para este trabajo, así que simplemente nos va a alcanzar con decir que esta modificación fue realizada con éxito, pero al mismo tiempo el cambio en el compilador generó la necesidad de usar una versión forkeada de Nargo durante el resto del desarrollo. 
 
-Otro problema relacionado con el uso de $p_{goldilocks} = 2^{64}-2^{32}+1$ en Plonky2 es que no permite representar fácilmente valores de 64 bits, una funcionalidad que Noir provee. Esto se debe a que $p_{goldilocks} < 2^{64}-1$ por lo tanto un \texttt{u64} no “entra'' en un elemento de $\Fp$. Esta dificultad se podría saltear usando dos elementos de $\Fp$ para representar un \texttt{u64}, donde cada elemento de cuerpo representa los 32 bits menos significativos o los 32 bits más significativos del \texttt{u64}. Sin embargo, esto sigue resultando insuficiente ya que habría que modificar la resolución de Witnesses por parte de Nargo y su forma de armar el código ACIR. En particular, al usar \texttt{u64} en un programa de Noir e intentar compilarlo con nuestro Nargo modificado para usar $p_{goldilocks}$, el compilador genera un error ''\texttt{Range constraint of 64 bits is too large for the Field size}''. Por estas cosas vamos a impedir el uso de \texttt{u64} y \texttt{u128} en Noirky2. 
+Otro problema relacionado con el uso de $p_{goldilocks} = 2^{64}-2^{32}+1$ en Plonky2 es que no permite representar fácilmente valores de 64 bits, una funcionalidad que Noir provee. Esto se debe a que $p_{goldilocks} < 2^{64}-1$ por lo tanto un \texttt{u64} no “entra'' en un elemento de $\Fp$. Esta dificultad se podría saltear usando dos elementos de $\Fp$ para representar un \texttt{u64}, donde cada elemento de cuerpo representa los 32 bits menos significativos o los 32 bits más significativos del \texttt{u64}. Sin embargo, esto sigue resultando insuficiente ya que habría que modificar la resolución de Witnesses por parte de Nargo y su forma de armar el código ACIR. En particular, al usar \texttt{u64} en un programa de Noir e intentar compilarlo con nuestro Nargo modificado para usar $p_{goldilocks}$, el compilador genera un error “\texttt{Range constraint of 64 bits is too large for the Field size}''. Por estas cosas vamos a impedir el uso de \texttt{u64} y \texttt{u128} en Noirky2. 
 
 
 
@@ -66,22 +66,22 @@ Es importante entender también que Noirky2 empieza su flujo cuando Noir ya cons
 Toda la traducción que veremos a continuación ocurre durante el tiempo de generación de circuito. El tiempo de resolución de circuito comienza cuando decidimos proveer el \texttt{PartialWitness} con los valores concretos para generar la prueba, pero Noirky2 no tiene control sobre eso, sino que toda esa parte del flujo queda delegada en Plonky2 y su mecanismo interno.
 
 \section{Traducción de ACIR a Plonky2}
-En esencia lo que queremos hacer es traducir un lenguaje a otro preservando la semántica de los programas. El código ACIR tiene 
+En esencia lo que queremos hacer es traducir un “dialecto'' a otro preservando la semántica de los programas. El código ACIR tiene 
 \begin{itemize}
     \item Un conjunto de witnesses $W = \{w_i\}$ sobre los cuales opera. Llamamos $val_e: W \rightarrow \Fp$ a la función que recibe un witness y devuelve el valor asignado a ese witness en una ejecución $e$ con valores concretos. Para simplificar, vamos a decir $val$ en lugar de $val_e$.
     \item Una lista $OP$ de opcodes (AssertZero, operaciones de memoria, BlackBoxFunction y BrilligCall). Notamos $OP[i]$ al i-esimo opcode. Decimos también que $w_i \in OP[j]$ si el witness $w_i$ es referenciado por el j-esimo opcode del código ACIR.
 \end{itemize}
-Lo primero que notamos es que dado un programa $P$ de ACIR, todos los witnesses de $P$ van a tener un target equivalente en un circuito de Plonky2 $P'$ que tenga la misma semántica. Esto no va a ocurrir a la inversa, ya que un opcode de ACIR podría tener una implementación arbitrariamente compleja en Plonky2 que requiera el uso de muchos más targets. Por ende, siendo $W$ el conjunto de witnesses de $P$ y $T$ el conjunto de targets en $P'$, vamos a tener una función inyectiva 
+Lo primero que notamos es que dado un programa $P$ de ACIR, todos los witnesses de $P$ van a tener un target equivalente en un circuito de Plonky2 $C$ que tenga la misma semántica. Esto no va a ocurrir a la inversa, ya que un opcode de ACIR podría tener una implementación arbitrariamente compleja en Plonky2 que requiera el uso de muchos más targets. Por ende, si $W$ es el conjunto de witnesses de $P$ y $T$ el conjunto de targets en $C$, vamos a tener una función inyectiva 
 $$witness\_target\_map: W \rightarrow T$$
-que asigna a cada witness de $P$ un target de $P'$. Concretamente, esta función va a ser implementada con un diccionario que tendremos que mantener durante toda la generación de P'. ¿Por qué es necesario esto? Hay varios motivos para tener este mapeo:
+que asigna a cada witness de $P$ un target de $C$. Concretamente, esta función va a ser implementada con un diccionario que tendremos que mantener durante toda la generación de C. ¿Por qué es necesario esto? Hay varios motivos para tener este mapeo:
 \begin{enumerate}
     \item Supongamos que en el código ACIR tenemos el listado $OP$ de opcodes y que un witness $w_k$ aparece mencionado en más de un opcode. 
     Si nosotros asociamos un target $t$ a $w$ queremos referirnos al mismo $t$ cuando vuelva a aparecer $w$ más adelante. Para eso definimos la función tal que $$witness\_target\_map(w) = t$$ 
     \item Cuando generamos la prueba de Plonky2, tenemos que proveer al \texttt{CircuitBuilder} con una función 
     $$partial\_witness: T \rightarrow \Fp$$ 
-    que asigna a los targets de $P'$ un valor y también es representada como un diccionario. Pero ¿cómo sabemos cuál es el valor correspondiente a un target? Para resolver esto vamos a tener que usar la información de las funciones 
+    que asigna a los targets de $C$ un valor y también es representada como un diccionario. Pero ¿cómo sabemos cuál es el valor correspondiente a un target? Para resolver esto vamos a tener que usar la información de las funciones 
     $$witness\_target\_map: W \rightarrow T \text{  y  } val: W \rightarrow \Fp$$ 
-    Con ambas, dado un witness $w \in P$ podemos saber cual es su target  correspondiente en $P'$ y su valor en una ejecución concreta, por lo tanto también podemos construir la función $partial\_witness$ para que 
+    Con ambas, dado un witness $w \in P$ podemos saber cual es su target  correspondiente en $C$ y su valor en una ejecución concreta, por lo tanto también podemos construir la función $partial\_witness$ para que 
     $$partial\_witness(witness\_target\_map(w)) = val(w)$$ 
 \end{enumerate}
 
