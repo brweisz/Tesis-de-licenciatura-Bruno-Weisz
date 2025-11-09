@@ -1,6 +1,6 @@
 
 \chapter{Noirky2}
-Haber recorrido Noir y Plonky2 nos permite re-definir el problema que estamos intentando resolver en términos más concretos. Dijimos en la sección \ref{sec:problema} que la intención es adaptar Noir para que pueda usar Plonky2 para generar pruebas de ejecución. Concretamente, el trabajo consiste en hacer un programa (el cual llamaremos \textbf{Noirky2} de ahora en adelante) que tiene como dependencias a Nargo (el compilador de Noir) y a Plonky2. Tanto Nargo como Plonky2 están escritos en Rust, por lo tanto Noirky2 también estará programado en Rust. La figura \ref{fig:esquema_noirky2} muestra un esquema en alto nivel de la interacción de los programas involucrados.
+Haber recorrido Noir y Plonky2 nos permite re-definir el problema que estamos intentando resolver en términos más concretos. Dijimos en la sección \ref{sec:problema} que la intención es adaptar Noir para que pueda usar Plonky2 para generar pruebas de ejecución. Concretamente, el trabajo consiste en hacer un programa (el cual llamaremos \textbf{Noirky2} de ahora en adelante) que tiene como dependencias a Nargo (el compilador de Noir) y a Plonky2. Tanto Nargo como Plonky2 tienen el código fuente en Rust, entonces Noirky2 también estará programado en Rust para simplificar el uso de dependencias y por razones de eficiencia. La figura \ref{fig:esquema_noirky2} muestra un esquema en alto nivel de la interacción de los programas involucrados.
 
 \begin{figure}[h]
 \centering

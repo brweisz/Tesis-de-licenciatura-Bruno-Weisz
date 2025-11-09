@@ -61,16 +61,16 @@
 \contentsline {section}{\numberline {7.1}Cuerpo finito utilizado}{59}{section.7.1}%
 \contentsline {section}{\numberline {7.2}Momentos de ejecución}{60}{section.7.2}%
 \contentsline {section}{\numberline {7.3}Traducción de ACIR a Plonky2}{61}{section.7.3}%
-\contentsline {subsection}{\numberline {7.3.1}Traducción de AssertZero}{62}{subsection.7.3.1}%
+\contentsline {subsection}{\numberline {7.3.1}Traducción de AssertZero}{63}{subsection.7.3.1}%
 \contentsline {subsection}{\numberline {7.3.2}Asignación condicional en Plonky2}{64}{subsection.7.3.2}%
 \contentsline {subsection}{\numberline {7.3.3}Traducción de operaciones de memoria}{67}{subsection.7.3.3}%
 \contentsline {subsubsection}{\textbf {Lectura de memoria}}{68}{section*.51}%
 \contentsline {subsubsection}{\textbf {Escritura de memoria}}{69}{section*.52}%
-\contentsline {subsection}{\numberline {7.3.4}Traducción de Range-Check}{70}{subsection.7.3.4}%
+\contentsline {subsection}{\numberline {7.3.4}Traducción de Range-Check}{69}{subsection.7.3.4}%
 \contentsline {subsubsection}{\textbf {Range-Check con descomposición en bits}}{70}{section*.54}%
 \contentsline {subsubsection}{\textbf {Range-Check con lookup tables}}{71}{section*.55}%
-\contentsline {subsubsection}{\textbf {Range-Check con descomposición en limbs y lookup tables}}{71}{section*.57}%
-\contentsline {subsection}{\numberline {7.3.5}Traducción de XOR y AND}{73}{subsection.7.3.5}%
+\contentsline {subsubsection}{\textbf {Range-Check con descomposición en limbs y lookup tables}}{72}{section*.57}%
+\contentsline {subsection}{\numberline {7.3.5}Traducción de XOR y AND}{74}{subsection.7.3.5}%
 \contentsline {subsubsection}{\textbf {XOR con descomposición en bits}}{74}{section*.58}%
 \contentsline {subsubsection}{\textbf {XOR con descomposición en limbs y lookup tables}}{75}{section*.60}%
 \contentsline {chapter}{\numberline {8.}Evaluación de la herramienta}{77}{chapter.8}%
