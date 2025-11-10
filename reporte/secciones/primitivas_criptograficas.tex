@@ -357,7 +357,9 @@ La dificultad ECDLP es similar a la del DLP para grupos genéricos, en el sentid
 \subsection{BLS y Pairings}
 Paralelamente, también existen curvas elípticas más seguras y con propiedades deseables, como puede ser la curva BLS12-385~\cite{Short_Signatures_from_the_Weil_Pairing}. Esta curva está definida como
 
-$$E(\Fp): Y^2=X^3+4 ~~~~~ p = 2^{255}-13$$
+$$E(\Fp): Y^2=X^3+4$$
+
+\noindent donde $p$ es un número primo de 381 bits.
 
 Esta curva posee la propiedad de que calcular \textbf{\textit{pairings}} es una operación poco costosa respecto a otras curvas. Ahora bien, ¿qué son los pairings? No voy a presentar una definición formal, más bien enunciar algunas de las propiedades que nos interesan en el contexto de los SNARKs.
 

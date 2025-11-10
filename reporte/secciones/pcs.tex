@@ -84,7 +84,7 @@ Vamos a ver ahora uno de los motivos centrales de la tesis: las implicancias de 
 
 \subsubsection{¿Cuánto pesa un punto de curva?}
 
-Un punto de curva se representa a través de un par ordenado de componentes, tal que $(x,y)\in \Fp \times \Fp$. Recordemos que usando una curva como BLS12-381, $p = 2^{255} - 13$ es decir que es un número de 256 bits. Sin embargo, la representación usada para estos números usa 381 bits por razones de seguridad y eficiencia a la hora de calcular pairings. Por ende, un punto de curva se representa con 762 bits.
+Un punto de curva se representa a través de un par ordenado de componentes, tal que $(x,y)\in \Fp \times \Fp$. Recordemos que usando una curva como BLS12-381, $p$ es un número primo de 381 bits. Por ende, un punto de curva se representa con 762 bits. Una aclaración importante es que para almacenar un punto de curva alcanza con guardar el valor de $x$ y usar un bit para determinar si $y$ es positivo o negativo. Esto se debe a que dado un valor de $x$ y la ecuación de la curva, queda determinado el valor de $y$. Con esto en mente, podríamos representar un punto de curva de manera comprimida con 382 bits. Para las cuentas posteriores, vamos a tomar la representación explícita (de 762 bits) ya que es la que se usa para realizar operaciones. 
 
 \subsubsection{¿Qué tan largo es el CRS?}
 
