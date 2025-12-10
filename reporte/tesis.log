@@ -1,13 +1,12 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.12.4)  10 DEC 2025 15:22
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.12.4)  10 DEC 2025 17:16
 entering extended mode
- restricted \write18 enabled.
- file:line:error style messages enabled.
+ \write18 enabled.
  %&-line parsing enabled.
 **tesis.tex
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/tesis.tex
+(./tesis.tex
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-11-14>
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/tesis.cls
+(./tesis.cls
 Document Class: tesis 1996/25/01 1.0g LaTeX document class (wm).
 \hours=\count275
 \minutes=\count276
@@ -152,7 +151,7 @@ Package: pgfopts 2014/07/10 v2.1a LaTeX package options with pgfkeys
 )
 (/usr/local/texlive/2025/texmf-dist/tex/latex/tools/shellesc.sty
 Package: shellesc 2023/07/08 v1.0d unified shell escape interface for LaTeX
-Package shellesc Info: Restricted shell escape enabled on input line 77.
+Package shellesc Info: Unrestricted shell escape enabled on input line 75.
 )
 (/usr/local/texlive/2025/texmf-dist/tex/latex/float/float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
@@ -881,28 +880,15 @@ File: pgflibraryarrows.meta.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count393
 )
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/tesis.aux
+(./tesis.aux
 LaTeX Info: Redefining \. on input line 11.
 LaTeX Info: Redefining \% on input line 11.
 Package babel Info: 'spanish' activates 'spanish' shorthands.
 (babel)             Reported on input line 11.
-
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/int
-roduccion.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/pri
-mitivas_criptograficas.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/pro
-ving_systems.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/pcs
-.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/pro
-blema_a_resolver.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/noi
-r.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/plo
-nky2.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/noi
-rky2.aux))
+ (./secciones/introduccion.aux)
+(./secciones/primitivas_criptograficas.aux) (./secciones/proving_systems.aux)
+(./secciones/pcs.aux) (./secciones/problema_a_resolver.aux)
+(./secciones/noir.aux) (./secciones/plonky2.aux) (./secciones/noirky2.aux))
 \openout1 = `tesis.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 29.
@@ -990,15 +976,13 @@ an be solved by adding a line like \setlength {\marginparwidth }{2cm} prior to
 loading the todonotes package. on input line 29.
 
 Package hyperref Info: Link coloring ON on input line 29.
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/tesis.out)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/tesis.out)
+(./tesis.out) (./tesis.out)
 \@outlinefile=\write5
 \openout5 = `tesis.out'.
 
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
-
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/caratula.tex
+ (./caratula.tex
 LaTeX Font Info:    Trying to load font information for U+msa on input line 9.
 
 (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/umsa.fd
@@ -1016,16 +1000,15 @@ Package pdftex.def Info: logofcen.pdf  used on input line 10.
 (pdftex.def)             Requested size: 73.97733pt x 73.98073pt.
  [1
 
-{/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map} </home/b
-weisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/logofcen.pdf>])
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/abs_esp.tex)
-[1
+{/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./logof
+cen.pdf>])
+(./abs_esp.tex) [1
 
 
-] (/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/tesis.toc
+] (./tesis.toc
 LaTeX Info: Redefining \. on input line 1.
 LaTeX Info: Redefining \% on input line 1.
-[2
+ [2
 
 ])
 \tf@toc=\write6
@@ -1043,16 +1026,13 @@ l.60 \part{Introducción}
 ]
 \openout2 = `secciones/introduccion.aux'.
 
-
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/int
-roduccion.tex) [2
+ (./secciones/introduccion.tex) [2
 
 ] [3]
 \openout2 = `secciones/primitivas_criptograficas.aux'.
 
 
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/pri
-mitivas_criptograficas.tex
+(./secciones/primitivas_criptograficas.tex
 Cap\'{\i }tulo 1.
 [4
 
@@ -1104,9 +1084,8 @@ ne 245.
 (pdftex.def)             Requested size: 213.39568pt x 172.59119pt.
 LaTeX Info: Redefining \. on input line 251.
 LaTeX Info: Redefining \% on input line 251.
- [11 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes
-/intuicion_shwartz_zippel.png> </home/bweisz/Documents/Tesis-de-licenciatura-Br
-uno-Weisz/reporte/imagenes/curvas elipticas de ejemplo.png>]
+ [11 <./imagenes/intuicion_shwartz_zippel.png> <./imagenes/curvas elipticas de 
+ejemplo.png>]
 <imagenes/suma tangente curva eliptica.png, id=516, 1134.2375pt x 917.4275pt>
 File: imagenes/suma tangente curva eliptica.png Graphic file (type png)
 <use imagenes/suma tangente curva eliptica.png>
@@ -1115,9 +1094,8 @@ ut line 254.
 (pdftex.def)             Requested size: 213.39568pt x 172.59119pt.
 LaTeX Info: Redefining \. on input line 268.
 LaTeX Info: Redefining \% on input line 268.
- [12 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes
-/elliptic_curve_addition.png> </home/bweisz/Documents/Tesis-de-licenciatura-Bru
-no-Weisz/reporte/imagenes/suma tangente curva eliptica.png>]
+ [12 <./imagenes/elliptic_curve_addition.png> <./imagenes/suma tangente curva e
+liptica.png>]
 <imagenes/curva eliptica Fp.png, id=526, 467.7475pt x 402.50375pt>
 File: imagenes/curva eliptica Fp.png Graphic file (type png)
 <use imagenes/curva eliptica Fp.png>
@@ -1131,8 +1109,7 @@ Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
 put line 316.
 LaTeX Info: Redefining \. on input line 355.
 LaTeX Info: Redefining \% on input line 355.
- [14 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes
-/curva eliptica Fp.png>]
+ [14 <./imagenes/curva eliptica Fp.png>]
 LaTeX Info: Redefining \. on input line 373.
 LaTeX Info: Redefining \% on input line 373.
 
@@ -1142,9 +1119,7 @@ LaTeX Info: Redefining \% on input line 62.
  [16]
 \openout2 = `secciones/proving_systems.aux'.
 
-
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/pro
-ving_systems.tex
+ (./secciones/proving_systems.tex
 Cap\'{\i }tulo 2.
 [17
 
@@ -1191,9 +1166,7 @@ LaTeX Info: Redefining \% on input line 165.
 [22]
 LaTeX Info: Redefining \. on input line 173.
 LaTeX Info: Redefining \% on input line 173.
- [23 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes
-/Circuito Plonk.jpg> </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/
-reporte/imagenes/circuito plonk valores.jpg>]
+ [23 <./imagenes/Circuito Plonk.jpg> <./imagenes/circuito plonk valores.jpg>]
 LaTeX Info: Redefining \. on input line 237.
 LaTeX Info: Redefining \% on input line 237.
  [24]
@@ -1238,9 +1211,7 @@ LaTeX Info: Redefining \% on input line 63.
  [34]
 \openout2 = `secciones/pcs.aux'.
 
-
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/pcs
-.tex
+ (./secciones/pcs.tex
 Cap\'{\i }tulo 3.
 [35
 
@@ -1271,9 +1242,7 @@ LaTeX Info: Redefining \% on input line 64.
  [42]
 \openout2 = `secciones/problema_a_resolver.aux'.
 
-
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/pro
-blema_a_resolver.tex
+ (./secciones/problema_a_resolver.tex
 Cap\'{\i }tulo 4.
 ) [43
 
@@ -1287,9 +1256,7 @@ Cap\'{\i }tulo 4.
 ]
 \openout2 = `secciones/noir.aux'.
 
-
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/noi
-r.tex
+ (./secciones/noir.tex
 Cap\'{\i }tulo 5.
 [45
 
@@ -1318,41 +1285,23 @@ LaTeX Info: Redefining \% on input line 68.
  [52]
 \openout2 = `secciones/plonky2.aux'.
 
-
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/plo
-nky2.tex
+ (./secciones/plonky2.tex
 Cap\'{\i }tulo 6.
 Package hyperref Info: bookmark level for unknown listing defaults to 0 on inpu
 t line 13.
 \pydata@fh@0=\write7
 \openout7 = `_04A3511FB91E3313EE47AAE4731CFC7A.data.minted'.
 
-runsystem(latexminted config  --timestamp 20251210152207 04A3511FB91E3313EE47AA
-E4731CFC7A)...executed safely (allowed).
+runsystem(latexminted config  --timestamp 20251210171627 04A3511FB91E3313EE47AA
+E4731CFC7A)...executed.
+
+(./_04A3511FB91E3313EE47AAE4731CFC7A.config.minted)
+runsystem(latexminted cleanconfig  --timestamp 20251210171627 04A3511FB91E3313E
+E47AAE4731CFC7A)...executed.
 
 
-/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/plon
-ky2.tex:49: Package minted Error: minted v3+ executable is not installed, is no
-t added to PATH, or is not permitted with restricted shell escape; or MiKTeX is
- being used with -aux-directory or -output-directory without setting a TEXMF_OU
-TPUT_DIRECTORY environment variable.
-
-See the minted package documentation for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.49 \end{minted}
-                 
-This error message was generated by an \errmessage
-command, so I can't give any explicit help.
-Pretend that you're Hercule Poirot: Examine all clues,
-and deduce the truth by order and method.
-
-
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/_minted/defau
-lt.style.minted)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/_minted/41E04
-8F69EDEAD32FC7AEE8E8DD39BBD.highlight.minted
+(./_minted/default.style.minted)
+(./_minted/41E048F69EDEAD32FC7AEE8E8DD39BBD.highlight.minted
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10.95> not available
 (Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 2.
 )
@@ -1382,9 +1331,7 @@ LaTeX Info: Redefining \% on input line 69.
  [57]
 \openout2 = `secciones/noirky2.aux'.
 
-
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/noi
-rky2.tex
+ (./secciones/noirky2.tex
 Cap\'{\i }tulo 7.
 [58
 
@@ -1415,11 +1362,11 @@ LaTeX Info: Redefining \% on input line 204.
  [63]
 LaTeX Info: Redefining \. on input line 204.
 LaTeX Info: Redefining \% on input line 204.
- [64 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes
-/circuito_assert_zero.jpg>]
+ [64 <./imagenes/circuito_assert_zero.jpg>]
 LaTeX Info: Redefining \. on input line 282.
 LaTeX Info: Redefining \% on input line 282.
- [65]
+
+[65]
 Overfull \hbox (4.00479pt too wide) in paragraph at lines 308--309
 []\OT1/cmr/m/n/10.95 La es-tra-te-gia va a ser co-mo si-gue: as^^S^^P co-mo ten
 ^^S^^Pamos un dic-cio-na-rio \OT1/cmtt/m/n/10.95 witness[]target[]map
@@ -1481,9 +1428,7 @@ Cap\'{\i }tulo 8.
 
 
 
-]
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/_minted/098B7
-5BACF2458A0F4119410D399A9F1.highlight.minted)
+] (./_minted/098B75BACF2458A0F4119410D399A9F1.highlight.minted)
 
 Package caption Warning: The option `hypcap=true' will be ignored for this
 (caption)                particular \caption on input line 124.
@@ -1491,21 +1436,16 @@ See the caption package documentation for explanation.
 
 LaTeX Info: Redefining \. on input line 127.
 LaTeX Info: Redefining \% on input line 127.
-[77]
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/_minted/F7294
-2CF74335F6A15529878CE259BD0.highlight.minted)
+[77] (./_minted/F72942CF74335F6A15529878CE259BD0.highlight.minted)
 LaTeX Info: Redefining \. on input line 166.
 LaTeX Info: Redefining \% on input line 166.
  [78]
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/_minted/F18BE
-0E595061A3FDC31025FCDF82213.highlight.minted)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/_minted/7A71D
-3E9EA5E6F9CE10AAF0A35299EFD.highlight.minted)
+(./_minted/F18BE0E595061A3FDC31025FCDF82213.highlight.minted)
+(./_minted/7A71D3E9EA5E6F9CE10AAF0A35299EFD.highlight.minted)
 LaTeX Info: Redefining \. on input line 200.
 LaTeX Info: Redefining \% on input line 200.
  [79]
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/_minted/E7C9E
-CC6C60D4F62CF2249A69F1C0645.highlight.minted)
+(./_minted/E7C9ECC6C60D4F62CF2249A69F1C0645.highlight.minted)
 LaTeX Info: Redefining \. on input line 231.
 LaTeX Info: Redefining \% on input line 231.
  [80]
@@ -1514,7 +1454,8 @@ LaTeX Info: Redefining \% on input line 258.
  [81]
 LaTeX Info: Redefining \. on input line 264.
 LaTeX Info: Redefining \% on input line 264.
- [82] [83
+
+[82] [83
 
 ]
 
@@ -1534,8 +1475,7 @@ File: imagenes/tiempos/write_vk-Xor-u8.png Graphic file (type png)
 Package pdftex.def Info: imagenes/tiempos/write_vk-Xor-u8.png  used on input li
 ne 317.
 (pdftex.def)             Requested size: 256.07741pt x 256.09163pt.
- [85 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes
-/tiempos/prove-Xor-u8.png>]
+ [85 <./imagenes/tiempos/prove-Xor-u8.png>]
 <imagenes/tiempos/prove-vs-vk-AssertZero-Noirky2.png, id=1133, 433.62pt x 433.6
 2pt>
 File: imagenes/tiempos/prove-vs-vk-AssertZero-Noirky2.png Graphic file (type pn
@@ -1544,8 +1484,7 @@ g)
 Package pdftex.def Info: imagenes/tiempos/prove-vs-vk-AssertZero-Noirky2.png  u
 sed on input line 329.
 (pdftex.def)             Requested size: 256.07741pt x 256.09163pt.
- [86 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes
-/tiempos/write_vk-Xor-u8.png>]
+ [86 <./imagenes/tiempos/write_vk-Xor-u8.png>]
 <imagenes/tiempos/verify-Assert Zero.png, id=1143, 433.62pt x 433.62pt>
 File: imagenes/tiempos/verify-Assert Zero.png Graphic file (type png)
 <use imagenes/tiempos/verify-Assert Zero.png>
@@ -1557,9 +1496,8 @@ Package pdftex.def Info: imagenes/tiempos/verify-Assert Zero.png  used on input
 Package hyperref Warning: Difference (2) between bookmark levels is greater 
 (hyperref)                than one, level fixed on input line 357.
 
-[87 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/
-tiempos/prove-vs-vk-AssertZero-Noirky2.png>] [88 </home/bweisz/Documents/Tesis-
-de-licenciatura-Bruno-Weisz/reporte/imagenes/tiempos/verify-Assert Zero.png>]
+[87 <./imagenes/tiempos/prove-vs-vk-AssertZero-Noirky2.png>] [88 <./imagenes/ti
+empos/verify-Assert Zero.png>]
 <imagenes/tiempos/prove-Assert Zero-log.png, id=1163, 433.62pt x 433.62pt>
 File: imagenes/tiempos/prove-Assert Zero-log.png Graphic file (type png)
 <use imagenes/tiempos/prove-Assert Zero-log.png>
@@ -1600,14 +1538,10 @@ g  used on input line 415.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[89 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/
-tiempos/prove-Assert Zero-log.png> </home/bweisz/Documents/Tesis-de-licenciatur
-a-Bruno-Weisz/reporte/imagenes/tiempos/prove-Assert Zero.png>] [90 </home/bweis
-z/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tiempos/prove-As
-sertZero-vs-mem-Noirky2.png> </home/bweisz/Documents/Tesis-de-licenciatura-Brun
-o-Weisz/reporte/imagenes/tiempos/prove-AssertZero-vs-mem-Barretenberg.png> </ho
-me/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tiempos/
-prove-Memoria (varía operaciones).png>]
+[89 <./imagenes/tiempos/prove-Assert Zero-log.png> <./imagenes/tiempos/prove-As
+sert Zero.png>] [90 <./imagenes/tiempos/prove-AssertZero-vs-mem-Noirky2.png> <.
+/imagenes/tiempos/prove-AssertZero-vs-mem-Barretenberg.png> <./imagenes/tiempos
+/prove-Memoria (varía operaciones).png>]
 <imagenes/tiempos/prove-Range-u8-table-vs-bits.png, id=1191, 433.62pt x 433.62p
 t>
 File: imagenes/tiempos/prove-Range-u8-table-vs-bits.png Graphic file (type png)
@@ -1628,8 +1562,7 @@ rg.png  used on input line 440.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[91 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/
-tiempos/prove-Range-u8-table-vs-bits.png>]
+[91 <./imagenes/tiempos/prove-Range-u8-table-vs-bits.png>]
 <imagenes/tiempos/prove-Xor-u16-Noirky2-vs-Barretenberg.png, id=1210, 433.62pt 
 x 433.62pt>
 File: imagenes/tiempos/prove-Xor-u16-Noirky2-vs-Barretenberg.png Graphic file (
@@ -1651,11 +1584,9 @@ nput line 463.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[92 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/
-tiempos/prove-Range-u16-Noirky2-vs-Barretenberg.png>] [93 </home/bweisz/Documen
-ts/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tiempos/prove-Xor-u16-Noi
-rky2-vs-Barretenberg.png> </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-W
-eisz/reporte/imagenes/tiempos/prove-Xor-Noirky2-bits.png>]
+[92 <./imagenes/tiempos/prove-Range-u16-Noirky2-vs-Barretenberg.png>] [93 <./im
+agenes/tiempos/prove-Xor-u16-Noirky2-vs-Barretenberg.png> <./imagenes/tiempos/p
+rove-Xor-Noirky2-bits.png>]
 <imagenes/tamanios/tamanio-write_vk-Assert Zero.png, id=1230, 433.62pt x 433.62
 pt>
 File: imagenes/tamanios/tamanio-write_vk-Assert Zero.png Graphic file (type png
@@ -1674,8 +1605,7 @@ Package pdftex.def Info: imagenes/tamanios/tamanio-write_vk-Xor-u8.png  used on
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[94 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/
-tamanios/tamanio-write_vk-Assert Zero.png>]
+[94 <./imagenes/tamanios/tamanio-write_vk-Assert Zero.png>]
 <imagenes/tamanios/tamanio-prove-Range-u8.png, id=1249, 433.62pt x 433.62pt>
 File: imagenes/tamanios/tamanio-prove-Range-u8.png Graphic file (type png)
 <use imagenes/tamanios/tamanio-prove-Range-u8.png>
@@ -1686,10 +1616,8 @@ input line 501.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[95 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/
-tamanios/tamanio-write_vk-Xor-u8.png>] [96 </home/bweisz/Documents/Tesis-de-lic
-enciatura-Bruno-Weisz/reporte/imagenes/tamanios/tamanio-prove-Range-u8.png>]
-[97
+[95 <./imagenes/tamanios/tamanio-write_vk-Xor-u8.png>] [96 <./imagenes/tamanios
+/tamanio-prove-Range-u8.png>] [97
 
 ] [98] [99] [100
 
@@ -1999,71 +1927,41 @@ nput line 1013.
 (pdftex.def)             Requested size: 140.84192pt x 140.8388pt.
 [104
 
- </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tie
-mpos/prove-Memoria (varía tamaño de lista).png> </home/bweisz/Documents/Tesis
--de-licenciatura-Bruno-Weisz/reporte/imagenes/tiempos/prove-Range-u8.png> </hom
-e/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tiempos/p
-rove-Range-u16.png> </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/r
-eporte/imagenes/tiempos/prove-Range-u32.png> </home/bweisz/Documents/Tesis-de-l
-icenciatura-Bruno-Weisz/reporte/imagenes/tiempos/prove-Xor-u16.png> </home/bwei
-sz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tiempos/prove-X
-or-u32.png>]
+ <./imagenes/tiempos/prove-Memoria (varía tamaño de lista).png> <./imagenes/t
+iempos/prove-Range-u8.png> <./imagenes/tiempos/prove-Range-u16.png> <./imagenes
+/tiempos/prove-Range-u32.png> <./imagenes/tiempos/prove-Xor-u16.png> <./imagene
+s/tiempos/prove-Xor-u32.png>]
 LaTeX Info: Redefining \. on input line 1022.
 LaTeX Info: Redefining \% on input line 1022.
- [105 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagene
-s/tiempos/write_vk-Assert Zero.png> </home/bweisz/Documents/Tesis-de-licenciatu
-ra-Bruno-Weisz/reporte/imagenes/tiempos/write_vk-Memoria (varía operaciones).p
-ng> </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/
-tiempos/write_vk-Memoria (varía tamaño de lista).png> </home/bweisz/Documents
-/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tiempos/write_vk-Range-u8.p
-ng> </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/
-tiempos/write_vk-Range-u16.png> </home/bweisz/Documents/Tesis-de-licenciatura-B
-runo-Weisz/reporte/imagenes/tiempos/write_vk-Range-u32.png> </home/bweisz/Docum
-ents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tiempos/write_vk-Xor-u1
-6.png> </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagen
-es/tiempos/write_vk-Xor-u32.png>]
+ [105 <./imagenes/tiempos/write_vk-Assert Zero.png> <./imagenes/tiempos/write_v
+k-Memoria (varía operaciones).png> <./imagenes/tiempos/write_vk-Memoria (varí
+a tamaño de lista).png> <./imagenes/tiempos/write_vk-Range-u8.png> <./imagenes
+/tiempos/write_vk-Range-u16.png> <./imagenes/tiempos/write_vk-Range-u32.png> <.
+/imagenes/tiempos/write_vk-Xor-u16.png> <./imagenes/tiempos/write_vk-Xor-u32.pn
+g>]
 LaTeX Info: Redefining \. on input line 1022.
 LaTeX Info: Redefining \% on input line 1022.
- [106 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagene
-s/tiempos/verify-Memoria (varia operaciones).png> </home/bweisz/Documents/Tesis
--de-licenciatura-Bruno-Weisz/reporte/imagenes/tiempos/verify-Memoria (varía ta
-maño de lista).png> </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/
-reporte/imagenes/tiempos/verify-Range-u8.png> </home/bweisz/Documents/Tesis-de-
-licenciatura-Bruno-Weisz/reporte/imagenes/tiempos/verify-Range-u16.png> </home/
-bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tiempos/ver
-ify-Range-u32.png> </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/re
-porte/imagenes/tiempos/verify-Xor-u8.png> </home/bweisz/Documents/Tesis-de-lice
-nciatura-Bruno-Weisz/reporte/imagenes/tiempos/verify-Xor-u16.png> </home/bweisz
-/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tiempos/verify-Xo
-r-u32.png>]
+ [106 <./imagenes/tiempos/verify-Memoria (varia operaciones).png> <./imagenes/t
+iempos/verify-Memoria (varía tamaño de lista).png> <./imagenes/tiempos/verify
+-Range-u8.png> <./imagenes/tiempos/verify-Range-u16.png> <./imagenes/tiempos/ve
+rify-Range-u32.png> <./imagenes/tiempos/verify-Xor-u8.png> <./imagenes/tiempos/
+verify-Xor-u16.png> <./imagenes/tiempos/verify-Xor-u32.png>]
 LaTeX Info: Redefining \. on input line 1022.
 LaTeX Info: Redefining \% on input line 1022.
- [107 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagene
-s/tamanios/tamanio-write_vk-Memoria (varía operaciones).png> </home/bweisz/Doc
-uments/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tamanios/tamanio-writ
-e_vk-Memoria (varía tamaño de lista).png> </home/bweisz/Documents/Tesis-de-li
-cenciatura-Bruno-Weisz/reporte/imagenes/tamanios/tamanio-write_vk-Range-u8.png>
- </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tam
-anios/tamanio-write_vk-Range-u16.png> </home/bweisz/Documents/Tesis-de-licencia
-tura-Bruno-Weisz/reporte/imagenes/tamanios/tamanio-write_vk-Range-u32.png> </ho
-me/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tamanios
-/tamanio-write_vk-Xor-u16.png> </home/bweisz/Documents/Tesis-de-licenciatura-Br
-uno-Weisz/reporte/imagenes/tamanios/tamanio-write_vk-Xor-u32.png>]
+ [107 <./imagenes/tamanios/tamanio-write_vk-Memoria (varía operaciones).png> <
+./imagenes/tamanios/tamanio-write_vk-Memoria (varía tamaño de lista).png> <./
+imagenes/tamanios/tamanio-write_vk-Range-u8.png> <./imagenes/tamanios/tamanio-w
+rite_vk-Range-u16.png> <./imagenes/tamanios/tamanio-write_vk-Range-u32.png> <./
+imagenes/tamanios/tamanio-write_vk-Xor-u16.png> <./imagenes/tamanios/tamanio-wr
+ite_vk-Xor-u32.png>]
 LaTeX Info: Redefining \. on input line 1022.
 LaTeX Info: Redefining \% on input line 1022.
- [108 </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagene
-s/tamanios/tamanio-prove-Assert Zero.png> </home/bweisz/Documents/Tesis-de-lice
-nciatura-Bruno-Weisz/reporte/imagenes/tamanios/tamanio-prove-Memoria (varía op
-eraciones).png> </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/repor
-te/imagenes/tamanios/tamanio-prove-Memoria (varía tamaño de lista).png> </hom
-e/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tamanios/
-tamanio-prove-Range-u16.png> </home/bweisz/Documents/Tesis-de-licenciatura-Brun
-o-Weisz/reporte/imagenes/tamanios/tamanio-prove-Range-u32.png> </home/bweisz/Do
-cuments/Tesis-de-licenciatura-Bruno-Weisz/reporte/imagenes/tamanios/tamanio-pro
-ve-Xor-u8.png> </home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/report
-e/imagenes/tamanios/tamanio-prove-Xor-u16.png> </home/bweisz/Documents/Tesis-de
--licenciatura-Bruno-Weisz/reporte/imagenes/tamanios/tamanio-prove-Xor-u32.png>]
-
+ [108 <./imagenes/tamanios/tamanio-prove-Assert Zero.png> <./imagenes/tamanios/
+tamanio-prove-Memoria (varía operaciones).png> <./imagenes/tamanios/tamanio-pr
+ove-Memoria (varía tamaño de lista).png> <./imagenes/tamanios/tamanio-prove-R
+ange-u16.png> <./imagenes/tamanios/tamanio-prove-Range-u32.png> <./imagenes/tam
+anios/tamanio-prove-Xor-u8.png> <./imagenes/tamanios/tamanio-prove-Xor-u16.png>
+ <./imagenes/tamanios/tamanio-prove-Xor-u32.png>]
 Cap\'{\i }tulo C.
 [109
 
@@ -2077,40 +1975,15 @@ Cap\'{\i }tulo D.
 ]
 LaTeX Info: Redefining \. on input line 1106.
 LaTeX Info: Redefining \% on input line 1106.
- [112]
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/tesis.bbl
-/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/tesis.bbl:75: 
-You can't use `macro parameter character #' in horizontal mode.
-l.75 ...cProtocol/barretenberg?tab=readme-ov file#
-                                                  ultrahonk.
-Sorry, but I'm not programmed to handle this case;
-I'll just pretend that you didn't ask for it.
-If you're in the wrong mode, you might be able to
-return to the right one by typing `I}' or `I$' or `I\par'.
+ [112] (./tesis.bbl) [113
 
-) [113
-
-]
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/tesis.aux
+] (./tesis.aux
 LaTeX Info: Redefining \. on input line 11.
 LaTeX Info: Redefining \% on input line 11.
-
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/int
-roduccion.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/pri
-mitivas_criptograficas.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/pro
-ving_systems.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/pcs
-.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/pro
-blema_a_resolver.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/noi
-r.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/plo
-nky2.aux)
-(/home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/reporte/secciones/noi
-rky2.aux))
+ (./secciones/introduccion.aux)
+(./secciones/primitivas_criptograficas.aux) (./secciones/proving_systems.aux)
+(./secciones/pcs.aux) (./secciones/problema_a_resolver.aux)
+(./secciones/noir.aux) (./secciones/plonky2.aux) (./secciones/noirky2.aux))
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-11-14>
@@ -2119,10 +1992,10 @@ Package rerunfilecheck Info: File `tesis.out' has not changed.
 (rerunfilecheck)             Checksum: E8B26DCC8A1D4F12BD4305FF13736E64;12253.
  ) 
 Here is how much of TeX's memory you used:
- 31777 strings out of 468662
- 648383 string characters out of 5441703
- 1121833 words of memory out of 5000000
- 59533 multiletter control sequences out of 15000+600000
+ 31786 strings out of 468662
+ 643188 string characters out of 5441703
+ 1121857 words of memory out of 5000000
+ 59542 multiletter control sequences out of 15000+600000
  641876 words of font info for 94 fonts, out of 8000000 for 9000
  430 hyphenation exceptions out of 8191
  95i,15n,131p,1201b,1322s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -2155,8 +2028,7 @@ t/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/local/texlive/2025/texmf-dist/
 fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/local/texlive/2025/texmf-dist/fo
 nts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2025/texmf-dis
 t/fonts/type1/public/cm-super/sfrm1095.pfb>
-Output written on /home/bweisz/Documents/Tesis-de-licenciatura-Bruno-Weisz/repo
-rte/tesis.pdf (117 pages, 3181375 bytes).
+Output written on tesis.pdf (117 pages, 3181330 bytes).
 PDF statistics:
  1645 PDF objects out of 1728 (max. 8388607)
  1334 compressed objects within 14 object streams
