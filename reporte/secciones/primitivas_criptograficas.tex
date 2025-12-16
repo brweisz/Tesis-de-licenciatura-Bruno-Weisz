@@ -351,7 +351,7 @@ Recordamos que el problema del logaritmo discreto de la sección \ref{sec:logari
 $$Q = \underbrace{P+P+\cdots+P}_{\text{n veces}} = nP$$
 Notamos $n = log_P(Q)$. Puede ocurrir que el problema no esté definido para algunos pares $P,Q\in E(\Fp)$, ya que $Q$ no necesariamente es un múltiplo de $P$. En la práctica, un agente de un protocolo criptográfico tomará un punto $P$ público y un valor secreto $n$ y computará $Q = nP$, por lo tanto el problema estará bien definido. 
 
-La dificultad ECDLP es similar a la del DLP para grupos genéricos, en el sentido de que dados $P,Q \in E(\Fp)$ conocidos, el mejor algoritmo conocido que computa $n = log_P(Q)$ es equivalente a sumar $P$ sucesivamente a sí mismo hasta alcanzar el valor de $Q$. Sin embargo, hay algunas curvas elípticas conocidas para las cuales existen algoritmos más eficientes para resolver ECDLP. 
+La dificultad ECDLP es similar a la del DLP para grupos genéricos. Sin embargo, hay algunas curvas elípticas conocidas para las cuales existen algoritmos más eficientes para resolver ECDLP.
 
 \subsection{BLS y Pairings}
 Paralelamente, también existen curvas elípticas más seguras y con propiedades deseables, como puede ser la curva BLS12-385~\cite{Short_Signatures_from_the_Weil_Pairing}. Esta curva está definida como
