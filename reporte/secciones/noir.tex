@@ -49,7 +49,7 @@ El \textit{Abstract Circuit Intermediate Representation} (ACIR) es el bytecode d
 
 Las variables de este sistema de ecuaciones son los \textbf{witnesses}. Un código ACIR describe qué variables van a ser \textbf{inputs públicos}, \textbf{inputs privados} y \textbf{valores de retorno}. Esto no significa nada para el sistema de ecuaciones en sí, pero provee información para que el proving system pueda replicar el programa escrito en Noir con su propio modelo. Los witnesses están numerados del $0$ en adelante, y los notamos $w_i$ o simplemente $\_i$. Podemos pensar a los witnesses como variables \textbf{inmutables} del programa, aunque en realidad sabemos que su inmutabilidad se debe a que estamos parados en otro modelo: en el de los sistemas de ecuaciones. 
 
-Las instrucciones que describen este sistema de ecuaciones se denominan \textbf{opcodes} y los hay de varios tipos. Ya nos topamos con uno antes cuando estábamos viendo el flujo de un programa de Noir en la figura \ref{fig:ACIR_ejemplo_1}. Todos los opcodes predican sobre witnesses, estableciendo restricciones sobre ellos. Veamos a los opcodes uno por uno:
+Las instrucciones que describen este sistema de ecuaciones se denominan \textbf{opcodes} y los hay de varios tipos. Todos los opcodes predican sobre witnesses, estableciendo restricciones sobre ellos. Veamos a los opcodes uno por uno:
 
 \subsection{AssertZero}
 

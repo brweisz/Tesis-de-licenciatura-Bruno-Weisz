@@ -497,7 +497,7 @@ Con esto en mente, creamos un Generator propio de la forma
 \]
 Para aquellos no tan familiarizados con Rust, la parametrización generada por \texttt{N} permite instanciar al \texttt{struct} con distintos valores para el parámetro. Estos valores tienen que ser conocidos en tiempo de compilación. En particular, nos va a interesar una descomposición en 2 limbs para números de $16$ bits y una descomposición en 4 limbs para números de $32$ bits (recordemos que números de 64 bits no son soportados nativamente por Noirky2). 
 
-Internamente, el Generator recibe 1 target \texttt{full\_number} con su valor asociado y $N$ targets para los limbs ($l_0, \cdots, l_{N-1}$). Su trabajo es calcular el valor de los $N$ limbs. El algoritmo puede verse en la figura \ref{alg:descomposicion_limbs}.
+Internamente, el Generator recibe 1 target \texttt{full\_number} con su valor asociado y $N$ targets para los limbs ($l_0, \cdots, l_{N-1}$). Su trabajo es calcular el valor de los $N$ limbs. El algoritmo puede verse en el pseudocódigo de \ref{alg:descomposicion_limbs}.
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]

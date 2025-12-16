@@ -204,7 +204,7 @@ Supongamos que un prover tiene una lista secreta $A$ de tamaño $N=2^n$ y necesi
 \end{figure}
 
 \section{FRI}
-Otro protocolo que implementa oráculos de polinomios es FRI. Este protocolo tiene la ventaja de que no necesita un CRS para funcionar, sin embargo las pruebas que genera ocupan más espacio de almacenamiento que las de KZG para alcanzar el mismo nivel de seguridad. FRI también es un protocolo interactivo, con muchas más interacciones que KZG y que se apoya en los commitments de listas de los Merkle Trees vistos en la sección \ref{sec:merkle_tree}. 
+Otro protocolo que implementa oráculos de polinomios es FRI\cite{ben2018fast}. Este protocolo tiene la ventaja de que no necesita un CRS para funcionar, sin embargo las pruebas que genera ocupan más espacio de almacenamiento que las de KZG para alcanzar el mismo nivel de seguridad. FRI también es un protocolo interactivo, con muchas más interacciones que KZG y que se apoya en los commitments de listas de los Merkle Trees vistos en la sección \ref{sec:merkle_tree}.
 
 Concretamente, FRI es una Low Degree Proof: un protocolo que sirve para demostrar que el prover conoce un polinomio de grado \textbf{menor estricto a} un cierto $N = 2^n$. El polinomial commitment scheme se apoya en este protocolo para dar garantías de Soundness. 
 
