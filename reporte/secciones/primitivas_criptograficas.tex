@@ -40,7 +40,7 @@ Algunas definiciones importantes sobre un grupo $(G, \cdot)$ son:
 \begin{enumerate}
     \item Si $G$ tiene una cantidad finita de elementos decimos que $(G, \cdot)$ es un grupo finito. El \textbf{orden} de $G$ se nota como $|G|$.
     \item La \textbf{exponenciación} se define como la aplicación sucesiva del producto a varias copias de un mismo elemento. Formalmente, dados $g \in G, x \in \mathbb{Z}^+$, $g^x = \underbrace{g \cdot g \cdot ... \cdot g}_{x \text{ veces}}$.
-    \item Sean $a \in G, d \in \mathbb{Z}^+$, si $d$ es el menor número tal que $a^d = e$ decimos que $d$ es el \textbf{orden} de $a$ en $(G, \cdot)$. Si no existe tal $d$ entonces decimos que $a$ es de orden \textit{infinito}.
+    \item Sean $a \in G, e \text{ elemento neutro de }G, d \in \mathbb{Z}^+$, si $d$ es el menor número tal que $a^d = e$ decimos que $d$ es el \textbf{orden} de $a$ en $(G, \cdot)$. Si no existe tal $d$ entonces decimos que $a$ es de orden \textit{infinito}.
     
     \textbf{Propiedades}:
     \begin{itemize}
@@ -174,7 +174,7 @@ Dados 2 polinomios $p,q\in \Fp[x]$ tales que $$p(x) = a_0+a_1\cdot x + ... + a_n
 \begin{itemize}
     \item Decimos que $p(x)=q(x)$  sii todos sus coeficientes son iguales, es decir si $\forall~ 0\leq i \leq m, ~ a_i = b_i$. 
     \item La suma de $p(x)$ y $q(x)$ es igual a $$p(x)+q(x) = a_0 + b_0 + (a_1 + b_1)\cdot x +...+ (a_m+b_m)\cdot x^m + ... + a_n\cdot x^n$$ asumiendo sin pérdida de generalidad que $m<n$. Es importante notar que la operación de suma $a_i+b_i$ es sobre el cuerpo $\Fp$.
-    \item El producto de $p(x)$ y $q(x)$ se obtiene a través de la multiplicación formal de sus símbolos, distribuyendo la suma. De esto se deduce que que el grado resultante es igual a la suma de los grados de $p$ y $q$. Nuevamente notamos que la operación de producto $a_i \cdot b_j$ es sobre el cuerpo $\Fp$.
+    \item El producto de $p(x)$ y $q(x)$ se obtiene a través de la multiplicación formal de sus símbolos, distribuyendo la suma. De esto se deduce que el grado resultante es igual a la suma de los grados de $p$ y $q$. Nuevamente notamos que la operación de producto $a_i \cdot b_j$ es sobre el cuerpo $\Fp$.
     
     Por ejemplo, si tomamos $p(x) = 1 + x - x^2$ y $q(x) = 2 + x^2 + x^3$, obtenemos que $p(x) \cdot q(x) = 2 + 2\cdot x - x^2 +2\cdot x^3 - x^5.$ 
 
