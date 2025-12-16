@@ -44,6 +44,17 @@ Dan Boneh, Ben Lynn, and Hovav Shacham.
 \newblock In Colin Boyd, editor, {\em Advances in Cryptology --- ASIACRYPT
   2001}. Springer Berlin Heidelberg, 2001.
 
+\bibitem{bitansky2017hunting}
+Nir Bitansky, Ran Canetti, Alessandro Chiesa, Shafi Goldwasser, Huijia Lin,
+  Aviad Rubinstein, and Eran Tromer.
+\newblock The hunting of the snark.
+\newblock {\em Journal of Cryptology}, 30(4):989--1066, 2017.
+
+\bibitem{petkus2019and}
+Maksym Petkus.
+\newblock Why and how zk-snark works.
+\newblock {\em arXiv preprint arXiv:1906.07221}, 2019.
+
 \bibitem{bernhard2012not}
 David Bernhard, Olivier Pereira, and Bogdan Warinschi.
 \newblock How not to prove yourself: Pitfalls of the fiat-shamir heuristic and
