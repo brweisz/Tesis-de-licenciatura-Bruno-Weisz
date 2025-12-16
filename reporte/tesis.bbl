@@ -13,8 +13,7 @@ Chengpeng Huang, Rui Song, Shang Gao, Yu~Guo, and Bin Xiao.
 \bibitem{benarroch2019diving}
 Daniel Benarroch.
 \newblock Diving into the zk-snarks setup phase, 2019.
-\newblock Available at \url{http://www.urlverdadera.com}, recuperado el día
-  xx/xx/xxxx.
+\newblock Disponible en \url{http://www.urlverdadera.com}.
 
 \bibitem{PLONK}
 Ariel Gabizon, Zachary~J. Williamson, and Oana Ciobotaru.
@@ -59,6 +58,12 @@ Ariel Gabizon and Zachary~J Williamson.
 \newblock plookup: A simplified polynomial protocol for lookup tables.
 \newblock {\em Cryptology ePrint Archive}, 2020.
 
+\bibitem{kate2010constant}
+Aniket Kate, Gregory~M Zaverucha, and Ian Goldberg.
+\newblock Constant-size commitments to polynomials and their applications.
+\newblock In {\em International conference on the theory and application of
+  cryptology and information security}, pages 177--194. Springer, 2010.
+
 \bibitem{ConstantSizeCommitmentstoPolynomialsandTheirApplications}
 Aniket Kate, Gregory~M. Zaverucha, and Ian Goldberg.
 \newblock Constant-size commitments to polynomials and their applications.
@@ -70,6 +75,13 @@ Ralph~C Merkle.
 \newblock A certified digital signature.
 \newblock In {\em Conference on the Theory and Application of Cryptology},
   pages 218--238. Springer, 1989.
+
+\bibitem{ben2018fast}
+Eli Ben-Sasson, Iddo Bentov, Yinon Horesh, and Michael Riabzev.
+\newblock Fast reed-solomon interactive oracle proofs of proximity.
+\newblock In {\em 45th international colloquium on automata, languages, and
+  programming (icalp 2018)}, pages 14--1. Schloss Dagstuhl--Leibniz-Zentrum
+  fuer Informatik, 2018.
 
 \bibitem{UltraHonk}
 https://github.com/AztecProtocol/barretenberg?tab=readme-ov file.
