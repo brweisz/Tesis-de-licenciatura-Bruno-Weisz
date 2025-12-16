@@ -44,6 +44,11 @@ Dan Boneh, Ben Lynn, and Hovav Shacham.
 \newblock In Colin Boyd, editor, {\em Advances in Cryptology --- ASIACRYPT
   2001}. Springer Berlin Heidelberg, 2001.
 
+\bibitem{galbraith2008pairings}
+Steven~D Galbraith, Kenneth~G Paterson, and Nigel~P Smart.
+\newblock Pairings for cryptographers.
+\newblock {\em Discrete Applied Mathematics}, 156(16):3113--3121, 2008.
+
 \bibitem{bitansky2017hunting}
 Nir Bitansky, Ran Canetti, Alessandro Chiesa, Shafi Goldwasser, Huijia Lin,
   Aviad Rubinstein, and Eran Tromer.
