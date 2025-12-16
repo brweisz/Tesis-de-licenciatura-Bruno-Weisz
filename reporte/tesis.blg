@@ -11,44 +11,44 @@ A level-1 auxiliary file: secciones/plonky2.aux
 A level-1 auxiliary file: secciones/noirky2.aux
 The style file: unsrt.bst
 Database file #1: bibliografia.bib
-You've used 18 entries,
+You've used 19 entries,
             1791 wiz_defined-function locations,
-            542 strings with 6606 characters,
-and the built_in function-call counts, 3558 in all, are:
-= -- 300
-> -- 153
+            548 strings with 6857 characters,
+and the built_in function-call counts, 3762 in all, are:
+= -- 321
+> -- 157
 < -- 4
-+ -- 59
-- -- 41
-* -- 142
-:= -- 530
-add.period$ -- 52
-call.type$ -- 18
-change.case$ -- 18
++ -- 61
+- -- 42
+* -- 157
+:= -- 562
+add.period$ -- 55
+call.type$ -- 19
+change.case$ -- 19
 chr.to.int$ -- 0
-cite$ -- 18
-duplicate$ -- 172
-empty$ -- 409
-format.name$ -- 41
-if$ -- 847
+cite$ -- 19
+duplicate$ -- 181
+empty$ -- 431
+format.name$ -- 42
+if$ -- 891
 int.to.chr$ -- 0
-int.to.str$ -- 18
-missing$ -- 8
-newline$ -- 85
-num.names$ -- 22
-pop$ -- 105
+int.to.str$ -- 19
+missing$ -- 9
+newline$ -- 90
+num.names$ -- 23
+pop$ -- 106
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 111
+skip$ -- 114
 stack$ -- 0
-substring$ -- 117
-swap$ -- 58
+substring$ -- 136
+swap$ -- 59
 text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 0
-while$ -- 32
-width$ -- 20
-write$ -- 173
+while$ -- 35
+width$ -- 21
+write$ -- 184

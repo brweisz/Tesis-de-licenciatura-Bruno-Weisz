@@ -53,6 +53,13 @@ David Bernhard, Olivier Pereira, and Bogdan Warinschi.
   Security, Beijing, China, December 2-6, 2012. Proceedings 18}, pages
   626--643. Springer, 2012.
 
+\bibitem{saarinen2018arithmetic}
+Markku-Juhani~O Saarinen.
+\newblock Arithmetic coding and blinding countermeasures for lattice
+  signatures: Engineering a side-channel resistant post-quantum signature
+  scheme with compact signatures.
+\newblock {\em Journal of Cryptographic Engineering}, 8(1):71--84, 2018.
+
 \bibitem{gabizon2020plookup}
 Ariel Gabizon and Zachary~J Williamson.
 \newblock plookup: A simplified polynomial protocol for lookup tables.
